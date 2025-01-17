@@ -8,22 +8,23 @@ $namespaceMap = [
 
 spl_autoload_register(function(string $classname) use ($namespaceMap) {
 
-    array_map(function($folder, $namespace) use ($classname) {
-        $class = end(explode($namespace, $classname));
-        $file = $folder . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-
-        $contains = str_contains($classname, end(explode($classname, $namespace)));
-        if (!$contains) {
+    foreach($namespaceMap as $namespace => $folder)
+    {
+        $class = explode($namespace, $classname);
+        if (!isset($class[1])) {
             return;
         }
 
-        if (!file_exists($file)
-        && (!interface_exists($classname) || !class_exists($classname))) {
-            return;
+        $file = $folder . str_replace('\\', DIRECTORY_SEPARATOR, $class[1]) . '.php';
+        if (!file_exists($file)) {
+            continue;
         }
 
         require_once $file;
 
-    }, $namespaceMap,array_keys($namespaceMap));
+        if (!interface_exists($classname) && !class_exists($classname)) {
+            return;
+        }
+    }
 
 });
