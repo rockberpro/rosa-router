@@ -12,7 +12,13 @@ spl_autoload_register(function(string $classname) use ($namespaceMap) {
         $class = end(explode($namespace, $classname));
         $file = $folder . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
 
-        if (!file_exists($file) && (!interface_exists($classname) || !class_exists($classname))) {
+        $contains = str_contains($classname, end(explode($classname, $namespace)));
+        if (!$contains) {
+            return;
+        }
+
+        if (!file_exists($file)
+        && (!interface_exists($classname) || !class_exists($classname))) {
             return;
         }
 
