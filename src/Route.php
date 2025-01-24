@@ -255,7 +255,6 @@ class Route implements RouteInterface
             'target' => self::$instance->target
         ];
 
-        /** controller for grouped namespace */
         if (!isset(self::$namespace))
         {
             $namespace = end(self::$groupNamespace);
@@ -263,13 +262,11 @@ class Route implements RouteInterface
                 $route['namespace'] = $namespace;
             }
         }
-        /** controller for individual namespace */
         else {
             $route['namespace'] = self::$namespace;
             self::$namespace = null;
         }
 
-        /** middleware for grouped routes */
         if (!isset(self::$middleware))
         {
             $middleware = end(self::$groupMiddleware);
@@ -277,7 +274,6 @@ class Route implements RouteInterface
                 $route['middleware'] = $middleware;
             }
         }
-        /** middleware for individual routes */
         else {
             $route['middleware'] = self::$middleware;
             self::$middleware = null;
@@ -303,12 +299,10 @@ class Route implements RouteInterface
             return $target;
         }
         else if (gettype($target) === 'string' && stripos($target, '@') === false) {
-            /** controller for grouped routes */
             if (!isset(self::$controller))
             {
                 $_controller = end(self::$groupController);
             }
-            /** controller for individual routes */
             else {
                 $_controller = self::$controller;
                 self::$middleware = null;
