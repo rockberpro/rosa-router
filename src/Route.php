@@ -225,39 +225,19 @@ class Route implements RouteInterface
      */
     public function group($closure)
     {
-        self::$groupNamespace[] = self::$namespace;
-        self::$groupController[] = self::$controller;
-        self::$groupMiddleware[] = self::$middleware;
+        self::$groupNamespace[]  = self::$namespace ?? end(self::$groupNamespace);
+        self::$namespace = null;
+        self::$groupController[] = self::$controller ?? end(self::$groupController);
+        self::$controller = null;
+        self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
+        self::$middleware = null;
 
         $closure();
 
-        self::collapseGroups();
-    }
-
-    /**
-     * Collapse the groups
-     * 
-     * @method private
-     * @return void
-     */
-    private static function collapseGroups()
-    {
         array_pop(self::$groupPrefix);
-
         array_pop(self::$groupNamespace);
-        if (empty(self::$groupNamespace)) {
-            self::$namespace = null;
-        }
-
         array_pop(self::$groupController);
-        if (empty(self::$groupController)) {
-            self::$controller = null;
-        }
-
         array_pop(self::$groupMiddleware);
-        if (empty(self::$groupMiddleware)) {
-            self::$middleware = null;
-        }
     }
 
     /**
@@ -276,23 +256,29 @@ class Route implements RouteInterface
         ];
 
         /** controller for grouped namespace */
-        $namespace = end(self::$groupNamespace);
-        if ($namespace) {
-            $route['namespace'] = $namespace;
+        if (!isset(self::$namespace))
+        {
+            $namespace = end(self::$groupNamespace);
+            if ($namespace) {
+                $route['namespace'] = $namespace;
+            }
         }
         /** controller for individual namespace */
-        if (isset(self::$namespace) && empty(self::$groupNamespace)) {
+        else {
             $route['namespace'] = self::$namespace;
             self::$namespace = null;
         }
 
         /** middleware for grouped routes */
-        $middleware = end(self::$groupMiddleware);
-        if ($middleware) {
-            $route['middleware'] = $middleware;
+        if (!isset(self::$middleware))
+        {
+            $middleware = end(self::$groupMiddleware);
+            if ($middleware) {
+                $route['middleware'] = $middleware;
+            }
         }
         /** middleware for individual routes */
-        if (isset(self::$middleware) && empty(self::$groupMiddleware)) {
+        else {
             $route['middleware'] = self::$middleware;
             self::$middleware = null;
         }
@@ -313,23 +299,32 @@ class Route implements RouteInterface
         if ($target instanceof Closure) {
             return $target;
         }
-        if (gettype($target) === 'array') {
+        else if (gettype($target) === 'array') {
             return $target;
         }
-        if (gettype($target) === 'string') {
-            $_controller = end(self::$groupController);
-            if (isset(self::$controller) && empty(self::$groupController)) {
-                $_controller = self::$controller;
-                self::$controller = null;
+        else if (gettype($target) === 'string' && stripos($target, '@') === false) {
+            /** controller for grouped routes */
+            if (!isset(self::$controller))
+            {
+                $_controller = end(self::$groupController);
             }
+            /** controller for individual routes */
+            else {
+                $_controller = self::$controller;
+                self::$middleware = null;
+            }
+
             $controller = $_controller;
             $method = $target;
         }
-        else if (isset(self::$namespace)) {
-            $namespace = self::$namespace;
-            $parts = explode('@', $target);
-            $controller = $namespace.'\\'.$parts[0];
-            $method = $parts[1];
+        else if (stripos($target, '@') !== false) {
+            $_namespace = self::$namespace ?? end(self::$groupNamespace);
+            if (isset($_namespace)) {
+                $namespace = $_namespace;
+                $parts = explode('@', $target);
+                $controller = $namespace.'\\'.$parts[0];
+                $method = $parts[1];
+            }
         }
         else {
             throw new Exception('Error trying to determine the route target');
