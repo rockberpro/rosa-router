@@ -124,7 +124,6 @@ class Route implements RouteInterface
         self::$instance->build();
     }
 
-
     /**
      * @method delete
      * @param string $route
