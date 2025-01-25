@@ -315,6 +315,7 @@ class Route implements RouteInterface
             if (isset($_namespace)) {
                 $namespace = $_namespace;
                 $parts = explode('@', $target);
+
                 $controller = $namespace.'\\'.$parts[0];
                 $method = $parts[1];
             }
