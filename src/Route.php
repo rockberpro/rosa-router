@@ -225,11 +225,11 @@ class Route implements RouteInterface
      */
     public function group($closure)
     {
-        self::$groupNamespace[]  = self::$namespace ?? end(self::$groupNamespace);
-        self::$namespace = null;
+        self::$groupNamespace[] = self::$namespace ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
-        self::$controller = null;
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
+        self::$namespace = null;
+        self::$controller = null;
         self::$middleware = null;
 
         $closure();
