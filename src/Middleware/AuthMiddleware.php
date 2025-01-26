@@ -28,6 +28,10 @@ class AuthMiddleware
     {
         Sop::check();
 
+        if (!DotEnv::get('API_AUTH_METHOD')) {
+            Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
+        }
+
         if (DotEnv::get('API_AUTH_METHOD') === 'JWT') {
             Jwt::validate(Server::authorization(), 'access');
         }
