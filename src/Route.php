@@ -227,6 +227,7 @@ class Route implements RouteInterface
         self::$groupNamespace[] = self::$namespace ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
+
         self::$namespace = null;
         self::$controller = null;
         self::$middleware = null;
@@ -263,7 +264,6 @@ class Route implements RouteInterface
         }
         else {
             $route['namespace'] = self::$namespace;
-            self::$namespace = null;
         }
 
         if (!isset(self::$middleware))
@@ -275,8 +275,11 @@ class Route implements RouteInterface
         }
         else {
             $route['middleware'] = self::$middleware;
-            self::$middleware = null;
         }
+
+        self::$namespace = null;
+        self::$controller = null;
+        self::$middleware = null;
 
         global $routes;
         $routes[self::$instance->method][] = $route;
@@ -304,7 +307,6 @@ class Route implements RouteInterface
             }
             else {
                 $_controller = self::$controller;
-                self::$middleware = null;
             }
 
             $controller = $_controller;
