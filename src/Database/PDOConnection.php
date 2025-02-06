@@ -58,12 +58,12 @@ class PDOConnection
      */
     private function loadConfigurations()
     {
-        $this->setUsername(DotEnv::get('DB_USER'));
-        $this->setPassword(DotEnv::get('DB_PASS'));
-        $this->setDbName(DotEnv::get('DB_NAME'));
-        $this->setHostname(DotEnv::get('DB_HOST'));
-        $this->setPort(DotEnv::get('DB_PORT'));
-        $this->setDriverType(DotEnv::get('DB_TYPE'));
+        $this->setUsername(DotEnv::get('API_DB_USER'));
+        $this->setPassword(DotEnv::get('API_DB_PASS'));
+        $this->setDbName(DotEnv::get('API_DB_NAME'));
+        $this->setHostname(DotEnv::get('API_DB_HOST'));
+        $this->setPort(DotEnv::get('API_DB_PORT'));
+        $this->setDriverType(DotEnv::get('API_DB_TYPE'));
 
         return true;
     }
