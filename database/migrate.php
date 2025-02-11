@@ -52,8 +52,6 @@ $pdo->createStandardStatement(<<<SQL
     CREATE TABLE sys_api_logs(
         id SERIAL NOT NULL PRIMARY KEY,
         subject TEXT NOT NULL,
-        client_token TEXT,
-        client_key TEXT,
         remote_address TEXT NOT NULL,
         target_address TEXT NOT NULL,
         user_agent TEXT,

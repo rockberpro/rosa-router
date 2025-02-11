@@ -31,8 +31,6 @@ class SysApiLogs
     public static function write(Request $request)
     {
         $subject = SysApiLogs::SUBJECT;
-        $client_token = Server::authorization();
-        $client_key = Server::key();
         $remote_address = Server::remoteAddress();
         $target_address = Server::targetAddress();
         $user_agent = Server::userAgent();
@@ -53,8 +51,6 @@ class SysApiLogs
             INSERT INTO sys_api_logs
             (
                 subject,
-                client_token,
-                client_key,
                 remote_address,
                 target_address,
                 user_agent,
@@ -69,8 +65,6 @@ class SysApiLogs
             VALUES
             (
                 :subject,
-                :client_token,
-                :client_key,
                 :remote_address,
                 :target_address,
                 :user_agent,
@@ -84,8 +78,6 @@ class SysApiLogs
             )
         ");
         $pdo->bindParameter(':subject', $subject, PDO::PARAM_STR);
-        $pdo->bindParameter(':client_token', $client_token, PDO::PARAM_STR);
-        $pdo->bindParameter(':client_key', $client_key, PDO::PARAM_STR);
         $pdo->bindParameter(':remote_address', $remote_address, PDO::PARAM_STR);
         $pdo->bindParameter(':target_address', $target_address, PDO::PARAM_STR);
         $pdo->bindParameter(':user_agent', $user_agent, PDO::PARAM_STR);
