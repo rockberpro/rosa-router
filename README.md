@@ -1,4 +1,4 @@
-# ROSA-Router: A REST API Engine Built in PHP
+# ROSA-Router: Smart REST router for PHP
 
 ## Introduction
 **ROSA-Router** is a lightweight and efficient REST API engine built using PHP. It is designed to handle HTTP requests and route them to the appropriate controllers or functions based on the defined API endpoints. With a focus on simplicity and performance, ROSA-Router enables developers to quickly create and deploy RESTful web services.
