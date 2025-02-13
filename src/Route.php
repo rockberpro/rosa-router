@@ -333,7 +333,7 @@ class Route implements RouteInterface
     {
         self::$namespace = null;
         self::$controller = null;
-        self::$middleware = null;          
+        self::$middleware = null;
     }
 
     /**
