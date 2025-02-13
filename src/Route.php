@@ -319,10 +319,6 @@ class Route implements RouteInterface
             $route['middleware'] = self::$middleware;
         }
 
-        if (!$this->isChained) {
-            self::clear();
-        }
-
         global $routes;
         $routes[self::$instance->method][] = $route;
     }
