@@ -30,10 +30,12 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
-        $prefix = RouteHelper::routeMatchArgs(end($request->getAction()->getRoute()))[0];
+        $route = $request->getAction()->getRoute();
+        $route = end($route);
+        $prefix = RouteHelper::routeMatchArgs($route)[0];
 
         $_uri = str_replace($prefix, '', $request->getAction()->getUri());
-        $_route = str_replace($prefix, '', end($request->getAction()->getRoute()));
+        $_route = str_replace($prefix, '', $route);
 
         $uri_parts = explode('/', $_uri);
         $route_parts = explode('/', $_route);
