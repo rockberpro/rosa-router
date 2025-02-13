@@ -143,20 +143,3 @@ Route::controller(HelloWorldController::class)->group(function() {
     Route::get('/hello', 'hello');
 });
 ```
-
-### Chaining
-```php
-Route::namespace('Rockberpro\RestRouter\Controllers')
-    ->chain()
-    ->get('/method1', 'HelloWorldController@method1')
-    ->get('/method2', 'HelloWorldController@method2')
-    ->get('/method3', 'HelloWorldController@method3')
-    ->end();
-
-Route::controller(HelloWorldController::class)
-    ->chain()
-    ->get('/method1', 'method1')
-    ->get('/method2', 'method2')
-    ->get('/method3', 'method3')
-    ->end();
-```
