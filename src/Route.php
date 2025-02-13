@@ -161,34 +161,6 @@ class Route implements RouteInterface
     }
 
     /**
-     * Allows chaining of route methods
-     * 
-     * @method chain
-     * @return self
-     */
-    public function chain()
-    {
-        $this->isChained = true;
-
-        return $this;
-    }
-
-    /**
-     * Ends the route method chaining
-     * 
-     * @method end
-     * @return void
-     */
-    public function end()
-    {
-        $this->isChained = false;
-
-        self::$namespace = null;
-        self::$controller = null;
-        self::$middleware = null;
-    }
-
-    /**
      * Adds prefix to the route group
      * 
      * @method prefix
@@ -269,9 +241,7 @@ class Route implements RouteInterface
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
 
-        self::$namespace = null;
-        self::$controller = null;
-        self::$middleware = null;
+        self::clear();
 
         $closure();
 
@@ -279,6 +249,32 @@ class Route implements RouteInterface
         array_pop(self::$groupNamespace);
         array_pop(self::$groupController);
         array_pop(self::$groupMiddleware);
+    }
+
+    /**
+     * Allows chaining of route methods
+     * 
+     * @method chain
+     * @return self
+     */
+    public function chain()
+    {
+        $this->isChained = true;
+
+        return $this;
+    }
+
+    /**
+     * Ends the route method chaining
+     * 
+     * @method end
+     * @return void
+     */
+    public function end()
+    {
+        $this->isChained = false;
+
+        self::clear();
     }
 
     /**
@@ -363,13 +359,24 @@ class Route implements RouteInterface
         }
 
         if (!$this->isChained) {
-            self::$namespace = null;
-            self::$controller = null;
-            self::$middleware = null;            
+            self::clear();
         }
 
         global $routes;
         $routes[self::$instance->method][] = $route;
+    }
+
+    /**
+     * Clears the route properties
+     * 
+     * @method clear
+     * @return void
+     */
+    private function clear()
+    {
+        self::$namespace = null;
+        self::$controller = null;
+        self::$middleware = null;          
     }
 
     /**
