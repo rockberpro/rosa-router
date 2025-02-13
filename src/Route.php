@@ -16,6 +16,8 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
+    private bool $isChained = false;
+
     private static $namespace;
     private static $controller;
     private static $middleware;
@@ -36,10 +38,11 @@ class Route implements RouteInterface
      * @method get
      * @param string $route
      * @param string $target
-     * @return void
+     * @return self
      */
     public static function get($route, $target)
     {
+        
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
             $_route = Route::PREFIX.implode(self::$groupPrefix).$route;
@@ -53,13 +56,15 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
+
+        return self::$instance;
     }
 
     /**
      * @method post
      * @param string $route
      * @param string $target
-     * @return void
+     * @return self
      */
     public static function post($route, $target)
     {
@@ -76,13 +81,15 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
+
+        return self::$instance;
     }
 
     /**
      * @method put
      * @param string $route
      * @param string $target
-     * @return void
+     * @return self
      */
     public static function put($route, $target)
     {
@@ -99,13 +106,15 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
+
+        return self::$instance;
     }
 
     /**
      * @method patch
      * @param string $route
      * @param string $target
-     * @return void
+     * @return self
      */
     public static function patch($route, $target)
     {
@@ -122,13 +131,15 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
+
+        return self::$instance;
     }
 
     /**
      * @method delete
      * @param string $route
      * @param string $target
-     * @return void
+     * @return self
      */
     public static function delete($route, $target)
     {
@@ -145,6 +156,8 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
+
+        return self::$instance;
     }
 
     /**
@@ -224,13 +237,11 @@ class Route implements RouteInterface
      */
     public function group($closure)
     {
-        self::$groupNamespace[] = self::$namespace ?? end(self::$groupNamespace);
+        self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
 
-        self::$namespace = null;
-        self::$controller = null;
-        self::$middleware = null;
+        self::clear();
 
         $closure();
 
@@ -241,48 +252,29 @@ class Route implements RouteInterface
     }
 
     /**
-     * Building the route
+     * Allows chaining of route methods
      * 
-     * @method private
-     * @param void
+     * @method chain
+     * @return self
+     */
+    public function chain()
+    {
+        $this->isChained = true;
+
+        return $this;
+    }
+
+    /**
+     * Ends the route method chaining
+     * 
+     * @method end
      * @return void
      */
-    private function build()
+    public function end()
     {
-        $route = [
-            'prefix' => self::$instance->prefix,
-            'route' => self::$instance->route,
-            'target' => self::$instance->target
-        ];
+        $this->isChained = false;
 
-        if (!isset(self::$namespace))
-        {
-            $namespace = end(self::$groupNamespace);
-            if ($namespace) {
-                $route['namespace'] = $namespace;
-            }
-        }
-        else {
-            $route['namespace'] = self::$namespace;
-        }
-
-        if (!isset(self::$middleware))
-        {
-            $middleware = end(self::$groupMiddleware);
-            if ($middleware) {
-                $route['middleware'] = $middleware;
-            }
-        }
-        else {
-            $route['middleware'] = self::$middleware;
-        }
-
-        self::$namespace = null;
-        self::$controller = null;
-        self::$middleware = null;
-
-        global $routes;
-        $routes[self::$instance->method][] = $route;
+        self::clear();
     }
 
     /**
@@ -327,6 +319,64 @@ class Route implements RouteInterface
         }
 
         return [$controller, $method];
+    }
+
+    /**
+     * Building the route
+     * 
+     * @method private
+     * @param void
+     * @return void
+     */
+    private function build()
+    {
+        $route = [
+            'prefix' => self::$instance->prefix,
+            'route' => self::$instance->route,
+            'target' => self::$instance->target
+        ];
+
+        if (!isset(self::$namespace))
+        {
+            $namespace = end(self::$groupNamespace);
+            if ($namespace) {
+                $route['namespace'] = $namespace;
+            }
+        }
+        else {
+            $route['namespace'] = self::$namespace;
+        }
+
+        if (!isset(self::$middleware))
+        {
+            $middleware = end(self::$groupMiddleware);
+            if ($middleware) {
+                $route['middleware'] = $middleware;
+            }
+        }
+        else {
+            $route['middleware'] = self::$middleware;
+        }
+
+        if (!$this->isChained) {
+            self::clear();
+        }
+
+        global $routes;
+        $routes[self::$instance->method][] = $route;
+    }
+
+    /**
+     * Clears the route properties
+     * 
+     * @method clear
+     * @return void
+     */
+    private function clear()
+    {
+        self::$namespace = null;
+        self::$controller = null;
+        self::$middleware = null;          
     }
 
     /**

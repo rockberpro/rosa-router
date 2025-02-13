@@ -19,28 +19,22 @@ class Server implements ServerInterface
 
     public static function query()
     {
-        return $_SERVER['QUERY_STRING'];
+        return $_SERVER['QUERY_STRING'] ?? '';
     }
 
     public static function method()
     {
-        return $_SERVER['REQUEST_METHOD'];
+        return $_SERVER['REQUEST_METHOD'] ?? '';
     }
 
     public static function key()
     {
-        if (isset($_SERVER['HTTP_X_API_KEY'])) {
-            return $_SERVER['HTTP_X_API_KEY'];
-        }
-        return '';
+        return $_SERVER['HTTP_X_API_KEY'] ?? '';
     }
 
     public static function authorization()
     {
-        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-            return $_SERVER['HTTP_AUTHORIZATION'];
-        }
-        return '';
+        return $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     }
 
     public static function userAgent()
@@ -57,36 +51,36 @@ class Server implements ServerInterface
 
     public static function documentRoot()
     {
-        return $_SERVER['DOCUMENT_ROOT'];
+        return $_SERVER['DOCUMENT_ROOT'] ?? '';
     }
 
     public static function serverName()
     {
-        return $_SERVER['SERVER_NAME'];
+        return $_SERVER['SERVER_NAME'] ?? '';
     }
 
     public static function serverAddress()
     {
-        return $_SERVER['SERVER_ADDR'];
+        return $_SERVER['SERVER_ADDR'] ?? '';
     }
 
     public static function remoteAddress()
     {
-        return $_SERVER['REMOTE_ADDR'];
+        return $_SERVER['REMOTE_ADDR'] ?? '';
     }
 
     public static function targetAddress()
     {
-        return $_SERVER['HTTP_HOST'];
+        return $_SERVER['HTTP_HOST'] ?? '';
     }
 
     public static function requestMethod()
     {
-        return $_SERVER['REQUEST_METHOD'];
+        return $_SERVER['REQUEST_METHOD'] ?? '';
     }
 
     public static function requestUri()
     {
-        return $_SERVER['REQUEST_URI'];
+        return $_SERVER['REQUEST_URI'] ?? '';
     }
 }
