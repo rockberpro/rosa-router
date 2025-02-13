@@ -241,6 +241,50 @@ class Route implements RouteInterface
     }
 
     /**
+     * Build the target for the route
+     * 
+     * @method buildTarget
+     * @param string|array $target
+     * @return array
+     */
+    private static function buildTarget($target)
+    {
+        if ($target instanceof Closure) {
+            return $target;
+        }
+        else if (gettype($target) === 'array') {
+            return $target;
+        }
+        else if (gettype($target) === 'string' && stripos($target, '@') === false) {
+            if (!isset(self::$controller))
+            {
+                $_controller = end(self::$groupController);
+            }
+            else {
+                $_controller = self::$controller;
+            }
+
+            $controller = $_controller;
+            $method = $target;
+        }
+        else if (stripos($target, '@') !== false) {
+            $_namespace = self::$namespace ?? end(self::$groupNamespace);
+            if (isset($_namespace)) {
+                $namespace = $_namespace;
+                $parts = explode('@', $target);
+
+                $controller = $namespace.'\\'.$parts[0];
+                $method = $parts[1];
+            }
+        }
+        else {
+            throw new Exception('Error trying to determine the route target');
+        }
+
+        return [$controller, $method];
+    }
+
+    /**
      * Building the route
      * 
      * @method private
@@ -283,50 +327,6 @@ class Route implements RouteInterface
 
         global $routes;
         $routes[self::$instance->method][] = $route;
-    }
-
-    /**
-     * Build the target for the route
-     * 
-     * @method buildTarget
-     * @param string|array $target
-     * @return array
-     */
-    private static function buildTarget($target)
-    {
-        if ($target instanceof Closure) {
-            return $target;
-        }
-        else if (gettype($target) === 'array') {
-            return $target;
-        }
-        else if (gettype($target) === 'string' && stripos($target, '@') === false) {
-            if (!isset(self::$controller))
-            {
-                $_controller = end(self::$groupController);
-            }
-            else {
-                $_controller = self::$controller;
-            }
-
-            $controller = $_controller;
-            $method = $target;
-        }
-        else if (stripos($target, '@') !== false) {
-            $_namespace = self::$namespace ?? end(self::$groupNamespace);
-            if (isset($_namespace)) {
-                $namespace = $_namespace;
-                $parts = explode('@', $target);
-
-                $controller = $namespace.'\\'.$parts[0];
-                $method = $parts[1];
-            }
-        }
-        else {
-            throw new Exception('Error trying to determine the route target');
-        }
-
-        return [$controller, $method];
     }
 
     /**
