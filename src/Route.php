@@ -162,6 +162,7 @@ class Route implements RouteInterface
 
     /**
      * Allows chaining of route methods
+     * 
      * @method chain
      * @return self
      */
@@ -170,6 +171,21 @@ class Route implements RouteInterface
         $this->isChained = true;
 
         return $this;
+    }
+
+    /**
+     * Ends the route method chaining
+     * 
+     * @method end
+     * @return void
+     */
+    public function end()
+    {
+        $this->isChained = false;
+
+        self::$namespace = null;
+        self::$controller = null;
+        self::$middleware = null;
     }
 
     /**
@@ -249,7 +265,7 @@ class Route implements RouteInterface
      */
     public function group($closure)
     {
-        self::$groupNamespace[] = self::$namespace ?? end(self::$groupNamespace);
+        self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
 
@@ -258,8 +274,6 @@ class Route implements RouteInterface
         self::$middleware = null;
 
         $closure();
-
-        $this->isChained = false;
 
         array_pop(self::$groupPrefix);
         array_pop(self::$groupNamespace);
