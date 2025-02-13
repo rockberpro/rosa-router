@@ -42,7 +42,6 @@ class Route implements RouteInterface
      */
     public static function get($route, $target)
     {
-        
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
             $_route = Route::PREFIX.implode(self::$groupPrefix).$route;

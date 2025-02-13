@@ -14,7 +14,7 @@ class Server implements ServerInterface
 {
     public static function uri()
     {
-        return $_SERVER['REQUEST_URI'];
+        return $_SERVER['REQUEST_URI'] ?? '';
     }
 
     public static function query()
