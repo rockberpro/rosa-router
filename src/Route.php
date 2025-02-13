@@ -16,8 +16,6 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
-    private bool $isChained = false;
-
     private static $namespace;
     private static $controller;
     private static $middleware;
@@ -55,8 +53,6 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
-
-        return self::$instance;
     }
 
     /**
@@ -80,8 +76,6 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
-
-        return self::$instance;
     }
 
     /**
@@ -105,8 +99,6 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
-
-        return self::$instance;
     }
 
     /**
@@ -130,8 +122,6 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
-
-        return self::$instance;
     }
 
     /**
@@ -155,8 +145,6 @@ class Route implements RouteInterface
         self::$instance->target = self::buildTarget($target);
 
         self::$instance->build();
-
-        return self::$instance;
     }
 
     /**
@@ -248,32 +236,6 @@ class Route implements RouteInterface
         array_pop(self::$groupNamespace);
         array_pop(self::$groupController);
         array_pop(self::$groupMiddleware);
-    }
-
-    /**
-     * Allows chaining of route methods
-     * 
-     * @method chain
-     * @return self
-     */
-    public function chain()
-    {
-        $this->isChained = true;
-
-        return $this;
-    }
-
-    /**
-     * Ends the route method chaining
-     * 
-     * @method end
-     * @return void
-     */
-    public function end()
-    {
-        $this->isChained = false;
-
-        self::clear();
     }
 
     /**
