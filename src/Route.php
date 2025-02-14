@@ -16,16 +16,16 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
-    public static ?string $namespace;
-    public static ?string $controller;
-    public static ?string $middleware;
+    private static ?string $namespace;
+    private static ?string $controller;
+    private static ?string $middleware;
 
-    public static ?string $prefixHandler;
+    private static ?string $prefixHandler;
 
-    public static array $groupPrefix = [];
-    public static array $groupNamespace = [];
-    public static array $groupController = [];
-    public static array $groupMiddleware = [];
+    private static array $groupPrefix = [];
+    private static array $groupNamespace = [];
+    private static array $groupController = [];
+    private static array $groupMiddleware = [];
 
     private static self $instance;
 
@@ -42,12 +42,8 @@ class Route implements RouteInterface
      */
     public static function get($route, $target)
     {
-        $_route = Route::PREFIX.$route;
-        if (self::$groupPrefix) {
-            /** might have duplicate parts due group prefix stacking */
-            $routeStack = array_unique(self::$groupPrefix);
-            $_route = Route::PREFIX.implode($routeStack).$route;
-        }
+        $_route = self::route($route);
+
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
@@ -67,12 +63,8 @@ class Route implements RouteInterface
      */
     public static function post($route, $target)
     {
-        $_route = Route::PREFIX.$route;
-        if (self::$groupPrefix) {
-            /** might have duplicate parts due group prefix stacking */
-            $routeStack = array_unique(self::$groupPrefix);
-            $_route = Route::PREFIX.implode($routeStack).$route;
-        }
+        $_route = self::route($route);
+
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
@@ -92,12 +84,8 @@ class Route implements RouteInterface
      */
     public static function put($route, $target)
     {
-        $_route = Route::PREFIX.$route;
-        if (self::$groupPrefix) {
-            /** might have duplicate parts due group prefix stacking */
-            $routeStack = array_unique(self::$groupPrefix);
-            $_route = Route::PREFIX.implode($routeStack).$route;
-        }
+        $_route = self::route($route);
+
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
@@ -117,12 +105,8 @@ class Route implements RouteInterface
      */
     public static function patch($route, $target)
     {
-        $_route = Route::PREFIX.$route;
-        if (self::$groupPrefix) {
-            /** might have duplicate parts due group prefix stacking */
-            $routeStack = array_unique(self::$groupPrefix);
-            $_route = Route::PREFIX.implode($routeStack).$route;
-        }
+        $_route = self::route($route);
+
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
@@ -142,12 +126,8 @@ class Route implements RouteInterface
      */
     public static function delete($route, $target)
     {
-        $_route = Route::PREFIX.$route;
-        if (self::$groupPrefix) {
-            /** might have duplicate parts due group prefix stacking */
-            $routeStack = array_unique(self::$groupPrefix);
-            $_route = Route::PREFIX.implode($routeStack).$route;
-        }
+        $_route = self::route($route);
+
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
@@ -237,10 +217,9 @@ class Route implements RouteInterface
      */
     public function group($closure)
     {
-        /** stacks when group function is called without prefix */
+        /** group function has no prefix */
         if (!self::$prefixHandler) {
-            $lastPrefix = end(self::$groupPrefix);
-            self::$groupPrefix[] = $lastPrefix;
+            self::$groupPrefix[] = null;
         }
 
         self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
@@ -340,6 +319,37 @@ class Route implements RouteInterface
 
         global $routes;
         $routes[self::$instance->method][] = $route;
+    }
+
+    /**
+     * Builds the route path
+     * 
+     * @method route
+     * @param void
+     */
+    private static function route($route)
+    {
+        $_route = Route::PREFIX.$route;
+        if (self::$groupPrefix) {
+            $routeStack = self::routeStack();
+            $_route = Route::PREFIX.implode($routeStack).$route;
+        }
+
+        return $_route;
+    }
+
+    /**
+     * Get the route call stack
+     * 
+     * @method routeStack
+     * @param void
+     * @return array
+     */
+    private static function routeStack()
+    {
+        return array_filter(self::$groupPrefix, function($value) {
+            return $value !== null;
+        });
     }
 
     /**
