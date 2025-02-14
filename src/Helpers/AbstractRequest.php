@@ -309,6 +309,17 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
                             $diff = array_diff($uri_parts, $route_parts);
 
+                            /** when route has no suffix */
+                            if (
+                               sizeof($diff) === sizeof($uri_sufixes)
+                            && end($route_parts) !== end($uri_parts)
+                            && !in_array(end($uri_parts), $route_parts)
+                            && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
+                            ) {
+                                return true;
+                            }
+
+                            /** when route has suffix */
                             if (
                                sizeof($diff) !== sizeof($uri_sufixes)
                             && end($route_parts) === end($uri_parts)
@@ -317,18 +328,11 @@ abstract class AbstractRequest implements AbstractRequestInterface
                                 return true;
                             }
 
+                            /** when suffix and prefix have the same value */
                             if (
-                               sizeof($diff) === sizeof($uri_sufixes)
+                               sizeof($diff) !== sizeof($uri_sufixes)
                             && end($route_parts) !== end($uri_parts)
                             && in_array(end($uri_parts), $route_parts)
-                            ) {
-                                return true;
-                            }
-
-                            if (
-                               sizeof($diff) === sizeof($uri_sufixes)
-                            && end($route_parts) !== end($uri_parts)
-                            && !in_array(end($uri_parts), $route_parts)
                             && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
                             ) {
                                 return true;
