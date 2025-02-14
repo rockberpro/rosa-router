@@ -16,14 +16,16 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
-    private static $namespace;
-    private static $controller;
-    private static $middleware;
+    public static ?string $namespace;
+    public static ?string $controller;
+    public static ?string $middleware;
 
-    private static $groupPrefix = [];
-    private static $groupNamespace = [];
-    private static $groupController = [];
-    private static $groupMiddleware = [];
+    public static ?string $prefixHandler;
+
+    public static array $groupPrefix = [];
+    public static array $groupNamespace = [];
+    public static array $groupController = [];
+    public static array $groupMiddleware = [];
 
     private static self $instance;
 
@@ -42,7 +44,9 @@ class Route implements RouteInterface
     {
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
-            $_route = Route::PREFIX.implode(self::$groupPrefix).$route;
+            /** might have duplicate parts due group prefix stacking */
+            $routeStack = array_unique(self::$groupPrefix);
+            $_route = Route::PREFIX.implode($routeStack).$route;
         }
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -65,7 +69,9 @@ class Route implements RouteInterface
     {
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
-            $_route = Route::PREFIX.implode(self::$groupPrefix).$route;
+            /** might have duplicate parts due group prefix stacking */
+            $routeStack = array_unique(self::$groupPrefix);
+            $_route = Route::PREFIX.implode($routeStack).$route;
         }
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -88,7 +94,9 @@ class Route implements RouteInterface
     {
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
-            $_route = Route::PREFIX.implode(self::$groupPrefix).$route;
+            /** might have duplicate parts due group prefix stacking */
+            $routeStack = array_unique(self::$groupPrefix);
+            $_route = Route::PREFIX.implode($routeStack).$route;
         }
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -111,7 +119,9 @@ class Route implements RouteInterface
     {
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
-            $_route = Route::PREFIX.implode(self::$groupPrefix).$route;
+            /** might have duplicate parts due group prefix stacking */
+            $routeStack = array_unique(self::$groupPrefix);
+            $_route = Route::PREFIX.implode($routeStack).$route;
         }
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -134,7 +144,9 @@ class Route implements RouteInterface
     {
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
-            $_route = Route::PREFIX.implode(self::$groupPrefix).$route;
+            /** might have duplicate parts due group prefix stacking */
+            $routeStack = array_unique(self::$groupPrefix);
+            $_route = Route::PREFIX.implode($routeStack).$route;
         }
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -156,6 +168,7 @@ class Route implements RouteInterface
      */
     public static function prefix($prefix)
     {
+        self::$prefixHandler = "/{$prefix}";
         self::$groupPrefix[] = "/{$prefix}";
 
         return new self();
@@ -224,6 +237,12 @@ class Route implements RouteInterface
      */
     public function group($closure)
     {
+        /** stacks when group function is called without prefix */
+        if (!self::$prefixHandler) {
+            $lastPrefix = end(self::$groupPrefix);
+            self::$groupPrefix[] = $lastPrefix;
+        }
+
         self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
@@ -331,6 +350,7 @@ class Route implements RouteInterface
      */
     private function clear()
     {
+        self::$prefixHandler = null;
         self::$namespace = null;
         self::$controller = null;
         self::$middleware = null;
