@@ -324,6 +324,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                                sizeof($diff) !== sizeof($uri_sufixes)
                             && end($route_parts) === end($uri_parts)
                             && in_array(end($uri_parts), $route_parts)
+                            && ( stripos(end($route_parts), '{') === false && stripos(end($route_parts), '}') === false )
                             ) {
                                 return true;
                             }
