@@ -309,7 +309,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
                             $diff = array_diff($uri_parts, $route_parts);
 
-                            /** when route has no suffix */
+                            /** when route has only prefix, not param nor suffix */
                             if (
                                sizeof($diff) === sizeof($uri_sufixes)
                             && end($route_parts) !== end($uri_parts)
@@ -328,7 +328,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                                 return true;
                             }
 
-                            /** when suffix and prefix have the same value */
+                            /** when prefix and param have the same value */
                             if (
                                sizeof($diff) !== sizeof($uri_sufixes)
                             && end($route_parts) !== end($uri_parts)
