@@ -10,7 +10,6 @@ use DateTime;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter
  */
 class Jwt

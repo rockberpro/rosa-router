@@ -15,7 +15,6 @@ use InvalidArgumentException;
  * 
  * @author Samuel Oberger Rockenbach <samuel.rockenbach@univates.br>
  * @since july-2022
- * @version 1.1
  */
 class PDOConnection
 {

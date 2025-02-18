@@ -11,7 +11,6 @@ use Exception;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Alfa\RestRouter\Database\Models
  */
 class SysApiUsers

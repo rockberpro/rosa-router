@@ -10,7 +10,6 @@ use Rockberpro\RestRouter\Server;
  * 
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter\Utils
  */
 class Sop

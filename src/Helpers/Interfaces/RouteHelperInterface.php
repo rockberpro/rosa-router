@@ -5,7 +5,6 @@ namespace Rockberpro\RestRouter\Helpers\Interfaces;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter
  */
 interface RouteHelperInterface

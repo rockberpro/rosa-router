@@ -11,7 +11,6 @@ use Exception;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.1
  * @package Rockberpro\RestRouter\Helpers
  */
 abstract class AbstractRequest implements AbstractRequestInterface
@@ -40,10 +39,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $uri_parts = explode('/', $_uri);
         $route_parts = explode('/', $_route);
 
-        /** handle path params */
         $request = $this->pathParams($request, $route_parts, $uri_parts);
 
-        /** handle query params */
         $request = $this->queryParams($request);
 
         /** handle middleware */

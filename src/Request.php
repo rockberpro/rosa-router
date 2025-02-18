@@ -18,7 +18,6 @@ use Exception;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter
  */
 class Request implements RequestInterface
@@ -107,8 +106,7 @@ class Request implements RequestInterface
         $class = $request->getAction()->getClass();
         $method = $request->getAction()->getMethod();
 
-        if (DotEnv::get('API_LOGS'))
-        {
+        if (DotEnv::get('API_LOGS')) {
             try {
                 SysApiLogs::write($request);
             }
