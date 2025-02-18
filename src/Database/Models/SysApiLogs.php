@@ -38,9 +38,9 @@ class SysApiLogs
         $request_uri = Server::requestUri();
         $request_body = json_encode($request->getParameters());
 
-        $endpoint = $request->getAction()->getUri();
-        $class = $request->getAction()->getClass();
-        $method = $request->getAction()->getMethod();
+        $endpoint = $request->getAction()->getUri() ?? '';
+        $class = $request->getAction()->getClass() ?? '';
+        $method = $request->getAction()->getMethod() ?? '';
 
         $access_at = date('Y-m-d H:i:s');
 

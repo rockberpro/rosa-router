@@ -94,8 +94,11 @@ class Request implements RequestInterface
                 break;
             default: break;
         }
+
         if (is_null($request))
             throw new Exception('It was not possible to match your request');
+
+        $this->writeLog($request);
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
@@ -106,6 +109,18 @@ class Request implements RequestInterface
         $class = $request->getAction()->getClass();
         $method = $request->getAction()->getMethod();
 
+        (new $class)->$method($request);
+    }
+
+    /**
+     * Write the request log
+     * 
+     * @method writeLog
+     * @param Request $request
+     * @return void
+     */
+    private function writeLog(Request $request)
+    {
         if (DotEnv::get('API_LOGS')) {
             try {
                 SysApiLogs::write($request);
@@ -114,8 +129,6 @@ class Request implements RequestInterface
                 throw new Exception("It was not possible to write the request log: {$e->getMessage()}");
             }
         }
-
-        (new $class)->$method($request);
     }
 
     /**
