@@ -43,7 +43,6 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
         $request = $this->queryParams($request);
 
-        /** handle middleware */
         if ($middleware = $request->getAction()->getMiddleware()) {
             $this->middleware($middleware, $request);
         }
