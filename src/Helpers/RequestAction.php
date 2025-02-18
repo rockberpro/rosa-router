@@ -7,7 +7,6 @@ use Rockberpro\RestRouter\Helpers\Interfaces\RequestActionInterface;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter\Helpers
  */
 class RequestAction implements RequestActionInterface

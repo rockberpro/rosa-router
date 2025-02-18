@@ -7,7 +7,6 @@ use Rockberpro\RestRouter\Interfaces\ServerInterface;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter
  */
 class Server implements ServerInterface

@@ -7,7 +7,6 @@ use Rockberpro\RestRouter\Helpers\Interfaces\RouteHelperInterface;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.1
  * @package Rockberpro\RestRouter\Helpers
  */
 class RouteHelper implements RouteHelperInterface

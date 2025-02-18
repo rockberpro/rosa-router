@@ -7,7 +7,6 @@ use Rockberpro\RestRouter\Request;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @version 1.0
  * @package Rockberpro\RestRouter\Helpers
  */
 class PostRequest extends AbstractRequest 

@@ -9,7 +9,6 @@ namespace Rockberpro\RestRouter\Utils;
  * 
  * @author Samuel Oberger Rockenbach
  * @since dec-2024
- * @version 1.0
  */
 class Uuid
 {
