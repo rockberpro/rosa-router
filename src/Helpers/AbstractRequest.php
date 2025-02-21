@@ -29,17 +29,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
-        $route = $request->getAction()->getRoute();
-        $route = end($route);
-        $prefix = RouteHelper::routeMatchArgs($route)[0];
-
-        $_uri = str_replace($prefix, '', $request->getAction()->getUri());
-        $_route = str_replace($prefix, '', $route);
-
-        $uri_parts = explode('/', $_uri);
-        $route_parts = explode('/', $_route);
-
-        $request = $this->pathParams($request, $route_parts, $uri_parts);
+        $parts = $this->getRouteParts($request);
+        $request = $this->pathParams($request, $parts['route_parts'], $parts['uri_parts']);
 
         $request = $this->queryParams($request);
 
@@ -65,17 +56,49 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
-        /** handle form params */
+        $parts = $this->getRouteParts($request);
+        $request = $this->pathParams($request, $parts['route_parts'], $parts['uri_parts']);
+
+        $request = $this->queryParams($request);
+
+        /** form params */
         foreach((array) $form as $key => $value) {
             $request->$key = $value;
         }
 
-        /** handle middleware */
         if ($middleware = $request->getAction()->getMiddleware()) {
             $this->middleware($middleware, $request);
         }
 
         return $request;
+    }
+
+    /**
+     * Build the route parts
+     * 
+     * @method getRouteParts
+     * @param Request $request
+     * @return array [
+     *   'route_parts' => [ * ],
+     *   'uri_parts' =>  [ * ]
+     * ]
+     */
+    private function getRouteParts(Request $request)
+    {
+        $route = $request->getAction()->getRoute();
+        $route = end($route);
+        $prefix = RouteHelper::routeMatchArgs($route)[0];
+
+        $_uri = str_replace($prefix, '', $request->getAction()->getUri());
+        $_route = str_replace($prefix, '', $route);
+
+        $uri_parts = explode('/', $_uri);
+        $route_parts = explode('/', $_route);
+
+        return [
+            'route_parts' => $route_parts,
+            'uri_parts' => $uri_parts
+        ];
     }
 
     /**
