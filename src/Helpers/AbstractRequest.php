@@ -273,7 +273,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     public function map($routes, $method, $uri)
     {
-        if (!$routes[$method])
+        if (!isset($routes[$method]))
             throw new Exception("No routes for method {$method}");
 
         $filter = array_filter(
