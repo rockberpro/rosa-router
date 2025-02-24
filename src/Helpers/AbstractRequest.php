@@ -29,9 +29,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
-        $parts = $this->getRouteParts($request);
-        $request = $this->pathParams($request, $parts['route_parts'], $parts['uri_parts']);
-
+        $request = $this->pathParams($request);
         $request = $this->queryParams($request);
 
         if ($middleware = $request->getAction()->getMiddleware()) {
@@ -56,8 +54,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
-        $parts = $this->getRouteParts($request);
-        $request = $this->pathParams($request, $parts['route_parts'], $parts['uri_parts']);
+        $request = $this->pathParams($request);
+        $request = $this->queryParams($request);
 
         $request = $this->queryParams($request);
 
@@ -71,34 +69,6 @@ abstract class AbstractRequest implements AbstractRequestInterface
         }
 
         return $request;
-    }
-
-    /**
-     * Build the route parts
-     * 
-     * @method getRouteParts
-     * @param Request $request
-     * @return array [
-     *   'route_parts' => [ * ],
-     *   'uri_parts' =>  [ * ]
-     * ]
-     */
-    private function getRouteParts(Request $request)
-    {
-        $route = $request->getAction()->getRoute();
-        $route = end($route);
-        $prefix = RouteHelper::routeMatchArgs($route)[0];
-
-        $_uri = str_replace($prefix, '', $request->getAction()->getUri());
-        $_route = str_replace($prefix, '', $route);
-
-        $uri_parts = explode('/', $_uri);
-        $route_parts = explode('/', $_route);
-
-        return [
-            'route_parts' => $route_parts,
-            'uri_parts' => $uri_parts
-        ];
     }
 
     /**
@@ -138,8 +108,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $uri_parts
      * @return Request
      */
-    private function pathParams(Request &$request, $route_parts, $uri_parts)
+    private function pathParams(Request &$request)
     {
+        $parts = $this->getRouteParts($request);
+        [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
         foreach($route_parts as $key => $value)
         {
             $attribute = substr($value, 1, -1);
@@ -195,6 +167,34 @@ abstract class AbstractRequest implements AbstractRequestInterface
         }
 
         return $request;
+    }
+
+    /**
+     * Build the route parts
+     * 
+     * @method getRouteParts
+     * @param Request $request
+     * @return array [
+     *   'route_parts' => [ * ],
+     *   'uri_parts' =>  [ * ]
+     * ]
+     */
+    private function getRouteParts(Request $request)
+    {
+        $route = $request->getAction()->getRoute();
+        $route = end($route);
+        $prefix = RouteHelper::routeMatchArgs($route)[0];
+
+        $_uri = str_replace($prefix, '', $request->getAction()->getUri());
+        $_route = str_replace($prefix, '', $route);
+
+        $uri_parts = explode('/', $_uri);
+        $route_parts = explode('/', $_route);
+
+        return [
+            'route_parts' => $route_parts,
+            'uri_parts' => $uri_parts
+        ];
     }
 
     /**
