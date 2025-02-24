@@ -310,63 +310,76 @@ abstract class AbstractRequest implements AbstractRequestInterface
         return array_filter(
             $mapped_routes,
             function($route) use ($uri) {
-                $prefix = RouteHelper::routeMatchArgs($route)[0];
+                return $this->matchCondition($route, $uri);
+            }
+        );
+    }
 
-                $_route_sufixes = explode($prefix, $route);
-                $route_sufixes = explode('/', end($_route_sufixes));
+    /**
+     * Match the route if attends the condition
+     * 
+     * @method matchCondition
+     * @param string $route
+     * @param string $uri
+     * @return bool
+     */
+    private function matchCondition($route, $uri)
+    {
+        $prefix = RouteHelper::routeMatchArgs($route)[0];
 
-                $_uri_sufixes = explode($prefix, $uri)[1];
-                $uri_sufixes = explode('/', $_uri_sufixes);
+        $_route_sufixes = explode($prefix, $route);
+        $route_sufixes = explode('/', end($_route_sufixes));
 
-                if (stripos($uri, $prefix) !== false) {
-                    $route_parts = explode('/', $route);
-                    $uri_parts = explode('/', $uri);
+        $_uri_sufixes = explode($prefix, $uri)[1];
+        $uri_sufixes = explode('/', $_uri_sufixes);
 
-                    if (sizeof($uri_parts) === sizeof($route_parts)) {
+        if (stripos($uri, $prefix) !== false) {
+            $route_parts = explode('/', $route);
+            $uri_parts = explode('/', $uri);
 
-                        if (sizeof($uri_sufixes) === sizeof($route_sufixes)) {
+            if (sizeof($uri_parts) === sizeof($route_parts)) {
 
-                            $diff = array_diff($uri_parts, $route_parts);
+                if (sizeof($uri_sufixes) === sizeof($route_sufixes)) {
 
-                            /** when route has only prefix, not param nor suffix */
-                            if (
-                               sizeof($diff) === sizeof($uri_sufixes)
-                            && end($route_parts) !== end($uri_parts)
-                            && !in_array(end($uri_parts), $route_parts)
-                            && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
-                            ) {
-                                return true;
-                            }
+                    $diff = array_diff($uri_parts, $route_parts);
 
-                            /** when route has suffix */
-                            if (
-                               sizeof($diff) !== sizeof($uri_sufixes)
-                            && end($route_parts) === end($uri_parts)
-                            && in_array(end($uri_parts), $route_parts)
-                            && ( stripos(end($route_parts), '{') === false && stripos(end($route_parts), '}') === false )
-                            ) {
-                                return true;
-                            }
+                    /** when route has only prefix, not param nor suffix */
+                    if (
+                       sizeof($diff) === sizeof($uri_sufixes)
+                    && end($route_parts) !== end($uri_parts)
+                    && !in_array(end($uri_parts), $route_parts)
+                    && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
+                    ) {
+                        return true;
+                    }
 
-                            /** when prefix and param have the same value */
-                            if (
-                               sizeof($diff) !== sizeof($uri_sufixes)
-                            && end($route_parts) !== end($uri_parts)
-                            && in_array(end($uri_parts), $route_parts)
-                            && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
-                            ) {
-                                return true;
-                            }
+                    /** when route has suffix */
+                    if (
+                       sizeof($diff) !== sizeof($uri_sufixes)
+                    && end($route_parts) === end($uri_parts)
+                    && in_array(end($uri_parts), $route_parts)
+                    && ( stripos(end($route_parts), '{') === false && stripos(end($route_parts), '}') === false )
+                    ) {
+                        return true;
+                    }
 
-                            return false;
-                        }
-
-                        return false;
+                    /** when prefix and param have the same value */
+                    if (
+                       sizeof($diff) !== sizeof($uri_sufixes)
+                    && end($route_parts) !== end($uri_parts)
+                    && in_array(end($uri_parts), $route_parts)
+                    && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
+                    ) {
+                        return true;
                     }
 
                     return false;
                 }
+
+                return false;
             }
-        );
+
+            return false;
+        }
     }
 }
