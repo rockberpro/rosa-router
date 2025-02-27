@@ -49,7 +49,7 @@ class Route implements RouteInterface
         self::$instance->prefix = explode('{', $_route)[0];
         self::$instance->route = $_route;
         self::$instance->method = 'GET';
-        self::$instance->target = self::buildTarget($target);
+        self::$instance->target = self::$instance->buildTarget($target);
 
         self::$instance->build();
     }
@@ -70,7 +70,7 @@ class Route implements RouteInterface
         self::$instance->prefix = explode('{', $_route)[0];
         self::$instance->route = $_route;
         self::$instance->method = 'POST';
-        self::$instance->target = self::buildTarget($target);
+        self::$instance->target = self::$instance->buildTarget($target);
 
         self::$instance->build();
     }
@@ -91,7 +91,7 @@ class Route implements RouteInterface
         self::$instance->prefix = explode('{', $_route)[0];
         self::$instance->route = $_route;
         self::$instance->method = 'PUT';
-        self::$instance->target = self::buildTarget($target);
+        self::$instance->target = self::$instance->buildTarget($target);
 
         self::$instance->build();
     }
@@ -112,7 +112,7 @@ class Route implements RouteInterface
         self::$instance->prefix = explode('{', $_route)[0];
         self::$instance->route = $_route;
         self::$instance->method = 'PATCH';
-        self::$instance->target = self::buildTarget($target);
+        self::$instance->target = self::$instance->buildTarget($target);
 
         self::$instance->build();
     }
@@ -133,7 +133,7 @@ class Route implements RouteInterface
         self::$instance->prefix = explode('{', $_route)[0];
         self::$instance->route = $_route;
         self::$instance->method = 'DELETE';
-        self::$instance->target = self::buildTarget($target);
+        self::$instance->target = self::$instance->buildTarget($target);
 
         self::$instance->build();
     }
@@ -242,7 +242,7 @@ class Route implements RouteInterface
      * @param string|array $target
      * @return array
      */
-    private static function buildTarget($target)
+    private function buildTarget($target)
     {
         if ($target instanceof Closure) {
             return $target;
