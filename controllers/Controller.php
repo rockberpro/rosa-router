@@ -9,7 +9,7 @@ class Controller implements ControllerInterface
 {
     /**
      * @param mixed $data
-     * @param mixed $code
+     * @param int $code
      * @return void
      */
     public function response($data, $code)
