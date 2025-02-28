@@ -3,7 +3,6 @@
 namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Interfaces\ResponseInterface;
-use Rockberpro\RestRouter\Utils\Encoding;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -44,7 +43,7 @@ class Response implements ResponseInterface
      * Get request
      * 
      * @method json
-     * @param arary $data
+     * @param mixed $data
      * @param int $code
      */
     public static function json($data, $code)
@@ -52,9 +51,7 @@ class Response implements ResponseInterface
         http_response_code($code);
         header('Content-Type: application/json; charset=utf-8');
         exit(
-            json_encode(
-                Encoding::encodeUTF8Deep($data)
-            )
+            json_encode($data)
         );
     }
 }

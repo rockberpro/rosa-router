@@ -36,8 +36,7 @@ class Route implements RouteInterface
     /**
      * @method get
      * @param string $route
-     * @param string $target
-     * @return self
+     * @param mixed $target
      */
     public static function get($route, $target)
     {
@@ -57,8 +56,7 @@ class Route implements RouteInterface
     /**
      * @method post
      * @param string $route
-     * @param string $target
-     * @return self
+     * @param mixed $target
      */
     public static function post($route, $target)
     {
@@ -78,8 +76,7 @@ class Route implements RouteInterface
     /**
      * @method put
      * @param string $route
-     * @param string $target
-     * @return self
+     * @param mixed $target
      */
     public static function put($route, $target)
     {
@@ -99,8 +96,7 @@ class Route implements RouteInterface
     /**
      * @method patch
      * @param string $route
-     * @param string $target
-     * @return self
+     * @param mixed $target
      */
     public static function patch($route, $target)
     {
@@ -120,8 +116,7 @@ class Route implements RouteInterface
     /**
      * @method delete
      * @param string $route
-     * @param string $target
-     * @return self
+     * @param mixed $target
      */
     public static function delete($route, $target)
     {
@@ -212,7 +207,7 @@ class Route implements RouteInterface
      * 
      * @method group
      * @param string $prefix
-     * @param function $closure()
+     * @param closure $closure()
      */
     public function group($closure)
     {
@@ -240,7 +235,7 @@ class Route implements RouteInterface
      * 
      * @method buildTarget
      * @param string|array $target
-     * @return array
+     * @return mixed
      */
     private function buildTarget($target)
     {
@@ -283,7 +278,6 @@ class Route implements RouteInterface
      * Building the route
      * 
      * @method private
-     * @param void
      * @return void
      */
     private function build()
@@ -324,7 +318,7 @@ class Route implements RouteInterface
      * Builds the route path
      * 
      * @method route
-     * @param void
+     * @param string
      */
     private static function route($route)
     {
@@ -341,7 +335,6 @@ class Route implements RouteInterface
      * Get the route call stack
      * 
      * @method routeStack
-     * @param void
      * @return array
      */
     private static function routeStack()
@@ -369,7 +362,6 @@ class Route implements RouteInterface
      * Get all routes
      * 
      * @method getRoutes
-     * @param void
      * @return array
      */
     public static function getRoutes()
