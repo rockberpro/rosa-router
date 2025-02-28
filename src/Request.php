@@ -61,7 +61,7 @@ class Request implements RequestInterface
     public function handle($method, $uri, $query = null, $form = null)
     {
         global $routes;
-        if (is_null($routes))
+        if ($routes === null)
             Response::json(['message' => 'No registered routes'], Response::NOT_FOUND);
 
         $path = UrlParser::path($uri);
