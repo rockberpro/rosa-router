@@ -381,5 +381,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
             return false;
         }
+
+        return false;
     }
 }

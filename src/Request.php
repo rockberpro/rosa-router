@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Database\Models\SysApiLogs;
 use Rockberpro\RestRouter\Interfaces\RequestInterface;
 use Rockberpro\RestRouter\Helpers\DeleteRequest;
 use Rockberpro\RestRouter\Helpers\GetRequest;
@@ -13,6 +12,7 @@ use Rockberpro\RestRouter\Helpers\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Database\Models\SysApiLogs;
 use Exception;
 
 /**
