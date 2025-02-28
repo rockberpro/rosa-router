@@ -3,7 +3,6 @@
 namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Interfaces\ResponseInterface;
-use Rockberpro\RestRouter\Utils\Encoding;
 
 /**
  * @author Samuel Oberger Rockenbach
