@@ -80,7 +80,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param string $uri
      * @return RequestAction
      */
-    public function handle($routes, $method, $uri)
+    public function handle($routes, $method, $uri): RequestAction
     {
         $routes_map = $this->map($routes, $method, $uri);
         $match = $this->match($routes_map, $uri);
@@ -108,7 +108,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $uri_parts
      * @return Request
      */
-    private function pathParams(Request &$request)
+    private function pathParams(Request &$request): Request
     {
         $parts = $this->getRouteParts($request);
         [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
@@ -141,7 +141,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param Request $request
      * @return Request
      */
-    private function queryParams(Request &$request)
+    private function queryParams(Request &$request): Request
     {
         if (stripos(Server::query(), 'path=') !== false) {
             $parts = [];
@@ -179,7 +179,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      *   'uri_parts' =>  [ * ]
      * ]
      */
-    private function getRouteParts(Request $request)
+    private function getRouteParts(Request $request): array
     {
         $route = $request->getAction()->getRoute();
         $route = end($route);
@@ -207,7 +207,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $match
      * @return RequestAction
      */
-    private function buildAction($routes, $method, $uri, $match)
+    private function buildAction($routes, $method, $uri, $match): RequestAction
     {
         $action = new RequestAction();
         $action->setUri($uri);
@@ -250,7 +250,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param Request $request
      * @return void
      */
-    private function middleware($middleware, Request $request)
+    private function middleware($middleware, Request $request): void
     {
         if (!class_exists($middleware)) {
             throw new Exception("Middleware not found: {$middleware}");
@@ -271,7 +271,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * * @param string $uri
      * @return array mapped_routes
      */
-    public function map($routes, $method, $uri)
+    public function map($routes, $method, $uri): array
     {
         if (!isset($routes[$method]))
             throw new Exception("No routes for method {$method}");
@@ -287,7 +287,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         );
 
         $map = array_map(
-            function($route) {
+            function($route): mixed {
                 return $route['route'];
             },
             $filter
@@ -305,7 +305,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param string $uri
      * @return array
      */
-    public function match($mapped_routes, $uri)
+    public function match($mapped_routes, $uri): array
     {
         return array_filter(
             $mapped_routes,
@@ -323,7 +323,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param string $uri
      * @return bool
      */
-    private function matchCondition($route, $uri)
+    private function matchCondition($route, $uri): bool
     {
         $prefix = RouteHelper::routeMatchArgs($route)[0];
 

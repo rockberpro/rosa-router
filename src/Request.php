@@ -33,7 +33,7 @@ class Request implements RequestInterface
      * @param bool $parse
      * @return mixed
      */
-    public static function form($parse = true)
+    public static function form($parse = true): array|bool|string|null
     {
         $input = file_get_contents("php://input");
 
@@ -58,7 +58,7 @@ class Request implements RequestInterface
      * @param string $query
      * @param array $form
      */
-    public function handle($method, $uri, $query = null, $form = null)
+    public function handle($method, $uri, $query = null, $form = null): void
     {
         global $routes;
         if ($routes === null)
@@ -121,7 +121,7 @@ class Request implements RequestInterface
      * @param Request $request
      * @return void
      */
-    private function writeLog(Request $request)
+    private function writeLog(Request $request): void
     {
         if (DotEnv::get('API_LOGS')) {
             try {
@@ -140,7 +140,7 @@ class Request implements RequestInterface
      * @param RequestAction $action
      * @return void
      */
-    public function setAction(RequestAction $action)
+    public function setAction(RequestAction $action): void
     {
         $this->action = $action;
     }
@@ -151,7 +151,7 @@ class Request implements RequestInterface
      * @method getAction
      * @return RequestAction
      */
-    public function getAction()
+    public function getAction(): RequestAction
     {
         return $this->action;
     }
@@ -162,7 +162,7 @@ class Request implements RequestInterface
      * @method getParameters
      * @return array
      */
-    public function getParameters()
+    public function getParameters(): array
     {
         return $this->parameters;
     }
@@ -175,7 +175,7 @@ class Request implements RequestInterface
      * @param string $value
      * @return mixed
      */
-    public function get($key)
+    public function get($key): mixed
     {
         return $this->parameters[$key];
     }

@@ -23,7 +23,7 @@ class AuthMiddleware
      * @method handle
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         Sop::check();
 

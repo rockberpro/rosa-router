@@ -22,7 +22,7 @@ class Jwt
      * @param string $type
      * @return void
      */
-    public static function validate($token, $type)
+    public static function validate($token, $type): void
     {
         $instance = new self();
 
@@ -86,7 +86,7 @@ class Jwt
      * @param DateTime|null $expires
      * @return string token
      */
-    public static function getRefreshToken($audience, $expires = null)
+    public static function getRefreshToken($audience, $expires = null): string
     {
         if (!$expires) {
             $expires = (new DateTime())->add(DateInterval::createFromDateString('7 days'));
@@ -109,7 +109,7 @@ class Jwt
      * @param DateTime|null $expires
      * @return string token
      */
-    public static function getAccessToken($expires = null)
+    public static function getAccessToken($expires = null): string
     {
         if (!$expires) {
             $expires = (new DateTime())->add(DateInterval::createFromDateString('30 minutes'));
@@ -131,7 +131,7 @@ class Jwt
      * @method getHeader
      * @return string header
      */
-    private function getHeader()
+    private function getHeader(): bool|string
     {
         return json_encode([
             'alg' => 'HS256',
@@ -148,7 +148,7 @@ class Jwt
      * @param string $audience
      * @return string payload
      */
-    private function getPayload($expires = null, $type, $audience = null)
+    private function getPayload($expires = null, $type, $audience = null): bool|string
     {
         $payload = [
             'iss' => DotEnv::get('JWT_ISSUER'),
