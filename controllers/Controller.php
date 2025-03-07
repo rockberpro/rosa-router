@@ -8,7 +8,7 @@ use Rockberpro\RestRouter\Response;
 class Controller implements ControllerInterface
 {
     /**
-     * @param mixed $data
+     * @param array|object $data
      * @param int $status
      * @return Response
      */

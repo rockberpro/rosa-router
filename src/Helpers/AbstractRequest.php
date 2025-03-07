@@ -287,7 +287,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         );
 
         $map = array_map(
-            function($route): mixed {
+            function($route) {
                 return $route['route'];
             },
             $filter

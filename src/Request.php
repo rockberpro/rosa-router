@@ -31,7 +31,7 @@ class Request implements RequestInterface
      * 
      * @method form
      * @param bool $parse
-     * @return mixed
+     * @return array|bool|string|null
      */
     public static function form($parse = true): array|bool|string|null
     {
@@ -173,9 +173,8 @@ class Request implements RequestInterface
      * @method get
      * @param string $key
      * @param string $value
-     * @return mixed
      */
-    public function get($key): mixed
+    public function get($key)
     {
         return $this->parameters[$key];
     }
