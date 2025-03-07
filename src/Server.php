@@ -38,13 +38,13 @@ class Server implements ServerInterface
 
     public static function userAgent()
     {
-        return $_SERVER['HTTP_USER_AGENT'];
+        return $_SERVER['HTTP_USER_AGENT'] ?? '';
     }
 
     public static function routeArgv()
     {
         if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
-            return explode('path=', $_SERVER['argv'][0])[1];
+            return explode('path=', $_SERVER['argv'][0])[1] ?? '';
         }
     }
 
