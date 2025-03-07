@@ -109,7 +109,8 @@ class Request implements RequestInterface
         $class = $request->getAction()->getClass();
         $method = $request->getAction()->getMethod();
 
-        (new $class)->$method($request);
+        $response = (new $class)->$method($request);
+        Response::json($response['data'], $response['status']);
     }
 
     /**

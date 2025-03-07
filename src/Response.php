@@ -44,11 +44,11 @@ class Response implements ResponseInterface
      * 
      * @method json
      * @param mixed $data
-     * @param int $code
+     * @param int $status
      */
-    public static function json($data, $code)
+    public static function json($data, $status)
     {
-        http_response_code($code);
+        http_response_code($status);
         header('Content-Type: application/json; charset=utf-8');
         exit(
             json_encode($data)

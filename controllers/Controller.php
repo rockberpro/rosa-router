@@ -3,17 +3,16 @@
 namespace Rockberpro\RestRouter\Controllers;
 
 use Rockberpro\RestRouter\Controllers\Interfaces\ControllerInterface;
-use Rockberpro\RestRouter\Response;
 
 class Controller implements ControllerInterface
 {
     /**
      * @param mixed $data
-     * @param int $code
-     * @return void
+     * @param int $status
+     * @return array
      */
-    public function response($data, $code)
+    public function response($data, $status)
     {
-        Response::json($data, $code);
+        return ['data' => $data, 'status' => $status];
     }   
 }
