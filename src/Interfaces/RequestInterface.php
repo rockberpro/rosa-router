@@ -11,8 +11,8 @@ use Rockberpro\RestRouter\Helpers\RequestAction;
  */
 interface RequestInterface
 {
-    public static function form();
-    public function handle($method, $uri, $query = null, $form = null);
+    public static function body();
+    public function handle($method, $uri, $query = null, $body = null);
     public function setAction(RequestAction $action);
     public function getAction();
     public function get($key);

@@ -27,13 +27,13 @@ class Request implements RequestInterface
     private array $parameters = [];
 
     /**
-     * Get the form data
+     * Get the body data
      * 
-     * @method form
+     * @method body
      * @param bool $parse
      * @return array|bool|string|null
      */
-    public static function form($parse = true): array|bool|string|null
+    public static function body($parse = true): array|bool|string|null
     {
         $input = file_get_contents("php://input");
 
@@ -56,9 +56,9 @@ class Request implements RequestInterface
      * @param string $method
      * @param string $uri
      * @param string $query
-     * @param array $form
+     * @param array $body
      */
-    public function handle($method, $uri, $query = null, $form = null): void
+    public function handle($method, $uri, $query = null, $body = null): void
     {
         global $routes;
         if ($routes === null)
@@ -81,13 +81,13 @@ class Request implements RequestInterface
                 $request = (new GetRequest())->buildRequest($routes, $method, $path);
                 break;
             case 'POST':
-                $request = (new PostRequest())->buildRequest($routes, $method, $path, $form);
+                $request = (new PostRequest())->buildRequest($routes, $method, $path, $body);
                 break;
             case 'PUT':
-                $request = (new PutRequest())->buildRequest($routes, $method, $path, $form);
+                $request = (new PutRequest())->buildRequest($routes, $method, $path, $body);
                 break;
             case 'PATCH':
-                $request = (new PatchRequest())->buildRequest($routes, $method, $path, $form);
+                $request = (new PatchRequest())->buildRequest($routes, $method, $path, $body);
                 break;
             case 'DELETE':
                 $request = (new DeleteRequest())->buildRequest($routes, $method, $path);
