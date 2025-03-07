@@ -39,7 +39,7 @@ class Response implements ResponseInterface
     const BAD_GATEWAY = 502;
     const SERVICE_UNAVAILABLE = 503;
 
-    private mixed $data;
+    private array $data;
     private int $status;
 
     public function __construct($data, $status)
@@ -51,7 +51,7 @@ class Response implements ResponseInterface
     /**
      * Summary of response
      * 
-     * @param mixed $data
+     * @param array $data
      * @param int $status
      * @exit
      */
@@ -66,7 +66,7 @@ class Response implements ResponseInterface
      * * end of execution
      * 
      * @method json
-     * @param mixed $data
+     * @param array $data
      * @param int $status
      * @exit
      */
