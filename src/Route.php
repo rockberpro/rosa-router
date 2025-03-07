@@ -36,7 +36,7 @@ class Route implements RouteInterface
     /**
      * @method get
      * @param string $route
-     * @param mixed $target
+     * @param string|array|Closure $target
      */
     public static function get($route, $target): void
     {
@@ -56,7 +56,7 @@ class Route implements RouteInterface
     /**
      * @method post
      * @param string $route
-     * @param mixed $target
+     * @param string|array|Closure $target
      */
     public static function post($route, $target): void
     {
@@ -76,7 +76,7 @@ class Route implements RouteInterface
     /**
      * @method put
      * @param string $route
-     * @param mixed $target
+     * @param string|array|Closure $target
      */
     public static function put($route, $target): void
     {
@@ -96,7 +96,7 @@ class Route implements RouteInterface
     /**
      * @method patch
      * @param string $route
-     * @param mixed $target
+     * @param string|array|Closure $target
      */
     public static function patch($route, $target): void
     {
@@ -116,7 +116,7 @@ class Route implements RouteInterface
     /**
      * @method delete
      * @param string $route
-     * @param mixed $target
+     * @param string|array|Closure $target
      */
     public static function delete($route, $target): void
     {
@@ -235,7 +235,7 @@ class Route implements RouteInterface
      * 
      * @method buildTarget
      * @param string|array $target
-     * @return mixed
+     * @return array|Closure|string
      */
     private function buildTarget($target): array|Closure|string
     {
@@ -364,7 +364,7 @@ class Route implements RouteInterface
      * @method getRoutes
      * @return array
      */
-    public static function getRoutes(): mixed
+    public static function getRoutes(): array
     {
         global $routes;
         return $routes;

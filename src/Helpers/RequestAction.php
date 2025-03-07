@@ -32,7 +32,7 @@ class RequestAction implements RequestActionInterface
         $this->method = $method;
     }
 
-    public function getClosure(): mixed {
+    public function getClosure() {
         return $this->closure;
     }
     public function setClosure($closure): void {

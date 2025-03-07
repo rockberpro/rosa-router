@@ -40,7 +40,7 @@ class Encoding
      *
      * @method utf8_encode_deep
      * @param array $input
-     * @return mixed
+     * @return object|array
      */
     public static function utf8_encode_deep(&$input)
     {

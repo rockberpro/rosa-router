@@ -41,7 +41,7 @@ class Server implements ServerInterface
         return $_SERVER['HTTP_USER_AGENT'] ?? '';
     }
 
-    public static function routeArgv(): mixed
+    public static function routeArgv(): string
     {
         if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
             return explode('path=', $_SERVER['argv'][0])[1] ?? '';
