@@ -9,7 +9,7 @@ class Controller implements ControllerInterface
     /**
      * @param mixed $data
      * @param int $status
-     * @return array
+     * @return array [data, status]
      */
     public function response($data, $status)
     {
