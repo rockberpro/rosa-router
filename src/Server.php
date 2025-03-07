@@ -13,7 +13,7 @@ class Server implements ServerInterface
 {
     public static function uri(): string
     {
-        return $_SERVER['REQUEST_URI'] ?? '';
+        return urldecode(parse_url($_SERVER["REQUEST_URI"] ?? '', PHP_URL_PATH));
     }
 
     public static function query(): string
