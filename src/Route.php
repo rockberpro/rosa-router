@@ -38,7 +38,7 @@ class Route implements RouteInterface
      * @param string $route
      * @param mixed $target
      */
-    public static function get($route, $target)
+    public static function get($route, $target): void
     {
         $_route = self::route($route);
 
@@ -58,7 +58,7 @@ class Route implements RouteInterface
      * @param string $route
      * @param mixed $target
      */
-    public static function post($route, $target)
+    public static function post($route, $target): void
     {
         $_route = self::route($route);
 
@@ -78,7 +78,7 @@ class Route implements RouteInterface
      * @param string $route
      * @param mixed $target
      */
-    public static function put($route, $target)
+    public static function put($route, $target): void
     {
         $_route = self::route($route);
 
@@ -98,7 +98,7 @@ class Route implements RouteInterface
      * @param string $route
      * @param mixed $target
      */
-    public static function patch($route, $target)
+    public static function patch($route, $target): void
     {
         $_route = self::route($route);
 
@@ -118,7 +118,7 @@ class Route implements RouteInterface
      * @param string $route
      * @param mixed $target
      */
-    public static function delete($route, $target)
+    public static function delete($route, $target): void
     {
         $_route = self::route($route);
 
@@ -140,7 +140,7 @@ class Route implements RouteInterface
      * @param $prefix
      * @return self
      */
-    public static function prefix($prefix)
+    public static function prefix($prefix): Route
     {
         self::$prefixHandler = "/{$prefix}";
         self::$groupPrefix[] = "/{$prefix}";
@@ -155,7 +155,7 @@ class Route implements RouteInterface
      * @param string $namespace
      * @return self
      */
-    public static function namespace($namespace)
+    public static function namespace($namespace): Route
     {
         self::$namespace = $namespace;
 
@@ -173,7 +173,7 @@ class Route implements RouteInterface
      * @param string $controller classname
      * @return self
      */
-    public static function controller($controller)
+    public static function controller($controller): Route
     {
         self::$controller = $controller;
 
@@ -191,7 +191,7 @@ class Route implements RouteInterface
      * @param string $middleware classname
      * @return self
      */
-    public static function middleware($middleware)
+    public static function middleware($middleware): Route
     {
         self::$middleware = $middleware;
 
@@ -209,7 +209,7 @@ class Route implements RouteInterface
      * @param string $prefix
      * @param closure $closure()
      */
-    public function group($closure)
+    public function group($closure): void
     {
         /** group function has no prefix */
         if (!self::$prefixHandler) {
@@ -237,7 +237,7 @@ class Route implements RouteInterface
      * @param string|array $target
      * @return mixed
      */
-    private function buildTarget($target)
+    private function buildTarget($target): array|Closure|string
     {
         if ($target instanceof Closure) {
             return $target;
@@ -280,7 +280,7 @@ class Route implements RouteInterface
      * @method private
      * @return void
      */
-    private function build()
+    private function build(): void
     {
         $route = [
             'prefix' => self::$instance->prefix,
@@ -320,7 +320,7 @@ class Route implements RouteInterface
      * @method route
      * @param string
      */
-    private static function route($route)
+    private static function route($route): string
     {
         $_route = Route::PREFIX.$route;
         if (self::$groupPrefix) {
@@ -337,7 +337,7 @@ class Route implements RouteInterface
      * @method routeStack
      * @return array
      */
-    private static function routeStack()
+    private static function routeStack(): array
     {
         return array_filter(self::$groupPrefix, function($value) {
             return $value !== null;
@@ -350,7 +350,7 @@ class Route implements RouteInterface
      * @method clear
      * @return void
      */
-    private function clear()
+    private function clear(): void
     {
         self::$prefixHandler = null;
         self::$namespace = null;
@@ -364,7 +364,7 @@ class Route implements RouteInterface
      * @method getRoutes
      * @return array
      */
-    public static function getRoutes()
+    public static function getRoutes(): mixed
     {
         global $routes;
         return $routes;

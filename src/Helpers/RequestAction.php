@@ -11,52 +11,52 @@ use Rockberpro\RestRouter\Helpers\Interfaces\RequestActionInterface;
  */
 class RequestAction implements RequestActionInterface
 {
-    private $middleware;
-    private $method;
+    private ?string $middleware = '';
+    private string $method;
     private $closure;
-    private $route;
-    private $class;
-    private $uri;
+    private array $route;
+    private string $class;
+    private string $uri;
 
-    public function getMiddleware() {
+    public function getMiddleware(): string {
         return $this->middleware;
     }
-    public function setMiddleware($middleware) {
+    public function setMiddleware($middleware): void {
         $this->middleware = $middleware;
     }
 
-    public function getMethod() {
+    public function getMethod(): string {
         return $this->method;
     }
-    public function setMethod($method) {
+    public function setMethod($method): void {
         $this->method = $method;
     }
 
-    public function getClosure() {
+    public function getClosure(): mixed {
         return $this->closure;
     }
-    public function setClosure($closure) {
+    public function setClosure($closure): void {
         $this->closure = $closure;
     }
 
-    public function getRoute() {
+    public function getRoute(): array {
         return $this->route;
     }
-    public function setRoute($route) {
+    public function setRoute($route): void {
         $this->route = $route;
     }
 
-    public function getClass() {
+    public function getClass(): string {
         return $this->class;
     }
-    public function setClass($class) {
+    public function setClass($class): void {
         $this->class = $class;
     }
 
-    public function getUri() {
+    public function getUri(): string {
         return $this->uri;
     }
-    public function setUri($uri) {
+    public function setUri($uri): void {
         $this->uri = $uri;
     }
 }

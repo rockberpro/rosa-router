@@ -12,7 +12,7 @@ class Controller implements ControllerInterface
      * @param int $status
      * @return Response
      */
-    public function response($data, $status)
+    public function response($data, $status): Response
     {
         return new Response($data, $status);
     }

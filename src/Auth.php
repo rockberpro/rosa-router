@@ -16,7 +16,7 @@ class Auth
      * @param string $client_key
      * @return void
      */
-    public static function check($api_key, $client_key)
+    public static function check($api_key, $client_key): void
     {
         if (!$api_key) {
             Response::json(['message' => 'API-Key could not be loaded'], Response::FORBIDDEN);

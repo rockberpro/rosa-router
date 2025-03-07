@@ -55,7 +55,7 @@ class Response implements ResponseInterface
      * @param int $status
      * @exit
      */
-    public function response()
+    public function response(): void
     {
         self::json($this->data, $this->status);
     }
@@ -70,7 +70,7 @@ class Response implements ResponseInterface
      * @param int $status
      * @exit
      */
-    public static function json($data, $status)
+    public static function json($data, $status): never
     {
         http_response_code($status);
         header('Content-Type: application/json; charset=utf-8');
