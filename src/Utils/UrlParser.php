@@ -39,6 +39,6 @@ class UrlParser
             $vars
         );
 
-        return array_key_first($vars);
+        return urldecode(array_key_first($vars));
     }
 }
