@@ -7,5 +7,5 @@ namespace Rockberpro\RestRouter\Controllers\Interfaces;
  */
 interface ControllerInterface
 {
-    public function response($data, $code);
+    public function response($data, $status);
 }
