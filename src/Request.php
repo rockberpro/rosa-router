@@ -111,7 +111,10 @@ class Request implements RequestInterface
 
         /** call the controller */
         $response = (new $class)->$method($request);
-        $response->response();
+        if (!method_exists($response, 'response')) {
+            $response->response();
+        }
+        Response::json(['message' => 'Not implemented'], Response::NOT_IMPLEMENTED);
     }
 
     /**
