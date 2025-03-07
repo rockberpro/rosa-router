@@ -46,10 +46,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $routes
      * @param string $method
      * @param string $uri
-     * @param array $form
+     * @param array $body
      * @return Request
      */
-    public function buildFormRequest($routes, $method, $uri, $form) : Request
+    public function buildFormRequest($routes, $method, $uri, $body) : Request
     {
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
@@ -60,7 +60,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = $this->queryParams($request);
 
         /** form params */
-        foreach((array) $form as $key => $value) {
+        foreach((array) $body as $key => $value) {
             $request->$key = $value;
         }
 

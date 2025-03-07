@@ -12,7 +12,7 @@ use Rockberpro\RestRouter\Request;
 interface AbstractRequestInterface
 {
     public function buildUriRequest($routes, $method, $uri) : Request;
-    public function buildFormRequest($routes, $method, $uri, $form) : Request;
+    public function buildFormRequest($routes, $method, $uri, $body) : Request;
     public function handle($routes, $method, $uri);
     public function map($routes, $method, $uri);
     public function match($mapped_routes, $uri);

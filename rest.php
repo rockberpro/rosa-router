@@ -10,7 +10,7 @@ require_once "autoload.php";
 require_once "routes/api.php";
 
 $uri = Server::uri(); /// if request: /api
-$form = Request::form();
+$body = Request::body();
 $method = Server::method();
 $route = Server::routeArgv(); /// if request: .htaccess redirect
 $query = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
@@ -18,7 +18,7 @@ $query = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
 try
 {
     DotEnv::load('.env');
-    (new Request())->handle($method, $uri, $query, $form);
+    (new Request())->handle($method, $uri, $query, $body);
 }
 catch(Throwable $th)
 {

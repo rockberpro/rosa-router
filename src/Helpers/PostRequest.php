@@ -18,11 +18,11 @@ class PostRequest extends AbstractRequest
      * @param array $routes
      * @param string $method
      * @param string $uri
-     * @param array $form
+     * @param array $body
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri, $form) : Request
+    public function buildRequest($routes, $method, $uri, $body) : Request
     {
-        return parent::buildFormRequest($routes, $method, $uri, $form);
+        return parent::buildFormRequest($routes, $method, $uri, $body);
     }
 }
