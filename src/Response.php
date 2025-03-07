@@ -39,12 +39,36 @@ class Response implements ResponseInterface
     const BAD_GATEWAY = 502;
     const SERVICE_UNAVAILABLE = 503;
 
+    private mixed $data;
+    private int $status;
+
+    public function __construct($data, $status)
+    {
+        $this->data = $data;
+        $this->status = $status;
+    }
+
     /**
-     * Get request
+     * Summary of response
+     * 
+     * @param mixed $data
+     * @param int $status
+     * @exit
+     */
+    public function response()
+    {
+        self::json($this->data, $this->status);
+    }
+
+    /**
+     * Response
+     * 
+     * * end of execution
      * 
      * @method json
      * @param mixed $data
      * @param int $status
+     * @exit
      */
     public static function json($data, $status)
     {
