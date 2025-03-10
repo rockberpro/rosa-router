@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Interfaces;
 
-use Rockberpro\RestRouter\Helpers\RequestAction;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 
@@ -11,5 +9,7 @@ use Rockberpro\RestRouter\Helpers\RequestAction;
  */
 interface ResponseInterface
 {
-    public static function json($data, $code);
+    public function __construct($code, $status);
+    public function response(): void;
+    public static function json($data, $status): never;
 }
