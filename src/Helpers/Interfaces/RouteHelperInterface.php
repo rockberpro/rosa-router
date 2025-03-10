@@ -5,12 +5,12 @@ namespace Rockberpro\RestRouter\Helpers\Interfaces;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter
+ * @package Rockberpro\RestRouter\Helpers\Interfaces
  */
 interface RouteHelperInterface
 {
-    public static function routeArgs($route_match);
-    public static function routeMatchArgs($route);
-    public static function routeVars($route);
-    public static function isAlphaNumeric($string);
+    public static function routeArgs($route_match): array|bool;
+    public static function routeMatchArgs($route): array|bool;
+    public static function routeVars($route): array|bool;
+    public static function isAlphaNumeric($string): bool|int;
 }

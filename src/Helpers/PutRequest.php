@@ -21,7 +21,7 @@ class PutRequest extends AbstractRequest
      * @param array $body
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri, $body) : Request
+    public function buildRequest($routes, $method, $uri, $body): Request
     {
         return parent::buildFormRequest($routes, $method, $uri, $body);
     }
