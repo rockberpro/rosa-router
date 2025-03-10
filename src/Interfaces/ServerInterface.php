@@ -5,22 +5,22 @@ namespace Rockberpro\RestRouter\Interfaces;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter
+ * @package Rockberpro\RestRouter\Interfaces
  */
 interface ServerInterface
 {
-    public static function uri();
-    public static function query();
-    public static function method();
-    public static function key();
-    public static function authorization();
-    public static function routeArgv();
-    public static function documentRoot();
-    public static function serverName();
-    public static function serverAddress();
-    public static function userAgent();
-    public static function remoteAddress();
-    public static function targetAddress();
-    public static function requestMethod();
-    public static function requestUri();
+    public static function uri(): string;
+    public static function query(): string;
+    public static function method(): string;
+    public static function key(): string;
+    public static function authorization(): string;
+    public static function routeArgv(): string;
+    public static function documentRoot(): string;
+    public static function serverName(): string;
+    public static function serverAddress(): string;
+    public static function userAgent(): string;
+    public static function remoteAddress(): string;
+    public static function targetAddress(): string;
+    public static function requestMethod(): string;
+    public static function requestUri(): string;
 }

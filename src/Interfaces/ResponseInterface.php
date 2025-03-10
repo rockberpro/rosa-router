@@ -5,7 +5,7 @@ namespace Rockberpro\RestRouter\Interfaces;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter
+ * @package Rockberpro\RestRouter\Interfaces
  */
 interface ResponseInterface
 {
