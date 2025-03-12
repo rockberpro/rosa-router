@@ -42,14 +42,14 @@ abstract class AbstractRequest implements AbstractRequestInterface
     /**
      * Build the request from form data
      * 
-     * @method buildRequest
+     * @method buildBodyRequest
      * @param array $routes
      * @param string $method
      * @param string $uri
      * @param array $body
      * @return Request
      */
-    public function buildFormRequest($routes, $method, $uri, $body): Request
+    public function buildBodyRequest($routes, $method, $uri, $body): Request
     {
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
