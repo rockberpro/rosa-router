@@ -95,7 +95,7 @@ class Request implements RequestInterface
             default: break;
         }
 
-        if (is_null($request))
+        if ($request === null)
             throw new Exception('It was not possible to match your request');
 
         $this->writeLog($request);

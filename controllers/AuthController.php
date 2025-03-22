@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Controllers;
 
 use Rockberpro\RestRouter\Jwt;
+use Rockberpro\RestRouter\JwtException;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
@@ -88,7 +89,12 @@ class AuthController extends Controller
             return $this->response(['message' => 'Token revoked'], Response::UNAUTHORIZED);
         }
 
-        Jwt::validate(Server::authorization(), 'refresh');
+        try {
+            Jwt::validate(Server::authorization(), 'refresh');
+        }
+        catch(JwtException $e) {
+            return new Response(['message' => $e->getMessage()], Response::UNAUTHORIZED);
+        }
 
         $access_token = Jwt::getAccessToken();
         return $this->response([

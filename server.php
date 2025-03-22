@@ -17,6 +17,9 @@ $server = new HttpServer(function(ServerRequest $request) {
     {
         DotEnv::load('.env');
 
+        /**
+         * TODO implement query params and body params
+         */
         $response = (new Request())->handle(
             $request->getMethod(), 
             $request->getUri()->getPath(), 
@@ -25,26 +28,40 @@ $server = new HttpServer(function(ServerRequest $request) {
         );
 
         if (get_class($response) === 'Rockberpro\RestRouter\Response') {
-            return (new Response($response->status))->json($response->data);
+            return new Response(
+                $response->status,
+                ['Content-Type' => 'application/json'],
+                json_encode($response->data)
+            );
         }
 
-        return (new Response(500))->json(['message' => 'Not implemented']);
+        return new Response(
+            500,
+            ['Content-Type' => 'application/json'],
+            json_encode(['message' => 'Not implemented'])
+        );
     }
     catch(Throwable $th)
     {
         if (DotEnv::get('API_DEBUG'))
         {
-            Response::json([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTrace(),
-            ]);
+            return new Response(
+                500,
+                ['Content-Type' => 'application/json'],
+                json_encode([
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTrace(),
+                ])
+            );
         }
-    
-        Response::json([
-            'message' => $th->getMessage(),
-        ]);
+
+        return new Response(
+            500,
+            ['Content-Type' => 'application/json'],
+            json_encode(['message' => $th->getMessage()])
+        );
     }
 });
 
