@@ -10,6 +10,6 @@ namespace Rockberpro\RestRouter\Interfaces;
 interface ResponseInterface
 {
     public function __construct($code, $status);
-    public function response(): void;
+    public function response();
     public static function json($data, $status): never;
 }

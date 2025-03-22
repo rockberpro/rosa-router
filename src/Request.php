@@ -2,6 +2,7 @@
 
 namespace Rockberpro\RestRouter;
 
+use React\Http\Message\Response;
 use Rockberpro\RestRouter\Interfaces\RequestInterface;
 use Rockberpro\RestRouter\Helpers\DeleteRequest;
 use Rockberpro\RestRouter\Helpers\GetRequest;
@@ -58,7 +59,7 @@ class Request implements RequestInterface
      * @param string $query
      * @param array $body
      */
-    public function handle($method, $uri, $query = null, $body = null): void
+    public function handle($method, $uri, $query = null, $body = null)
     {
         global $routes;
         if ($routes === null)
@@ -102,8 +103,8 @@ class Request implements RequestInterface
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
-            $closure($request);
-            return;
+            $response = $closure($request); /// Response
+            return $response;
         }
 
         $class = $request->getAction()->getClass();
@@ -111,10 +112,7 @@ class Request implements RequestInterface
 
         /** call the controller */
         $response = (new $class)->$method($request);
-        if (method_exists($response, 'response')) {
-            $response->response();
-        }
-        Response::json(['message' => 'Not implemented'], Response::NOT_IMPLEMENTED);
+        return $response;
     }
 
     /**

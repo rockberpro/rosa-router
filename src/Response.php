@@ -39,8 +39,8 @@ class Response implements ResponseInterface
     const BAD_GATEWAY = 502;
     const SERVICE_UNAVAILABLE = 503;
 
-    private array $data;
-    private int $status;
+    public array $data;
+    public int $status;
 
     public function __construct($data, $status)
     {

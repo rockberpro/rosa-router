@@ -18,7 +18,20 @@ $query = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
 try
 {
     DotEnv::load('.env');
-    (new Request())->handle($method, $uri, $query, $body);
+    $response = (new Request())->handle(
+        $method, 
+        $uri, 
+        $query, 
+        $body);
+
+    if (get_class($response) === 'Rockberpro\RestRouter\Response') {
+        $response->response();
+    }
+    if (get_class(object: $response) === 'React\Http\Message\Response') {
+        Response::json([
+            'message' => 'Not running async server',
+        ], Response::INTERNAL_SERVER_ERROR);
+    }
 }
 catch(Throwable $th)
 {
