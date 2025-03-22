@@ -14,13 +14,3 @@ Route::prefix('auth')->group(function() {
         AuthController::class, 'access'
     ]);
 });
-
-Route::prefix('v1')->group(function() {
-
-    Route::get('/user', function(Request $request) {
-
-        return new Response(['message' => "Sucesso"], 200);
-
-    });
-
-});
