@@ -18,6 +18,7 @@ $query = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
 try
 {
     DotEnv::load('.env');
+
     $response = (new Request())->handle(
         $method, 
         $uri, 
