@@ -27,11 +27,8 @@ try
     if (get_class($response) === 'Rockberpro\RestRouter\Response') {
         $response->response();
     }
-    if (get_class(object: $response) === 'React\Http\Message\Response') {
-        Response::json([
-            'message' => 'Not running async server',
-        ], Response::INTERNAL_SERVER_ERROR);
-    }
+
+    Response::json(['message' => 'Not implemented'], Response::INTERNAL_SERVER_ERROR);
 }
 catch(Throwable $th)
 {

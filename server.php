@@ -27,9 +27,8 @@ $server = new HttpServer(function(ServerRequest $request) {
         if (get_class($response) === 'Rockberpro\RestRouter\Response') {
             return (new Response($response->status))->json($response->data);
         }
-        if (get_class(object: $response) === 'React\Http\Message\Response') {
-            return $response;
-        }
+
+        return (new Response(500))->json(['message' => 'Not implemented']);
     }
     catch(Throwable $th)
     {

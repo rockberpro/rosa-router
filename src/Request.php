@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter;
 
-use React\Http\Message\Response;
 use Rockberpro\RestRouter\Interfaces\RequestInterface;
 use Rockberpro\RestRouter\Helpers\DeleteRequest;
 use Rockberpro\RestRouter\Helpers\GetRequest;
@@ -63,7 +62,7 @@ class Request implements RequestInterface
     {
         global $routes;
         if ($routes === null)
-            Response::json(['message' => 'No registered routes'], Response::NOT_FOUND);
+            return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
 
         $path = UrlParser::path($uri);
         if ($query) {
@@ -73,7 +72,7 @@ class Request implements RequestInterface
         $segments = explode('/', $path ?? '');
         array_shift($segments);
         if ($segments[0] !== 'api') {
-            Response::json(['message' => 'Not found'], Response::NOT_FOUND);
+            return new Response(['message' => 'Not found'], Response::NOT_FOUND);
         }
 
         $request = null;
