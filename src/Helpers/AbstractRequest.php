@@ -340,7 +340,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                         return true;
                     }
 
-                    /** when prefix and param have the same value */
+                    /** when route prefix and param have the same value */
                     if (
                        sizeof($diff) !== sizeof($uri_sufixes)
                     && end($route_parts) !== end($uri_parts)
