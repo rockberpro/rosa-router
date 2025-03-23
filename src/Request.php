@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Interfaces\RequestInterface;
+use Rockberpro\RestRouter\RequestInterface;
 use Rockberpro\RestRouter\Helpers\DeleteRequest;
 use Rockberpro\RestRouter\Helpers\GetRequest;
 use Rockberpro\RestRouter\Helpers\PatchRequest;

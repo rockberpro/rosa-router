@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Interfaces\ServerInterface;
+use Rockberpro\RestRouter\ServerInterface;
 
 /**
  * @author Samuel Oberger Rockenbach
