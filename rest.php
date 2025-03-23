@@ -30,7 +30,7 @@ try
         )
     );
 
-    if (get_class($response) === 'Rockberpro\RestRouter\Response') {
+    if ($response) {
         $response->response();
     }
 

@@ -27,7 +27,7 @@ $server = new HttpServer(function(ServerRequest $request) {
             )
         );
 
-        if (get_class($response) === 'Rockberpro\RestRouter\Response') {
+        if ($response) {
             return new Response(
                 $response->status,
                 ['Content-Type' => 'application/json'],
