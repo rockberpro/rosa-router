@@ -30,12 +30,13 @@ try
         $response->response();
     }
 
-    Response::json(['message' => 'Not implemented'], Response::INTERNAL_SERVER_ERROR);
+    Response::json([
+        'message' => 'Not implemented'
+    ], Response::INTERNAL_SERVER_ERROR);
 }
 catch(Throwable $th)
 {
-    if (DotEnv::get('API_DEBUG'))
-    {
+    if (DotEnv::get('API_DEBUG')) {
         Response::json([
             'message' => $th->getMessage(),
             'file' => $th->getFile(),

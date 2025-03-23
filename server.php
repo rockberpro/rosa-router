@@ -42,8 +42,7 @@ $server = new HttpServer(function(ServerRequest $request) {
     }
     catch(Throwable $th)
     {
-        if (DotEnv::get('API_DEBUG'))
-        {
+        if (DotEnv::get('API_DEBUG')) {
             return new Response(
                 500,
                 ['Content-Type' => 'application/json'],
