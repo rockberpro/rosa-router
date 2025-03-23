@@ -22,8 +22,8 @@ $server = new HttpServer(function(ServerRequest $request) {
             $request->getMethod(),
             $request->getUri()->getPath(),
             null, 
-            $request->getParsedBody(),
-            $request->getQueryParams()
+            (array) $request->getParsedBody(),
+            (array) $request->getQueryParams()
         );
 
         if (get_class($response) === 'Rockberpro\RestRouter\Response') {

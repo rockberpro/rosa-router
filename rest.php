@@ -23,7 +23,7 @@ try
         $method, 
         $uri, 
         $pathQuery, 
-        $body,
+        (array) $body,
         (array) queryParams()
     );
 
