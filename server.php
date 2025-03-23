@@ -6,7 +6,6 @@ use React\Http\Message\ServerRequest;
 use React\Socket\SocketServer;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
-use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 
 require_once "vendor/autoload.php";
