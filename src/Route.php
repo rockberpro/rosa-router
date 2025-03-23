@@ -91,7 +91,7 @@ class Route implements RouteInterface
      * @param mixed $target
      * @return void
      */
-    private static function buildRoute($method, $route, $target):void
+    private static function buildRoute($method, $route, $target): void
     {
         $_route = self::route($route);
 
