@@ -16,10 +16,10 @@ $method = Server::method();
 $route = Server::routeArgv(); /// if request: .htaccess redirect
 $pathQuery = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
 
+DotEnv::load('.env');
+
 try
 {
-    DotEnv::load('.env');
-
     $response = (new Request())->handle(
         new RequestData(
             $method, 
@@ -36,7 +36,7 @@ try
 
     Response::json([
         'message' => 'Not implemented'
-    ], Response::INTERNAL_SERVER_ERROR);
+    ], Response::NOT_IMPLEMENTED);
 }
 catch(Throwable $th)
 {

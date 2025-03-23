@@ -12,12 +12,11 @@ require_once "vendor/autoload.php";
 require_once "autoload.php";
 require_once "routes/api.php";
 
-$server = new HttpServer(function(ServerRequest $request) {
+DotEnv::load('.env');
 
+$server = new HttpServer(function(ServerRequest $request) {
     try
     {
-        DotEnv::load('.env');
-
         $response = (new Request())->handle(
             new RequestData(
                 $request->getMethod(),
@@ -37,7 +36,7 @@ $server = new HttpServer(function(ServerRequest $request) {
         }
 
         return new Response(
-            500,
+            501,
             ['Content-Type' => 'application/json'],
             json_encode(['message' => 'Not implemented'])
         );
@@ -65,7 +64,7 @@ $server = new HttpServer(function(ServerRequest $request) {
     }
 });
 
-$socket = new SocketServer('0.0.0.0:8081');
+$socket = new SocketServer("0.0.0.0:".DotEnv::get('API_SERVER_PORT'));
 $server->listen($socket);
 
 echo "Server running at http://0.0.0.0:8081".PHP_EOL;
