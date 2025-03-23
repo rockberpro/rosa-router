@@ -24,13 +24,13 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param string $uri
      * @return Request
      */
-    public function buildUriRequest($routes, $method, $uri): Request
+    public function buildUriRequest($routes, $method, $uri, $queryParams = null): Request
     {
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request);
+        $request = $this->queryParams($request, $queryParams);
 
         if ($middleware = $request->getAction()->getMiddleware()) {
             $this->middleware($middleware, $request);
@@ -47,15 +47,16 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param string $method
      * @param string $uri
      * @param array $body
+     * @param array $queryParams
      * @return Request
      */
-    public function buildBodyRequest($routes, $method, $uri, $body): Request
+    public function buildBodyRequest($routes, $method, $uri, $body, $queryParams = null): Request
     {
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request);
+        $request = $this->queryParams($request, $queryParams);
 
         $request = $this->queryParams($request);
 
@@ -139,10 +140,19 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method queryParams
      * @param Request $request
+     * @param array $queryParams
      * @return Request
      */
-    private function queryParams(Request &$request): Request
+    private function queryParams(Request &$request, $queryParams = null): Request
     {
+        if ($queryParams) {
+            foreach ($queryParams as $key => $value) {
+                $request->$key = $value;
+            }
+
+            return $request;
+        }
+
         if (stripos(Server::query(), 'path=') !== false) {
             $parts = [];
             $query = Server::query();

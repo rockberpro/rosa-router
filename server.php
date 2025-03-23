@@ -5,6 +5,7 @@ use React\Http\Message\Response;
 use React\Http\Message\ServerRequest;
 use React\Socket\SocketServer;
 use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 
 require_once "vendor/autoload.php";
@@ -17,14 +18,12 @@ $server = new HttpServer(function(ServerRequest $request) {
     {
         DotEnv::load('.env');
 
-        /**
-         * TODO implement query params and body params
-         */
         $response = (new Request())->handle(
-            $request->getMethod(), 
-            $request->getUri()->getPath(), 
-            $query = null, 
-            $body = null
+            $request->getMethod(),
+            $request->getUri()->getPath(),
+            null, 
+            $request->getParsedBody(),
+            $request->getQueryParams()
         );
 
         if (get_class($response) === 'Rockberpro\RestRouter\Response') {

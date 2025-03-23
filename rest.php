@@ -13,7 +13,7 @@ $uri = Server::uri(); /// if request: /api
 $body = Request::body();
 $method = Server::method();
 $route = Server::routeArgv(); /// if request: .htaccess redirect
-$query = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
+$pathQuery = UrlParser::pathQuery($uri); /// if request: rest.php?path=/api/route
 
 try
 {
@@ -22,8 +22,9 @@ try
     $response = (new Request())->handle(
         $method, 
         $uri, 
-        $query, 
-        $body);
+        $pathQuery, 
+        $body
+    );
 
     if (get_class($response) === 'Rockberpro\RestRouter\Response') {
         $response->response();

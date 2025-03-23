@@ -55,18 +55,19 @@ class Request implements RequestInterface
      * @method handle
      * @param string $method
      * @param string $uri
-     * @param string $query
+     * @param string $queryPath
      * @param array $body
+     * @param array $queryParams
      */
-    public function handle($method, $uri, $query = null, $body = null)
+    public function handle($method, $uri, $queryPath = null, $body = null, $queryParams = null)
     {
         global $routes;
         if ($routes === null)
             return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
 
         $path = UrlParser::path($uri);
-        if ($query) {
-            $path = UrlParser::path($query);
+        if ($queryPath) {
+            $path = UrlParser::path($queryPath);
         }
 
         $segments = explode('/', $path ?? '');
@@ -78,19 +79,19 @@ class Request implements RequestInterface
         $request = null;
         switch ($method) {
             case 'GET':
-                $request = (new GetRequest())->buildRequest($routes, $method, $path);
+                $request = (new GetRequest())->buildRequest($routes, $method, $path, $queryParams);
                 break;
             case 'POST':
-                $request = (new PostRequest())->buildRequest($routes, $method, $path, $body);
+                $request = (new PostRequest())->buildRequest($routes, $method, $path, $body, $queryParams);
                 break;
             case 'PUT':
-                $request = (new PutRequest())->buildRequest($routes, $method, $path, $body);
+                $request = (new PutRequest())->buildRequest($routes, $method, $path, $body, $queryParams);
                 break;
             case 'PATCH':
-                $request = (new PatchRequest())->buildRequest($routes, $method, $path, $body);
+                $request = (new PatchRequest())->buildRequest($routes, $method, $path, $body, $queryParams);
                 break;
             case 'DELETE':
-                $request = (new DeleteRequest())->buildRequest($routes, $method, $path);
+                $request = (new DeleteRequest())->buildRequest($routes, $method, $path, $queryParams);
                 break;
             default: break;
         }
@@ -176,7 +177,11 @@ class Request implements RequestInterface
      */
     public function get($key)
     {
-        return $this->parameters[$key];
+        if (isset($this->parameters[$key])) {
+            return $this->parameters[$key];
+        }
+
+        return null;
     }
 
     /**
