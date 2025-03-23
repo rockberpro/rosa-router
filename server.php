@@ -5,6 +5,7 @@ use React\Http\Message\Response;
 use React\Http\Message\ServerRequest;
 use React\Socket\SocketServer;
 use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 
@@ -19,11 +20,13 @@ $server = new HttpServer(function(ServerRequest $request) {
         DotEnv::load('.env');
 
         $response = (new Request())->handle(
-            $request->getMethod(),
-            $request->getUri()->getPath(),
-            null, 
-            (array) $request->getParsedBody(),
-            (array) $request->getQueryParams()
+            new RequestData(
+                $request->getMethod(),
+                $request->getUri()->getPath(),
+                null, 
+                (array) $request->getParsedBody(),
+                (array) $request->getQueryParams()
+            )
         );
 
         if (get_class($response) === 'Rockberpro\RestRouter\Response') {

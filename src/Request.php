@@ -59,15 +59,15 @@ class Request implements RequestInterface
      * @param array $body
      * @param array $queryParams
      */
-    public function handle($method, $uri, $queryPath = null, $body = null, $queryParams = null)
+    public function handle(RequestData $requestData)
     {
         global $routes;
         if ($routes === null)
             return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
 
-        $path = UrlParser::path($uri);
-        if ($queryPath) {
-            $path = UrlParser::path($queryPath);
+        $path = UrlParser::path($requestData->getUri());
+        if ($requestData->getPathQuery()) {
+            $path = UrlParser::path($requestData->getPathQuery());
         }
 
         $segments = explode('/', $path ?? '');
@@ -77,21 +77,21 @@ class Request implements RequestInterface
         }
 
         $request = null;
-        switch ($method) {
+        switch ($requestData->getMethod()) {
             case 'GET':
-                $request = (new GetRequest())->buildRequest($routes, $method, $path, $queryParams);
+                $request = (new GetRequest())->buildRequest($routes, $requestData);
                 break;
             case 'POST':
-                $request = (new PostRequest())->buildRequest($routes, $method, $path, $body, $queryParams);
+                $request = (new PostRequest())->buildRequest($routes, $requestData);
                 break;
             case 'PUT':
-                $request = (new PutRequest())->buildRequest($routes, $method, $path, $body, $queryParams);
+                $request = (new PutRequest())->buildRequest($routes, $requestData);
                 break;
             case 'PATCH':
-                $request = (new PatchRequest())->buildRequest($routes, $method, $path, $body, $queryParams);
+                $request = (new PatchRequest())->buildRequest($routes, $requestData);
                 break;
             case 'DELETE':
-                $request = (new DeleteRequest())->buildRequest($routes, $method, $path, $queryParams);
+                $request = (new DeleteRequest())->buildRequest($routes, $requestData);
                 break;
             default: break;
         }

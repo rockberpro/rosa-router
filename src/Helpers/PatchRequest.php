@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Helpers;
 
 use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\RequestData;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -16,14 +17,11 @@ class PatchRequest extends AbstractRequest
      * 
      * @method buildRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
-     * @param array $body
-     * @param array $queryParams
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri, $body, $queryParams): Request
+    public function buildRequest($routes, RequestData $requestData): Request
     {
-        return parent::buildBodyRequest($routes, $method, $uri, $body, $queryParams);
+        return parent::buildBodyRequest($routes, $requestData);
     }
 }

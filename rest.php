@@ -1,6 +1,7 @@
 <?php
 
 use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
@@ -20,11 +21,13 @@ try
     DotEnv::load('.env');
 
     $response = (new Request())->handle(
-        $method, 
-        $uri, 
-        $pathQuery, 
-        (array) $body,
-        (array) queryParams()
+        new RequestData(
+            $method, 
+            $uri, 
+            $pathQuery, 
+            (array) $body,
+            (array) queryParams()
+        )
     );
 
     if (get_class($response) === 'Rockberpro\RestRouter\Response') {

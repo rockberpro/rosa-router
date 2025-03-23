@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Helpers;
 
 use Rockberpro\RestRouter\Helpers\AbstractRequestInterface;
+use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Request;
 use Closure;
 use Exception;
@@ -19,17 +20,16 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method buildUriRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildUriRequest($routes, $method, $uri, $queryParams): Request
+    public function buildUriRequest($routes, RequestData $requestData): Request
     {
         $request = new Request();
-        $request->setAction($this->handle($routes, $method, $uri));
+        $request->setAction($this->handle($routes, $requestData->getMethod(), $requestData->getUri()));
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request, $queryParams);
+        $request = $this->queryParams($request, $requestData->getQueryParams());
 
         if ($middleware = $request->getAction()->getMiddleware()) {
             $this->middleware($middleware, $request);
@@ -43,22 +43,19 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method buildBodyRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
-     * @param array $body
-     * @param array $queryParams
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildBodyRequest($routes, $method, $uri, $body, $queryParams): Request
+    public function buildBodyRequest($routes, RequestData $requestData): Request
     {
         $request = new Request();
-        $request->setAction($this->handle($routes, $method, $uri));
+        $request->setAction($this->handle($routes, $requestData->getMethod(), $requestData->getUri()));
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request, $queryParams);
+        $request = $this->queryParams($request, $requestData->getQueryParams());
 
         /** form params */
-        foreach((array) $body as $key => $value) {
+        foreach((array) $requestData->getBody() as $key => $value) {
             $request->$key = $value;
         }
 
