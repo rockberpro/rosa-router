@@ -12,8 +12,8 @@ use Rockberpro\RestRouter\Request;
  */
 interface AbstractRequestInterface
 {
-    public function buildUriRequest($routes, $method, $uri): Request;
-    public function buildBodyRequest($routes, $method, $uri, $body): Request;
+    public function buildUriRequest($routes, $method, $uri, $queryParams): Request;
+    public function buildBodyRequest($routes, $method, $uri, $body, $queryParams): Request;
     public function handle($routes, $method, $uri): RequestAction;
     public function map($routes, $method, $uri): array;
     public function match($mapped_routes, $uri): array;

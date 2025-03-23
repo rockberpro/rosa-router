@@ -23,7 +23,8 @@ try
         $method, 
         $uri, 
         $pathQuery, 
-        $body
+        $body,
+        (array) queryParams()
     );
 
     if (get_class($response) === 'Rockberpro\RestRouter\Response') {
@@ -48,4 +49,37 @@ catch(Throwable $th)
     Response::json([
         'message' => $th->getMessage(),
     ], Response::INTERNAL_SERVER_ERROR);
+}
+
+function queryParams()
+{
+    $queryParams = new stdClass();
+    if (empty(Server::query())) {
+        return $queryParams;
+    }
+
+    if (stripos(Server::query(), 'path=') !== false) {
+        $parts = [];
+        $query = Server::query();
+        parse_str($query, $parts);
+        if (!empty($parts)) {
+            foreach($parts as $key => $value) {
+                if ($key !== 'path') {
+                    $queryParams->$key = $value;
+                }
+            }
+        }
+    }
+    else if (stripos(Server::query(), '=') !== false) {
+        $parts = [];
+        $query = Server::query();
+        parse_str($query, $parts);
+        if (!empty($query)) {
+            foreach($parts as $key => $value) {
+                $queryParams->$key = $value;
+            }
+        }
+    }
+
+    return $queryParams;
 }

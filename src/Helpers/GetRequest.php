@@ -20,7 +20,7 @@ class GetRequest extends AbstractRequest
      * @param string $uri
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri, $queryParams = null): Request
+    public function buildRequest($routes, $method, $uri, $queryParams): Request
     {
         return parent::buildUriRequest($routes, $method, $uri, $queryParams);
     }

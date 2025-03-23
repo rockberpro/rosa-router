@@ -22,7 +22,7 @@ class PatchRequest extends AbstractRequest
      * @param array $queryParams
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri, $body, $queryParams = null): Request
+    public function buildRequest($routes, $method, $uri, $body, $queryParams): Request
     {
         return parent::buildBodyRequest($routes, $method, $uri, $body, $queryParams);
     }

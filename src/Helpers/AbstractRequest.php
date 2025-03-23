@@ -2,9 +2,8 @@
 
 namespace Rockberpro\RestRouter\Helpers;
 
-use Rockberpro\RestRouter\Request;
-use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Helpers\AbstractRequestInterface;
+use Rockberpro\RestRouter\Request;
 use Closure;
 use Exception;
 
@@ -24,7 +23,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param string $uri
      * @return Request
      */
-    public function buildUriRequest($routes, $method, $uri, $queryParams = null): Request
+    public function buildUriRequest($routes, $method, $uri, $queryParams): Request
     {
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
@@ -50,15 +49,13 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $queryParams
      * @return Request
      */
-    public function buildBodyRequest($routes, $method, $uri, $body, $queryParams = null): Request
+    public function buildBodyRequest($routes, $method, $uri, $body, $queryParams): Request
     {
         $request = new Request();
         $request->setAction($this->handle($routes, $method, $uri));
 
         $request = $this->pathParams($request);
         $request = $this->queryParams($request, $queryParams);
-
-        $request = $this->queryParams($request);
 
         /** form params */
         foreach((array) $body as $key => $value) {
@@ -143,37 +140,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $queryParams
      * @return Request
      */
-    private function queryParams(Request &$request, $queryParams = null): Request
+    private function queryParams(Request &$request, $queryParams): Request
     {
-        if ($queryParams) {
-            foreach ($queryParams as $key => $value) {
-                $request->$key = $value;
-            }
-
-            return $request;
-        }
-
-        if (stripos(Server::query(), 'path=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($parts)) {
-                foreach($parts as $key => $value) {
-                    if ($key !== 'path') {
-                        $request->$key = $value;
-                    }
-                }
-            }
-        }
-        else if (stripos(Server::query(), '=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($query)) {
-                foreach($parts as $key => $value) {
-                    $request->$key = $value;
-                }
-            }
+        foreach ($queryParams as $key => $value) {
+            $request->$key = $value;
         }
 
         return $request;
