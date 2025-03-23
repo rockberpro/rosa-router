@@ -40,17 +40,7 @@ class Route implements RouteInterface
      */
     public static function get($route, $target): void
     {
-        $_route = self::route($route);
-
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-        }
-        self::$instance->prefix = explode('{', $_route)[0];
-        self::$instance->route = $_route;
-        self::$instance->method = 'GET';
-        self::$instance->target = self::$instance->buildTarget($target);
-
-        self::$instance->build();
+        self::buildRoute('GET', $route, $target);
     }
 
     /**
@@ -60,17 +50,7 @@ class Route implements RouteInterface
      */
     public static function post($route, $target): void
     {
-        $_route = self::route($route);
-
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-        }
-        self::$instance->prefix = explode('{', $_route)[0];
-        self::$instance->route = $_route;
-        self::$instance->method = 'POST';
-        self::$instance->target = self::$instance->buildTarget($target);
-
-        self::$instance->build();
+        self::buildRoute('POST', $route, $target);
     }
 
     /**
@@ -80,17 +60,7 @@ class Route implements RouteInterface
      */
     public static function put($route, $target): void
     {
-        $_route = self::route($route);
-
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-        }
-        self::$instance->prefix = explode('{', $_route)[0];
-        self::$instance->route = $_route;
-        self::$instance->method = 'PUT';
-        self::$instance->target = self::$instance->buildTarget($target);
-
-        self::$instance->build();
+        self::buildRoute('PUT', $route, $target);
     }
 
     /**
@@ -100,17 +70,7 @@ class Route implements RouteInterface
      */
     public static function patch($route, $target): void
     {
-        $_route = self::route($route);
-
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-        }
-        self::$instance->prefix = explode('{', $_route)[0];
-        self::$instance->route = $_route;
-        self::$instance->method = 'PATCH';
-        self::$instance->target = self::$instance->buildTarget($target);
-
-        self::$instance->build();
+        self::buildRoute('PATCH', $route, $target);
     }
 
     /**
@@ -120,6 +80,19 @@ class Route implements RouteInterface
      */
     public static function delete($route, $target): void
     {
+        self::buildRoute('DELETE', $route, $target);
+    }
+
+    /**
+     * Build the route
+     * 
+     * @param mixed $method
+     * @param mixed $route
+     * @param mixed $target
+     * @return void
+     */
+    private static function buildRoute($method, $route, $target):void
+    {
         $_route = self::route($route);
 
         if (!isset(self::$instance)) {
@@ -127,7 +100,7 @@ class Route implements RouteInterface
         }
         self::$instance->prefix = explode('{', $_route)[0];
         self::$instance->route = $_route;
-        self::$instance->method = 'DELETE';
+        self::$instance->method = $method;
         self::$instance->target = self::$instance->buildTarget($target);
 
         self::$instance->build();
