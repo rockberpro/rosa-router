@@ -165,7 +165,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                 }
             }
         }
-        else if (stripos(Server::uri(), '?') !== false) {
+        else if (stripos(Server::query(), '=') !== false) {
             $parts = [];
             $query = Server::query();
             parse_str($query, $parts);
