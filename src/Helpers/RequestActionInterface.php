@@ -1,11 +1,11 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers\Interfaces;
+namespace Rockberpro\RestRouter\Helpers;
 
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers\Interfaces
+ * @package Rockberpro\RestRouter\Helpers
  */
 interface RequestActionInterface
 {

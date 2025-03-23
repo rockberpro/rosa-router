@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers\Interfaces;
+namespace Rockberpro\RestRouter\Helpers;
 
 use Rockberpro\RestRouter\Helpers\RequestAction;
 use Rockberpro\RestRouter\Request;
@@ -8,7 +8,7 @@ use Rockberpro\RestRouter\Request;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers\Interfaces
+ * @package Rockberpro\RestRouter\Helpers
  */
 interface AbstractRequestInterface
 {

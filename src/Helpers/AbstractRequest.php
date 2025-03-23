@@ -4,7 +4,7 @@ namespace Rockberpro\RestRouter\Helpers;
 
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\Server;
-use Rockberpro\RestRouter\Helpers\Interfaces\AbstractRequestInterface;
+use Rockberpro\RestRouter\Helpers\AbstractRequestInterface;
 use Closure;
 use Exception;
 
