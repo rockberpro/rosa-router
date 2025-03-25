@@ -12,11 +12,11 @@ require_once "vendor/autoload.php";
 require_once "autoload.php";
 require_once "routes/api.php";
 
-DotEnv::load('.env');
-
 $server = new HttpServer(function(ServerRequest $request) {
     try
     {
+        DotEnv::load('.env');
+
         $response = (new Request())->handle(
             new RequestData(
                 $request->getMethod(),

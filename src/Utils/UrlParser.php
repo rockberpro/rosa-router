@@ -13,7 +13,7 @@ class UrlParser
     {
         $vars = [];
         parse_str(
-            parse_url($uri, PHP_URL_QUERY) ?? '',
+            parse_url("?{$uri}", PHP_URL_QUERY) ?? '',
             $vars
         );
 

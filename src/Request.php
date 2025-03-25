@@ -65,16 +65,11 @@ class Request implements RequestInterface
         if ($routes === null)
             return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
 
-        $path = UrlParser::path($requestData->getUri());
-        if ($requestData->getPathQuery()) {
-            $path = UrlParser::path($requestData->getPathQuery());
-        }
-
-        $segments = explode('/', $path ?? '');
-        array_shift($segments);
-        if ($segments[0] !== 'api') {
+        $path = $this->getPath($requestData);
+        if (!$path) {
             return new Response(['message' => 'Not found'], Response::NOT_FOUND);
         }
+        $requestData->setUri($path);
 
         $request = null;
         switch ($requestData->getMethod()) {
@@ -113,6 +108,30 @@ class Request implements RequestInterface
         /** call the controller */
         $response = (new $class)->$method($request);
         return $response;
+    }
+
+    /**
+     * Get the route path
+     * 
+     * @param RequestData $requestData
+     * @return string|null
+     */
+    private function getPath(RequestData $requestData)
+    {
+        if ($requestData->getPathQuery()) {
+            $path = UrlParser::path($requestData->getPathQuery());
+            return $path;
+        }
+
+        $path = UrlParser::path($requestData->getUri());
+
+        $segments = explode('/', $path ?? '');
+        array_shift($segments);
+        if ($segments[0] !== 'api') {
+            return null;
+        }
+
+        return $path;
     }
 
     /**
