@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Controllers\Interfaces;
+namespace Rockberpro\RestRouter\Controllers;
 
 /**
  * @author Samuel Oberger Rockenbach

@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Helpers;
 
 use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\RequestData;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -16,12 +17,11 @@ class DeleteRequest extends AbstractRequest
      * 
      * @method buildRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri): Request
+    public function buildRequest($routes, RequestData $requestData): Request
     {
-        return parent::buildUriRequest($routes, $method, $uri);
+        return parent::buildUriRequest($routes, $requestData);
     }
 }

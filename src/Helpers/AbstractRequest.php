@@ -2,9 +2,9 @@
 
 namespace Rockberpro\RestRouter\Helpers;
 
+use Rockberpro\RestRouter\Helpers\AbstractRequestInterface;
+use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Request;
-use Rockberpro\RestRouter\Server;
-use Rockberpro\RestRouter\Helpers\Interfaces\AbstractRequestInterface;
 use Closure;
 use Exception;
 
@@ -20,17 +20,16 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method buildUriRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildUriRequest($routes, $method, $uri): Request
+    public function buildUriRequest($routes, RequestData $requestData): Request
     {
         $request = new Request();
-        $request->setAction($this->handle($routes, $method, $uri));
+        $request->setAction($this->handle($routes, $requestData->getMethod(), $requestData->getUri()));
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request);
+        $request = $this->queryParams($request, $requestData->getQueryParams());
 
         if ($middleware = $request->getAction()->getMiddleware()) {
             $this->middleware($middleware, $request);
@@ -44,23 +43,19 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method buildBodyRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
-     * @param array $body
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildBodyRequest($routes, $method, $uri, $body): Request
+    public function buildBodyRequest($routes, RequestData $requestData): Request
     {
         $request = new Request();
-        $request->setAction($this->handle($routes, $method, $uri));
+        $request->setAction($this->handle($routes, $requestData->getMethod(), $requestData->getUri()));
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request);
-
-        $request = $this->queryParams($request);
+        $request = $this->queryParams($request, $requestData->getQueryParams());
 
         /** form params */
-        foreach((array) $body as $key => $value) {
+        foreach((array) $requestData->getBody() as $key => $value) {
             $request->$key = $value;
         }
 
@@ -139,31 +134,13 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method queryParams
      * @param Request $request
+     * @param array $queryParams
      * @return Request
      */
-    private function queryParams(Request &$request): Request
+    private function queryParams(Request &$request, $queryParams): Request
     {
-        if (stripos(Server::query(), 'path=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($parts)) {
-                foreach($parts as $key => $value) {
-                    if ($key !== 'path') {
-                        $request->$key = $value;
-                    }
-                }
-            }
-        }
-        else if (stripos(Server::uri(), '?') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($query)) {
-                foreach($parts as $key => $value) {
-                    $request->$key = $value;
-                }
-            }
+        foreach ($queryParams as $key => $value) {
+            $request->$key = $value;
         }
 
         return $request;
@@ -363,7 +340,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                         return true;
                     }
 
-                    /** when prefix and param have the same value */
+                    /** when route prefix and param have the same value */
                     if (
                        sizeof($diff) !== sizeof($uri_sufixes)
                     && end($route_parts) !== end($uri_parts)

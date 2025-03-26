@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Helpers;
 
 use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\RequestData;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -16,13 +17,11 @@ class PostRequest extends AbstractRequest
      * 
      * @method buildRequest
      * @param array $routes
-     * @param string $method
-     * @param string $uri
-     * @param array $body
+     * @param RequestData $requestData
      * @return Request
      */
-    public function buildRequest($routes, $method, $uri, $body): Request
+    public function buildRequest($routes, RequestData $requestData): Request
     {
-        return parent::buildBodyRequest($routes, $method, $uri, $body);
+        return parent::buildBodyRequest($routes, $requestData);
     }
 }

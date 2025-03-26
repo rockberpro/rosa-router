@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Interfaces\RequestInterface;
+use Rockberpro\RestRouter\RequestInterface;
 use Rockberpro\RestRouter\Helpers\DeleteRequest;
 use Rockberpro\RestRouter\Helpers\GetRequest;
 use Rockberpro\RestRouter\Helpers\PatchRequest;
@@ -55,55 +55,51 @@ class Request implements RequestInterface
      * @method handle
      * @param string $method
      * @param string $uri
-     * @param string $query
+     * @param string $queryPath
      * @param array $body
+     * @param array $queryParams
      */
-    public function handle($method, $uri, $query = null, $body = null): void
+    public function handle(RequestData $requestData)
     {
         global $routes;
         if ($routes === null)
-            Response::json(['message' => 'No registered routes'], Response::NOT_FOUND);
+            return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
 
-        $path = UrlParser::path($uri);
-        if ($query) {
-            $path = UrlParser::path($query);
+        $path = $this->getPath($requestData);
+        if (!$path) {
+            return new Response(['message' => 'Not found'], Response::NOT_FOUND);
         }
-
-        $segments = explode('/', $path ?? '');
-        array_shift($segments);
-        if ($segments[0] !== 'api') {
-            Response::json(['message' => 'Not found'], Response::NOT_FOUND);
-        }
+        $requestData->setUri($path);
 
         $request = null;
-        switch ($method) {
+        switch ($requestData->getMethod()) {
             case 'GET':
-                $request = (new GetRequest())->buildRequest($routes, $method, $path);
+                $request = (new GetRequest())->buildRequest($routes, $requestData);
                 break;
             case 'POST':
-                $request = (new PostRequest())->buildRequest($routes, $method, $path, $body);
+                $request = (new PostRequest())->buildRequest($routes, $requestData);
                 break;
             case 'PUT':
-                $request = (new PutRequest())->buildRequest($routes, $method, $path, $body);
+                $request = (new PutRequest())->buildRequest($routes, $requestData);
                 break;
             case 'PATCH':
-                $request = (new PatchRequest())->buildRequest($routes, $method, $path, $body);
+                $request = (new PatchRequest())->buildRequest($routes, $requestData);
                 break;
             case 'DELETE':
-                $request = (new DeleteRequest())->buildRequest($routes, $method, $path);
+                $request = (new DeleteRequest())->buildRequest($routes, $requestData);
                 break;
             default: break;
         }
 
-        if (is_null($request))
+        if ($request === null)
             throw new Exception('It was not possible to match your request');
 
         $this->writeLog($request);
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
-            $closure($request);
-            return;
+            $response = $closure($request); /// Response
+            return $response;
         }
 
         $class = $request->getAction()->getClass();
@@ -111,10 +107,31 @@ class Request implements RequestInterface
 
         /** call the controller */
         $response = (new $class)->$method($request);
-        if (method_exists($response, 'response')) {
-            $response->response();
+        return $response;
+    }
+
+    /**
+     * Get the route path
+     * 
+     * @param RequestData $requestData
+     * @return string|null
+     */
+    private function getPath(RequestData $requestData)
+    {
+        if ($requestData->getPathQuery()) {
+            $path = UrlParser::path($requestData->getPathQuery());
+            return $path;
         }
-        Response::json(['message' => 'Not implemented'], Response::NOT_IMPLEMENTED);
+
+        $path = UrlParser::path($requestData->getUri());
+
+        $segments = explode('/', $path ?? '');
+        array_shift($segments);
+        if ($segments[0] !== 'api') {
+            return null;
+        }
+
+        return $path;
     }
 
     /**
@@ -179,7 +196,11 @@ class Request implements RequestInterface
      */
     public function get($key)
     {
-        return $this->parameters[$key];
+        if (isset($this->parameters[$key])) {
+            return $this->parameters[$key];
+        }
+
+        return null;
     }
 
     /**

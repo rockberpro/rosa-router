@@ -3,9 +3,10 @@
 namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Response;
 use DateInterval;
 use DateTime;
+use Exception;
+use Throwable;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -27,7 +28,7 @@ class Jwt
         $instance = new self();
 
         if (!preg_match("/Bearer\s((.*)\.(.*)\.(.*))/", $token)) {
-            Response::json(['message' => 'Invalid token provided'], 401);
+            throw new JwtException('Invalid token provided');
         }
 
         $jwt_parts = explode('.', $token);
@@ -40,31 +41,31 @@ class Jwt
 
         /** header */
         if ($header['alg'] !== 'HS256') {
-            Response::json(['message' => 'Invalid algorithm'], Response::UNAUTHORIZED);
+            throw new JwtException('Invalid algorithm');
         }
         if ($header['typ'] !== 'JWT') {
-            Response::json(['message' => 'Invalid token type'], Response::UNAUTHORIZED);
+            throw new JwtException('Invalid token type');
         }
 
         /** payload */
         if ($type === 'access') {
             if ($payload['exp'] < (new DateTime())->getTimestamp()) {
-                Response::json(['message' => 'Token is expired'], Response::UNAUTHORIZED);
+                throw new JwtException('Token is expired');
             }
         }
         if ($type === 'refresh') {
             if (isset($payload['exp']) && $payload['exp'] < (new DateTime())->getTimestamp()) {
-                Response::json(['message' => 'Token is expired'], Response::UNAUTHORIZED);
+                throw new JwtException('Token is expired');
             }
         }
         if ($payload['iss'] !== DotEnv::get('JWT_ISSUER')) {
-            Response::json(['message' => 'Invalid token issuer'], Response::UNAUTHORIZED);
+            throw new JwtException('Invalid token issuer');
         }
         if ($payload['sub'] !== DotEnv::get('JWT_SUBJECT')) {
-            Response::json(['message' => 'Invalid token subject'], Response::UNAUTHORIZED);
+            throw new JwtException('Invalid token subject');
         }
         if ($payload['typ'] !== $type) {
-            Response::json(['message' => 'Invalid token type'], Response::UNAUTHORIZED);
+            throw new JwtException('Invalid token type');
         }
 
         /** signature */
@@ -74,7 +75,7 @@ class Jwt
         $enc_val_sig = $instance->base64UrlEncode($val_signature);
 
         if (!hash_equals($signature, $enc_val_sig)) {
-            Response::json(['message' => 'Invalid token'], Response::UNAUTHORIZED);
+            throw new JwtException('Invalid token');
         }
     }
 
@@ -178,5 +179,13 @@ class Jwt
     private function base64UrlEncode($text) : string
     {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($text));
+    }
+}
+
+class JwtException extends Exception
+{
+    public function __construct(string $message, int $code = 0, Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
     }
 }
