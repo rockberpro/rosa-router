@@ -37,16 +37,18 @@ class Request implements RequestInterface
     {
         $input = file_get_contents("php://input");
 
-        if (Json::isJson($input))
+        if (Json::isJson($input)) {
             return (array) json_decode($input, true);
-
-        if (!$parse)
+        }
+        if (!$parse) {
             return $input;
+        }
 
         $data = [];
         parse_str($input, $data);
-        if (empty($data))
+        if (empty($data)) {
             return null;
+        }
 
         return (array) $data;
     }
@@ -62,8 +64,9 @@ class Request implements RequestInterface
     public function handle(RequestData $requestData)
     {
         global $routes;
-        if ($routes === null)
+        if ($routes === null) {
             return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
+        }
 
         $path = $this->getPath($requestData);
         if (!$path) {
@@ -91,8 +94,9 @@ class Request implements RequestInterface
             default: break;
         }
 
-        if ($request === null)
+        if ($request === null) {
             throw new Exception('It was not possible to match your request');
+        }
 
         $this->writeLog($request);
 
