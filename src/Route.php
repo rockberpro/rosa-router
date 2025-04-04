@@ -210,7 +210,7 @@ class Route implements RouteInterface
      * @param string|array $target
      * @return array|Closure|string
      */
-    private function buildTarget($target): array|Closure|string
+    private function buildTarget($target)
     {
         if ($target instanceof Closure) {
             return $target;

@@ -33,7 +33,7 @@ class Request implements RequestInterface
      * @param bool $parse
      * @return array|bool|string|null
      */
-    public static function body($parse = true): array|bool|string|null
+    public static function body($parse = true)
     {
         $input = file_get_contents("php://input");
 

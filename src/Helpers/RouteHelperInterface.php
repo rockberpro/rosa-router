@@ -9,8 +9,8 @@ namespace Rockberpro\RestRouter\Helpers;
  */
 interface RouteHelperInterface
 {
-    public static function routeArgs($route_match): array|bool;
-    public static function routeMatchArgs($route): array|bool;
-    public static function routeVars($route): array|bool;
-    public static function isAlphaNumeric($string): bool|int;
+    public static function routeArgs($route_match);
+    public static function routeMatchArgs($route);
+    public static function routeVars($route);
+    public static function isAlphaNumeric($string);
 }
