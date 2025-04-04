@@ -132,7 +132,7 @@ class Jwt
      * @method getHeader
      * @return string header
      */
-    private function getHeader(): bool|string
+    private function getHeader()
     {
         return json_encode([
             'alg' => 'HS256',
@@ -149,7 +149,7 @@ class Jwt
      * @param string $audience
      * @return string payload
      */
-    private function getPayload($expires = null, $type, $audience = null): bool|string
+    private function getPayload($expires = null, $type, $audience = null)
     {
         $payload = [
             'iss' => DotEnv::get('JWT_ISSUER'),
