@@ -98,8 +98,9 @@ class Route implements RouteInterface
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
-        self::$instance->prefix = explode('{', $_route)[0];
-        self::$instance->route = $_route;
+        $_prefix = explode('{', $_route)[0];        
+        self::$instance->prefix = rtrim($_prefix, '/');
+        self::$instance->route = rtrim($_route, '/');
         self::$instance->method = $method;
         self::$instance->target = self::$instance->buildTarget($target);
 
