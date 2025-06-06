@@ -1,16 +1,14 @@
 <?php
 
-use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Route;
-use Rockberpro\RestRouter\Controllers\AuthController;
 
-Route::prefix('auth')->group(function() {
-    Route::post('/refresh', [
-        AuthController::class, 'refresh'
-    ]);
+Route::prefix('v1')->group(function() {
 
-    Route::post('/access', [
-        AuthController::class, 'access'
-    ]);
+    Route::get('/hello', function() {
+        return new Response([
+            'message' => 'Hello World'
+        ], 200);
+    });
+
 });

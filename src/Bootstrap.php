@@ -1,22 +1,24 @@
 <?php
 
-use React\EventLoop\Loop;
-use React\Http\Message\ServerRequest;
+namespace Rockberpro\RestRouter;
+
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
+use React\Http\Message\ServerRequest;
+use stdClass;
+use Throwable;
 
 class Bootstrap
 {
-    public function execute(ServerRequest $request)
+    public function execute(?ServerRequest $request)
     {
         if ($this->isEventLoop()) {
             $this->handleStateful($request);
         }
-
         if (!$this->isEventLoop()) {
             $this->handleStateless();
         }
@@ -146,13 +148,8 @@ class Bootstrap
     
         return $queryParams;
     }
-    
+
     public function isEventLoop(): bool {
-        try {
-            $loop = Loop::get();
-            return $loop !== null;
-        } catch (Throwable $e) {
-            return false;
-        }
+        return (php_sapi_name() === 'cli');
     }
 }
