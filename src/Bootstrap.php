@@ -16,12 +16,10 @@ class Bootstrap
 {
     public function execute(?ServerRequest $request)
     {
-        if ($this->isEventLoop()) {
-            $this->handleStateful($request);
-        }
         if (!$this->isEventLoop()) {
-            $this->handleStateless();
+            return $this->handleStateless();
         }
+        return $this->handleStateful($request);
     }
 
     public function handleStateful(ServerRequest $request)
