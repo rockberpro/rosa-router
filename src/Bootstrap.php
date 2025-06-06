@@ -76,7 +76,6 @@ class Bootstrap
         $uri = Server::uri(); /// if request: /api
         $body = Request::body();
         $method = Server::method();
-        $route = Server::routeArgv(); /// if request: .htaccess redirect
         $pathQuery = UrlParser::pathQuery(Server::query()); /// if request: rest.php?path=/api/route
 
         try {
