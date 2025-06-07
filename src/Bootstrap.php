@@ -2,14 +2,18 @@
 
 namespace Rockberpro\RestRouter;
 
-use React\Http\Message\ServerRequest;
+use Exception;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
-use Monolog\Logger;
+use Rockberpro\RestRouter\Database\PDOConnection;
+use Rockberpro\RestRouter\Handlers\PDOLogHandler;
+use React\Http\Message\ServerRequest;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use stdClass;
 use Throwable;
 
@@ -25,6 +29,12 @@ class Bootstrap
         $this->logger = new Logger('api_log');
         $log_file = Server::getRootDir()."/logs/api_error.log";
         $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
+        if (DotEnv::get('API_LOGS_DB')) {
+            $this->logger->pushHandler(new PDOLogHandler(
+                (new PDOConnection())->getPDO(),
+                'logs'
+            ));
+        }
     }
 
     public function execute()
@@ -62,12 +72,14 @@ class Bootstrap
                 json_encode(['message' => 'Not implemented'])
             );
         } catch (Throwable $th) {
-            $this->logger->error('Exception in handleStateful', [
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+            if (DotEnv::get('API_LOGS')) {
+                $this->logger->error('Exception in handleStateful', [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTraceAsString(),
+                ]);
+            }
 
             return new \React\Http\Message\Response(
                 500,
@@ -103,12 +115,14 @@ class Bootstrap
                 'message' => 'Not implemented'
             ], Response::NOT_IMPLEMENTED);
         } catch (Throwable $th) {
-            $this->logger->error('Exception in handleStateless', [
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+            if (DotEnv::get('API_LOGS')) {
+                $this->logger->error('Exception in handleStateless', [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTraceAsString(),
+                ]);
+            }
 
             Response::json([
                 'message' => $th->getMessage(),

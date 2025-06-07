@@ -32,13 +32,13 @@ class Request implements RequestInterface
     public function __construct()
     {
         $this->logger = new Logger('api_log');
-        $log_file = Server::getRootDir() . "/logs/api_access.log";
+        $log_file = Server::getRootDir()."/logs/api_access.log";
         $this->logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
-        if (DotEnv::get('API_LOGS')) {
+        if (DotEnv::get('API_LOGS_DB')) {
             $this->logger->pushHandler(new PDOLogHandler(
                 (new PDOConnection())->getPDO(),
                 'logs',
-                Logger::INFO
+                Logger::INFO,
             ));
         }
     }
