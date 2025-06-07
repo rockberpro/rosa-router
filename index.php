@@ -7,9 +7,9 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 require_once "vendor/autoload.php";
 
 if (Server::isRouteApi()) {
-    DotEnv::load(Server::getRootDir() . "/.env");
+    DotEnv::load(".env");
 
-    require_once Server::getRootDir() . "/routes/api.php";
+    require_once "routes/api.php";
 
     (new Bootstrap())->execute();
 }
