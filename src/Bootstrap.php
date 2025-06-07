@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter;
 
-use Exception;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
