@@ -151,9 +151,9 @@ class Request implements RequestInterface
     {
         if (DotEnv::get('API_LOGS')) {
             try {
-                $logger = new Logger('api_logs');
+                $logger = new Logger('access_log');
                 
-                $log_file = Server::getRootDir()."/logs/api.log";
+                $log_file = Server::getRootDir()."/logs/access.log";
                 $logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
                 
                 $is_closure = $request->getAction()->isClosure();

@@ -11,14 +11,21 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use stdClass;
 use Throwable;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
+    private Logger $logger;
 
     public function __construct(?ServerRequest $request = null)
     {
         $this->request = $request;
+
+        $this->logger = new Logger('error_log');
+        $log_file = Server::getRootDir()."/logs/error.log";
+        $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
     }
 
     public function execute()
@@ -55,20 +62,13 @@ class Bootstrap
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
-        }
-        catch(Throwable $th) {
-            if (DotEnv::get('API_DEBUG')) {
-                return new \React\Http\Message\Response(
-                    500,
-                    ['Content-Type' => 'application/json'],
-                    json_encode([
-                        'message' => $th->getMessage(),
-                        'file' => $th->getFile(),
-                        'line' => $th->getLine(),
-                        'trace' => $th->getTrace(),
-                    ])
-                );
-            }
+        } catch (Throwable $th) {
+            $this->logger->error('Exception in handleStateful', [
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
 
             return new \React\Http\Message\Response(
                 500,
@@ -83,7 +83,7 @@ class Bootstrap
         $uri = Server::uri();
         $body = Request::body();
         $method = Server::method();
-        $pathQuery = UrlParser::pathQuery(Server::query()); /// if request: rest.php?path=/api/route
+        $pathQuery = UrlParser::pathQuery(Server::query());
 
         try {
             $response = (new Request())->handle(
@@ -103,16 +103,13 @@ class Bootstrap
             Response::json([
                 'message' => 'Not implemented'
             ], Response::NOT_IMPLEMENTED);
-        }
-        catch(Throwable $th) {
-            if (DotEnv::get('API_DEBUG')) {
-                Response::json([
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTrace(),
-                ], Response::INTERNAL_SERVER_ERROR);
-            }
+        } catch (Throwable $th) {
+            $this->logger->error('Exception in handleStateless', [
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
 
             Response::json([
                 'message' => $th->getMessage(),
