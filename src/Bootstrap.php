@@ -2,23 +2,39 @@
 
 namespace Rockberpro\RestRouter;
 
-use React\Http\Message\ServerRequest;
+use Exception;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
+use Rockberpro\RestRouter\Database\PDOConnection;
+use Rockberpro\RestRouter\Handlers\PDOLogHandler;
+use React\Http\Message\ServerRequest;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use stdClass;
 use Throwable;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
+    private Logger $logger;
 
     public function __construct(?ServerRequest $request = null)
     {
         $this->request = $request;
+
+        $this->logger = new Logger('api_log');
+        $log_file = Server::getRootDir()."/logs/api_error.log";
+        $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
+        if (DotEnv::get('API_LOGS_DB')) {
+            $this->logger->pushHandler(new PDOLogHandler(
+                (new PDOConnection())->getPDO(),
+                'logs'
+            ));
+        }
     }
 
     public function execute()
@@ -55,19 +71,14 @@ class Bootstrap
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
-        }
-        catch(Throwable $th) {
-            if (DotEnv::get('API_DEBUG')) {
-                return new \React\Http\Message\Response(
-                    500,
-                    ['Content-Type' => 'application/json'],
-                    json_encode([
-                        'message' => $th->getMessage(),
-                        'file' => $th->getFile(),
-                        'line' => $th->getLine(),
-                        'trace' => $th->getTrace(),
-                    ])
-                );
+        } catch (Throwable $th) {
+            if (DotEnv::get('API_LOGS')) {
+                $this->logger->error('Exception in handleStateful', [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTraceAsString(),
+                ]);
             }
 
             return new \React\Http\Message\Response(
@@ -83,7 +94,7 @@ class Bootstrap
         $uri = Server::uri();
         $body = Request::body();
         $method = Server::method();
-        $pathQuery = UrlParser::pathQuery(Server::query()); /// if request: rest.php?path=/api/route
+        $pathQuery = UrlParser::pathQuery(Server::query());
 
         try {
             $response = (new Request())->handle(
@@ -103,15 +114,14 @@ class Bootstrap
             Response::json([
                 'message' => 'Not implemented'
             ], Response::NOT_IMPLEMENTED);
-        }
-        catch(Throwable $th) {
-            if (DotEnv::get('API_DEBUG')) {
-                Response::json([
+        } catch (Throwable $th) {
+            if (DotEnv::get('API_LOGS')) {
+                $this->logger->error('Exception in handleStateless', [
                     'message' => $th->getMessage(),
                     'file' => $th->getFile(),
                     'line' => $th->getLine(),
-                    'trace' => $th->getTrace(),
-                ], Response::INTERNAL_SERVER_ERROR);
+                    'trace' => $th->getTraceAsString(),
+                ]);
             }
 
             Response::json([

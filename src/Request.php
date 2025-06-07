@@ -12,7 +12,10 @@ use Rockberpro\RestRouter\Helpers\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Database\Models\SysApiLogs;
+use Rockberpro\RestRouter\Database\PDOConnection;
+use Rockberpro\RestRouter\Handlers\PDOLogHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Exception;
 
 /**
@@ -23,8 +26,22 @@ use Exception;
 class Request implements RequestInterface
 {
     private RequestAction $action;
-
     private array $parameters = [];
+    private Logger $logger;
+
+    public function __construct()
+    {
+        $this->logger = new Logger('api_log');
+        $log_file = Server::getRootDir()."/logs/api_access.log";
+        $this->logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
+        if (DotEnv::get('API_LOGS_DB')) {
+            $this->logger->pushHandler(new PDOLogHandler(
+                (new PDOConnection())->getPDO(),
+                'logs',
+                Logger::INFO,
+            ));
+        }
+    }
 
     /**
      * Get the body data
@@ -149,10 +166,25 @@ class Request implements RequestInterface
     {
         if (DotEnv::get('API_LOGS')) {
             try {
-                SysApiLogs::write($request);
-            }
-            catch(Exception $e) {
-                throw new Exception("It was not possible to write the request log: {$e->getMessage()}");
+                $is_closure = $request->getAction()->isClosure();
+                $log_data = [
+                    'subject' => 'rosa-router',
+                    'type' =>  $is_closure ? 'closure' : 'controller',
+                    'remote_address' => Server::remoteAddress(),
+                    'target_address' => Server::targetAddress(),
+                    'user_agent' => Server::userAgent(),
+                    'request_method' => Server::requestMethod(),
+                    'request_uri' => Server::requestUri(),
+                    'request_body' => json_encode($request->getParameters()),
+                    'endpoint' => $request->getAction()->getUri() ?? '',
+                ];
+                if (!$is_closure) {
+                    $log_data['class'] = $request->getAction()->getClass();
+                    $log_data['method'] = $request->getAction()->getMethod();
+                }
+                $this->logger->info('Request log', $log_data);
+            } catch (Exception $e) {
+                throw new Exception("Error attempting to write the request log: {$e->getMessage()}");
             }
         }
     }

@@ -48,29 +48,18 @@ $pdo->createStandardStatement(<<<SQL
     CREATE INDEX sys_api_tokens_audience ON sys_api_tokens(audience);
     CREATE INDEX sys_api_tokens_key ON sys_api_tokens(token);
 
-    DROP TABLE IF EXISTS sys_api_logs;
-    CREATE TABLE sys_api_logs(
-        id SERIAL NOT NULL PRIMARY KEY,
-        subject TEXT NOT NULL,
-        remote_address TEXT NOT NULL,
-        target_address TEXT NOT NULL,
-        user_agent TEXT,
-        request_method TEXT NOT NULL,
-        request_uri TEXT NOT NULL,
-        request_body TEXT,
-        endpoint TEXT NOT NULL,
-        class TEXT NOT NULL,
-        method TEXT NOT NULL,
-        access_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    DROP TABLE IF EXISTS logs;
+    CREATE TABLE logs(
+        id SERIAL PRIMARY KEY,
+        channel TEXT,
+        level TEXT,
+        message TEXT,
+        context TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-    CREATE INDEX sys_api_logs_subject ON sys_api_logs(subject);
-    CREATE INDEX sys_api_logs_remote_address ON sys_api_logs(remote_address);
-    CREATE INDEX sys_api_logs_target_address ON sys_api_logs(target_address);
-    CREATE INDEX sys_api_logs_request_method ON sys_api_logs(request_method);
-    CREATE INDEX sys_api_logs_endpoint ON sys_api_logs(endpoint);
-    CREATE INDEX sys_api_logs_class ON sys_api_logs(class);
-    CREATE INDEX sys_api_logs_method ON sys_api_logs(method);
-    CREATE INDEX sys_api_logs_access_at ON sys_api_logs(access_at);
+    CREATE INDEX logs_channel ON logs(channel);
+    CREATE INDEX logs_level ON logs(level);
+    CREATE INDEX logs_created_at ON logs(created_at);
 SQL);
 
 $pdo->execute();

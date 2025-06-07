@@ -9,9 +9,9 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 
 require_once "vendor/autoload.php";
 
-DotEnv::load(Server::getAppRootDirectory()."/.env");
+DotEnv::load(Server::getRootDir()."/.env");
 
-require_once Server::getAppRootDirectory()."/routes/api.php";
+require_once Server::getRootDir()."/routes/api.php";
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
