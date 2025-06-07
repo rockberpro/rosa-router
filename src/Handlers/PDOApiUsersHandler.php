@@ -98,7 +98,7 @@ class PDOApiUsersHandler
      * @param string $username
      * @return object
      */
-    public function getUser(string $username): ?array
+    public function getUser(string $username): ?object
     {
         $sql = "SELECT * FROM {$this->table} WHERE username = :username";
         $stmt = $this->pdo->prepare($sql);
