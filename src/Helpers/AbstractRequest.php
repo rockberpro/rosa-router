@@ -304,61 +304,31 @@ abstract class AbstractRequest implements AbstractRequestInterface
     {
         $prefix = RouteHelper::routeMatchArgs($route)[0];
 
-        $_route_sufixes = explode($prefix, $route);
-        $route_sufixes = explode('/', end($_route_sufixes));
-
-        $_uri_sufixes = explode($prefix, $uri)[1];
-        $uri_sufixes = explode('/', $_uri_sufixes);
-
-        if (stripos($uri, $prefix) !== false) {
-            $route_parts = explode('/', $route);
-            $uri_parts = explode('/', $uri);
-
-            if (sizeof($uri_parts) === sizeof($route_parts)) {
-
-                if (sizeof($uri_sufixes) === sizeof($route_sufixes)) {
-
-                    $diff = array_diff($uri_parts, $route_parts);
-
-                    /** when route has only prefix, not param nor suffix */
-                    if (
-                       sizeof($diff) === sizeof($uri_sufixes)
-                    && end($route_parts) !== end($uri_parts)
-                    && !in_array(end($uri_parts), $route_parts)
-                    && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
-                    ) {
-                        return true;
-                    }
-
-                    /** when route has suffix */
-                    if (
-                       sizeof($diff) !== sizeof($uri_sufixes)
-                    && end($route_parts) === end($uri_parts)
-                    && in_array(end($uri_parts), $route_parts)
-                    && ( stripos(end($route_parts), '{') === false && stripos(end($route_parts), '}') === false )
-                    ) {
-                        return true;
-                    }
-
-                    /** when route prefix and param have the same value */
-                    if (
-                       sizeof($diff) !== sizeof($uri_sufixes)
-                    && end($route_parts) !== end($uri_parts)
-                    && in_array(end($uri_parts), $route_parts)
-                    && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
-                    ) {
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                return false;
-            }
-
+        if (stripos($uri, $prefix) === false) {
             return false;
         }
 
-        return false;
+        $route_parts = explode('/', $route);
+        $uri_parts = explode('/', $uri);
+
+        if (count($route_parts) !== count($uri_parts)) {
+            return false;
+        }
+
+        foreach ($route_parts as $index => $route_part) {
+            $uri_part = $uri_parts[$index];
+
+            /** checks for dynamics params */
+            if (stripos($route_part, '{') !== false && stripos($route_part, '}') !== false) {
+                continue;
+            }
+
+            /** when param equals prefix */
+            if ($route_part !== $uri_part) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
