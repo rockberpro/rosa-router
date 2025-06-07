@@ -7,12 +7,11 @@ use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
-use stdClass;
-use Throwable;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use stdClass;
+use Throwable;
 
 class Bootstrap
 {
