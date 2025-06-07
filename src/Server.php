@@ -16,6 +16,11 @@ class Server implements ServerInterface
         return urldecode(parse_url($_SERVER["REQUEST_URI"] ?? '', PHP_URL_PATH));
     }
 
+    public static function isRouteApi(): bool
+    {
+        return strpos(self::uri(), '/api/') === 0;
+    }
+
     public static function query(): string
     {
         return $_SERVER['QUERY_STRING'] ?? '';
@@ -82,5 +87,10 @@ class Server implements ServerInterface
     public static function requestUri(): string
     {
         return $_SERVER['REQUEST_URI'] ?? '';
+    }
+
+    public static function getAppRootDirectory()
+    {
+        return dirname(__DIR__, 1);
     }
 }

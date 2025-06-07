@@ -1,7 +1,5 @@
 <?php
 
-use Rockberpro\RestRouter\Request;
-use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Route;
 use Rockberpro\RestRouter\Controllers\AuthController;
 
