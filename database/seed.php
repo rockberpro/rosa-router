@@ -1,8 +1,8 @@
 <?php
 
 use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Handlers\PDOApiKeysHandler;
-use Rockberpro\RestRouter\Handlers\PDOApiUsersHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\Uuid;
 

@@ -9,7 +9,7 @@ use Rockberpro\RestRouter\Utils\Cors;
 use Rockberpro\RestRouter\Utils\Sop;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Jwt;
-use Rockberpro\RestRouter\Handlers\PDOApiKeysHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
 
 /**
  * @author Samuel Oberger Rockenbach

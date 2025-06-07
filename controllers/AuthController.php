@@ -3,8 +3,8 @@
 namespace Rockberpro\RestRouter\Controllers;
 
 use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Handlers\PDOApiTokensHandler;
-use Rockberpro\RestRouter\Handlers\PDOApiUsersHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
 use Rockberpro\RestRouter\Jwt;
 use Rockberpro\RestRouter\JwtException;
 use Rockberpro\RestRouter\Response;
