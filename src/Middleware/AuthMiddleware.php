@@ -37,11 +37,11 @@ class AuthMiddleware
         }
 
         if (DotEnv::get('API_AUTH_METHOD') === 'KEY') {
-            $sysApiKey = new PDOApiKeysHandler(new PDOConnection()->getPDO());
-            if (!$sysApiKey->exists(Server::key())) {
+            $apiKey = new PDOApiKeysHandler(new PDOConnection()->getPDO());
+            if (!$apiKey->exists(Server::key())) {
                 Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
             }
-            if ($sysApiKey->isRevoked(Server::key())) {
+            if ($apiKey->isRevoked(Server::key())) {
                 Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
             }
         }
