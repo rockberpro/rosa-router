@@ -10,7 +10,7 @@ use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Handlers\PDOLogHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use React\Http\Message\ServerRequest;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;

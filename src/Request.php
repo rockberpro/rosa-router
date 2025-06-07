@@ -13,7 +13,7 @@ use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Handlers\PDOLogHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Exception;

@@ -1,7 +1,8 @@
 <?php
 
-use Rockberpro\RestRouter\Database\Models\SysApiKeys;
-use Rockberpro\RestRouter\Database\Models\SysApiUsers;
+use Rockberpro\RestRouter\Database\PDOConnection;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\Uuid;
 
@@ -14,12 +15,12 @@ $key = $uuid->uidv4Base64();
 
 print('X-Api-Key: ' . $key . PHP_EOL);
 
-$sysApiKey = new SysApiKeys();
-$sysApiKey->add($key, 'generic');
+$apiKey = new PDOApiKeysHandler((new PDOConnection())->getPDO());
+$apiKey->addKey($key, 'generic');
 
 print(PHP_EOL);
 
-$sysApiUser = new SysApiUsers();
-$sysApiUser->add('api', 'api', 'generic');
+$apiUser = new PDOApiUsersHandler((new PDOConnection())->getPDO());
+$apiUser->addUser('api', 'api', 'generic');
 print('Username: api' . PHP_EOL);
 print('Password: api' . PHP_EOL);

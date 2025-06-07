@@ -2,6 +2,9 @@
 
 namespace Rockberpro\RestRouter\Controllers;
 
+use Rockberpro\RestRouter\Database\PDOConnection;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
+use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
 use Rockberpro\RestRouter\Jwt;
 use Rockberpro\RestRouter\JwtException;
 use Rockberpro\RestRouter\Response;
@@ -9,8 +12,6 @@ use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\Controllers\Controller;
-use Rockberpro\RestRouter\Database\Models\SysApiTokens;
-use Rockberpro\RestRouter\Database\Models\SysApiUsers;
 use Exception;
 
 /**
@@ -35,24 +36,24 @@ class AuthController extends Controller
         $username = $request->get('username');
         $password = $request->get('password');
 
-        $sysApiUsers = new SysApiUsers();
-        $user = $sysApiUsers->get($username);
+        $apiUsers = new PDOApiUsersHandler((new PDOConnection())->getPDO());
+        $user = $apiUsers->getUser($username);
         if (!$user) {
             return $this->response(['message' => 'User does not exist'], Response::UNAUTHORIZED);
         }
-        if (!hash_equals($user->password, hash('sha256', $password))) {
+        if (!password_verify($password, $user->password)) {
             return $this->response(['message' => 'Invalid credentials'], Response::UNAUTHORIZED);
         }
 
-        $sysApiTokens = new SysApiTokens();
-        $last_token = $sysApiTokens->getLastValidToken($user->audience);
+        $apiTokens = new PDOApiTokensHandler((new PDOConnection())->getPDO());
+        $last_token = $apiTokens->getLastValidToken($user->audience);
         if ($last_token) {
-            $sysApiTokens->revokeByHash($last_token);
+            $apiTokens->revokeByHash($last_token);
         }
 
         $refresh_token = Jwt::getRefreshToken($user->audience);
         try {
-            $sysApiTokens->add($refresh_token, $user->audience);
+            $apiTokens->addToken($refresh_token, $user->audience);
         }
         catch (Exception $e) {
             return $this->response(['message' => $e->getMessage()], Response::INTERNAL_SERVER_ERROR);
@@ -81,11 +82,11 @@ class AuthController extends Controller
         }
 
         $token = explode(' ', Server::authorization())[1];
-        $sysApiTokens = new SysApiTokens();
-        if (!$sysApiTokens->exists($token)) {
+        $apiTokens = new PDOApiTokensHandler((new PDOConnection())->getPDO());
+        if (!$apiTokens->exists($token)) {
             return $this->response(['message' => 'Token is invalid'], Response::UNAUTHORIZED);
         }
-        if ($sysApiTokens->isRevoked($token)) {
+        if ($apiTokens->isRevoked($token)) {
             return $this->response(['message' => 'Token revoked'], Response::UNAUTHORIZED);
         }
 

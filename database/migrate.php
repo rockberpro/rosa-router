@@ -10,8 +10,8 @@ DotEnv::load('../.env');
 $pdo = new PDOConnection();
 
 $pdo->createStandardStatement(<<<SQL
-    DROP TABLE IF EXISTS  sys_api_users;
-    CREATE TABLE sys_api_users(
+    DROP TABLE IF EXISTS users;
+    CREATE TABLE users(
         id SERIAL NOT NULL PRIMARY KEY,
         username TEXT NOT NULL,
         password TEXT NOT NULL,
@@ -20,11 +20,11 @@ $pdo->createStandardStatement(<<<SQL
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         revoked_at TIMESTAMP
     );
-    CREATE INDEX idx_sys_api_users_username ON sys_api_users(username);
-    CREATE INDEX idx_sys_api_users_audience ON sys_api_users(audience);
+    CREATE INDEX idx_users_username ON users(username);
+    CREATE INDEX idx_users_audience ON users(audience);
 
-    DROP TABLE IF EXISTS sys_api_keys;
-    CREATE TABLE sys_api_keys(
+    DROP TABLE IF EXISTS api_keys;
+    CREATE TABLE api_keys(
         id SERIAL NOT NULL PRIMARY KEY,
         audience TEXT NOT NULL,
         key TEXT NOT NULL,
@@ -32,11 +32,11 @@ $pdo->createStandardStatement(<<<SQL
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         revoked_at TIMESTAMP
     );
-    CREATE INDEX idx_sys_api_keys_audience ON sys_api_keys(audience);
-    CREATE INDEX idx_sys_api_keys_key ON sys_api_keys(key);
+    CREATE INDEX idx_api_keys_audience ON api_keys(audience);
+    CREATE INDEX idx_api_keys_key ON api_keys(key);
 
-    DROP TABLE IF EXISTS sys_api_tokens;
-    CREATE TABLE sys_api_tokens(
+    DROP TABLE IF EXISTS api_tokens;
+    CREATE TABLE api_tokens(
         id SERIAL NOT NULL PRIMARY KEY,
         audience TEXT NOT NULL,
         type TEXT NOT NULL,
@@ -45,8 +45,8 @@ $pdo->createStandardStatement(<<<SQL
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         revoked_at TIMESTAMP
     );
-    CREATE INDEX sys_api_tokens_audience ON sys_api_tokens(audience);
-    CREATE INDEX sys_api_tokens_key ON sys_api_tokens(token);
+    CREATE INDEX idx_api_tokens_audience ON api_tokens(audience);
+    CREATE INDEX idx_api_tokens_key ON api_tokens(token);
 
     DROP TABLE IF EXISTS logs;
     CREATE TABLE logs(

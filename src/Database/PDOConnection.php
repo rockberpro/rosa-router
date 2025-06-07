@@ -35,12 +35,10 @@ class PDOConnection
      */
     public function __construct()
     {
-        if($this->loadConfigurations())
-        {
+        if($this->loadConfigurations()) {
             $this->configurePDO();
         }
-        else
-        {
+        else {
             throw new RuntimeException("Error configuring PDO");
         }
     }
@@ -77,8 +75,7 @@ class PDOConnection
      */
     private function configurePDO()
     {
-        try 
-        {
+        try {
             $this->setPdo(
                 new PDO(
                     $this->getDsnUrl(),
@@ -88,8 +85,7 @@ class PDOConnection
                 )
             );
         }
-        catch(Throwable $e)
-        {
+        catch(Throwable $e) {
             throw new RuntimeException("Error establishing connection: {$e->getMessage()}");
         }
     }  
@@ -154,8 +150,7 @@ class PDOConnection
      */
     public function bindParameter($column, $value, $pdoParamType)
     {
-        if(is_null($this->getPreparedStatement()))
-        {
+        if(is_null($this->getPreparedStatement())) {
             throw new RuntimeException("Stantement was not initialized");
         }
 
@@ -172,22 +167,22 @@ class PDOConnection
      */
     public function fetch($mode = PDO::FETCH_OBJ)
     {
-        if($this->getStandardStatement())
-        {
+        if($this->getStandardStatement()) {
             return $this->getPdo()
                         ->query($this->getStandardStatement())
                         ->fetch($mode);
         }
-        else if(!($this->getStandardStatement())
-             &&  ($this->getPreparedStatement())
-        )
-        {
-            if(!$this->getPreparedStatement()->execute())
-            {
+        else if(
+               !($this->getStandardStatement())
+            && ($this->getPreparedStatement())
+        ){
+            if(!$this->getPreparedStatement()->execute()) {
                 return null;    
             }
+
             return $this->getPreparedStatement()->fetch($mode);
         }
+
         return null;
     }
 
@@ -201,20 +196,19 @@ class PDOConnection
      */
     public function fetchAll($mode = PDO::FETCH_OBJ)
     {
-        if($this->getStandardStatement())
-        {
+        if($this->getStandardStatement()) {
             return $this->getPdo()
                         ->query($this->getStandardStatement())
                         ->fetchAll($mode);
         }
-        else if(!($this->getStandardStatement())
-             &&  ($this->getPreparedStatement())
-        )
-        {
-            if(!$this->getPreparedStatement()->execute())
-            {
+        else if(
+                !($this->getStandardStatement())
+             && ($this->getPreparedStatement())
+        ){
+            if(!$this->getPreparedStatement()->execute()) {
                 return null;
             }
+
             return $this->getPreparedStatement()->fetchAll($mode);
         }
     }
@@ -230,28 +224,25 @@ class PDOConnection
      */
     public function getStatement($paramValues = true)
     {
-        if($this->getStandardStatement())
-        {
+        if($this->getStandardStatement()) {
             return $this->getStandardStatement();
         }
         else if(!($this->getStandardStatement())
              &&  ($this->getPreparedStatement())
-        )
-        {
-            if(!$this->getPreparedStatement()->execute())
-            {
+        ){
+            if(!$this->getPreparedStatement()->execute()) {
                 return null;
             }
-            if($paramValues)
-            {
+            if($paramValues) {
                 $this->getPreparedStatement()->execute();
                 return $this->getPreparedStatement()->debugDumpParams();
             }
-            else
-            {
+            else {
                 return $this->getPreparedStatement();
             }
         }
+
+        return null;
     }
 
     /**
@@ -264,13 +255,11 @@ class PDOConnection
      */
     public function execute()
     {
-        if($this->getStandardStatement())
-        {
+        if($this->getStandardStatement()) {
             return $this->getPdo()->exec($this->getStandardStatement());
         }
 
-        if($this->getPreparedStatement())
-        {
+        if($this->getPreparedStatement()) {
             return $this->getPreparedStatement()
                         ->execute();
         }
@@ -287,16 +276,14 @@ class PDOConnection
      */
     public function rowCount()
     {
-        if($this->getStandardStatement())
-        {
+        if($this->getStandardStatement()) {
             $rowCount = $this->getPdo()->prepare($this->getStandardStatement());
             $rowCount->execute();
 
             return $rowCount->rowCount();
         }
 
-        if($this->getPreparedStatement())
-        {
+        if($this->getPreparedStatement()) {
             $rowCount =  $this->getPreparedStatement();
             $rowCount->execute();
 
