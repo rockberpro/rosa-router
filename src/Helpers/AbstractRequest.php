@@ -317,7 +317,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
         return !array_diff(
             array_filter(
-            $route_parts,
+                $route_parts,
                 function($part) {
                     return (
                            stripos($part, '{') === false
