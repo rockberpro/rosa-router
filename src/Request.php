@@ -172,7 +172,7 @@ class Request implements RequestInterface
                     $log_data['class'] = $request->getAction()->getClass();
                     $log_data['method'] = $request->getAction()->getMethod();
                 }
-                $logger->info('Request logged', $log_data);
+                $logger->info('Request log', $log_data);
             } catch (Exception $e) {
                 throw new Exception("Error attempting to write the request log: {$e->getMessage()}");
             }
