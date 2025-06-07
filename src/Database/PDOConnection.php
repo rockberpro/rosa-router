@@ -252,6 +252,8 @@ class PDOConnection
                 return $this->getPreparedStatement();
             }
         }
+
+        return null;
     }
 
     /**
