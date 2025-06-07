@@ -41,7 +41,7 @@ class AuthController extends Controller
         if (!$user) {
             return $this->response(['message' => 'User does not exist'], Response::UNAUTHORIZED);
         }
-        if (!hash_equals($user->password, hash('sha256', $password))) {
+        if (!password_verify($user->password, $password)) {
             return $this->response(['message' => 'Invalid credentials'], Response::UNAUTHORIZED);
         }
 

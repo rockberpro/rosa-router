@@ -37,8 +37,8 @@ class PDOApiUsersHandler
 
         $stmt->execute([
             ':username' => $username,
-            ':password' => hash('sha256', $password),
-            ':hash_alg' => 'sha256',
+            ':password' => password_hash($password, PASSWORD_BCRYPT),
+            ':hash_alg' => 'bcrypt',
             ':audience' => $audience,
             ':created_at' => date('Y-m-d H:i:s'),
         ]);
