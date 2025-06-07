@@ -15,7 +15,7 @@ require_once Server::getAppRootDirectory()."/routes/api.php";
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
-    return (new Bootstrap())->execute($request);
+    return (new Bootstrap($request))->execute();
 });
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);

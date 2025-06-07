@@ -2,24 +2,31 @@
 
 namespace Rockberpro\RestRouter;
 
+use React\Http\Message\ServerRequest;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
-use React\Http\Message\ServerRequest;
 use stdClass;
 use Throwable;
 
 class Bootstrap
 {
-    public function execute(?ServerRequest $request)
+    private ?ServerRequest $request;
+
+    public function __construct(?ServerRequest $request = null)
+    {
+        $this->request = $request;
+    }
+
+    public function execute()
     {
         if (!$this->isEventLoop()) {
             return $this->handleStateless();
         }
-        return $this->handleStateful($request);
+        return $this->handleStateful($this->request);
     }
 
     public function handleStateful(ServerRequest $request)
@@ -73,7 +80,7 @@ class Bootstrap
 
     public function handleStateless()
     {
-        $uri = Server::uri(); /// if request: /api
+        $uri = Server::uri();
         $body = Request::body();
         $method = Server::method();
         $pathQuery = UrlParser::pathQuery(Server::query()); /// if request: rest.php?path=/api/route
