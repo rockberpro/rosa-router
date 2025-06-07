@@ -107,18 +107,24 @@ abstract class AbstractRequest implements AbstractRequestInterface
     {
         $parts = $this->getRouteParts($request);
         [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
-        foreach($route_parts as $key => $value)
-        {
+
+        foreach ($route_parts as $key => $value) {
             $attribute = substr($value, 1, -1);
-            if (isset($uri_parts[$key])) {
-                if ($value === $uri_parts[$key]) {
-                    continue;
+
+            if (!isset($uri_parts[$key])) {
+                throw new Exception('Route does not match');
+            }
+
+            if ($value === $uri_parts[$key]) {
+                continue;
+            }
+
+            if (stripos($value, '{') === false || stripos($value, '}') === false) {
+                if ($value !== $uri_parts[$key]) {
+                    throw new Exception('Route does not match');
                 }
-                if (stripos($value, '{') === false || stripos($value, '}') === false) {
-                    if ($value !== $uri_parts[$key]) {
-                        throw new Exception('Route does not match');
-                    }
-                }
+            }
+            else {
                 if (!RouteHelper::isAlphaNumeric($uri_parts[$key])) {
                     throw new Exception('Route contains invalid characters');
                 }
