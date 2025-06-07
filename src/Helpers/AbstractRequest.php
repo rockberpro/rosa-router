@@ -107,18 +107,24 @@ abstract class AbstractRequest implements AbstractRequestInterface
     {
         $parts = $this->getRouteParts($request);
         [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
-        foreach($route_parts as $key => $value)
-        {
+
+        foreach ($route_parts as $key => $value) {
             $attribute = substr($value, 1, -1);
-            if (isset($uri_parts[$key])) {
-                if ($value === $uri_parts[$key]) {
-                    continue;
+
+            if (!isset($uri_parts[$key])) {
+                throw new Exception('Route does not match');
+            }
+
+            if ($value === $uri_parts[$key]) {
+                continue;
+            }
+
+            if (stripos($value, '{') === false || stripos($value, '}') === false) {
+                if ($value !== $uri_parts[$key]) {
+                    throw new Exception('Route does not match');
                 }
-                if (stripos($value, '{') === false || stripos($value, '}') === false) {
-                    if ($value !== $uri_parts[$key]) {
-                        throw new Exception('Route does not match');
-                    }
-                }
+            }
+            else {
                 if (!RouteHelper::isAlphaNumeric($uri_parts[$key])) {
                     throw new Exception('Route contains invalid characters');
                 }
@@ -304,61 +310,28 @@ abstract class AbstractRequest implements AbstractRequestInterface
     {
         $prefix = RouteHelper::routeMatchArgs($route)[0];
 
-        $_route_sufixes = explode($prefix, $route);
-        $route_sufixes = explode('/', end($_route_sufixes));
-
-        $_uri_sufixes = explode($prefix, $uri)[1];
-        $uri_sufixes = explode('/', $_uri_sufixes);
-
-        if (stripos($uri, $prefix) !== false) {
-            $route_parts = explode('/', $route);
-            $uri_parts = explode('/', $uri);
-
-            if (sizeof($uri_parts) === sizeof($route_parts)) {
-
-                if (sizeof($uri_sufixes) === sizeof($route_sufixes)) {
-
-                    $diff = array_diff($uri_parts, $route_parts);
-
-                    /** when route has only prefix, not param nor suffix */
-                    if (
-                       sizeof($diff) === sizeof($uri_sufixes)
-                    && end($route_parts) !== end($uri_parts)
-                    && !in_array(end($uri_parts), $route_parts)
-                    && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
-                    ) {
-                        return true;
-                    }
-
-                    /** when route has suffix */
-                    if (
-                       sizeof($diff) !== sizeof($uri_sufixes)
-                    && end($route_parts) === end($uri_parts)
-                    && in_array(end($uri_parts), $route_parts)
-                    && ( stripos(end($route_parts), '{') === false && stripos(end($route_parts), '}') === false )
-                    ) {
-                        return true;
-                    }
-
-                    /** when route prefix and param have the same value */
-                    if (
-                       sizeof($diff) !== sizeof($uri_sufixes)
-                    && end($route_parts) !== end($uri_parts)
-                    && in_array(end($uri_parts), $route_parts)
-                    && ( stripos(end($route_parts), '{') !== false && stripos(end($route_parts), '}') !== false )
-                    ) {
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                return false;
-            }
-
+        if (stripos($uri, $prefix) === false) {
             return false;
         }
 
-        return false;
+        $route_parts = explode('/', $route);
+        $uri_parts = explode('/', $uri);
+
+        if (sizeof($route_parts) !== sizeof($uri_parts)) {
+            return false;
+        }
+
+        return !array_diff(
+            array_filter(
+                $route_parts,
+                function($part) {
+                    return (
+                           stripos($part, '{') === false
+                        && stripos($part, '}') === false
+                    );
+                }
+            ),
+            $uri_parts
+        );
     }
 }
