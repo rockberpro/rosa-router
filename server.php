@@ -22,4 +22,4 @@ $server->on('error', function (Throwable $e) {
 $socket = new SocketServer("0.0.0.0:{$port}");
 $server->listen($socket);
 
-echo "Server running at http://0.0.0.0:{$port}".PHP_EOL;
+print("Server running at http://0.0.0.0:{$port}".PHP_EOL);
