@@ -89,7 +89,7 @@ class Server implements ServerInterface
         return $_SERVER['REQUEST_URI'] ?? '';
     }
 
-    public static function getAppRootDirectory()
+    public static function getRootDir()
     {
         return dirname(__DIR__, 1);
     }

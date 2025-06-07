@@ -59,4 +59,8 @@ class RequestAction implements RequestActionInterface
     public function setUri($uri): void {
         $this->uri = $uri;
     }
+
+    public function isClosure(): bool {
+        return is_callable($this->closure);
+    }
 }

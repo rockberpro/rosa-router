@@ -14,6 +14,8 @@ use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Database\Models\SysApiLogs;
 use Exception;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -149,10 +151,30 @@ class Request implements RequestInterface
     {
         if (DotEnv::get('API_LOGS')) {
             try {
-                SysApiLogs::write($request);
-            }
-            catch(Exception $e) {
-                throw new Exception("It was not possible to write the request log: {$e->getMessage()}");
+                $logger = new Logger('api_logs');
+                
+                $log_file = Server::getRootDir()."/logs/api.log";
+                $logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
+                
+                $is_closure = $request->getAction()->isClosure();
+                $log_data = [
+                    'subject' => 'rosa-router',
+                    'type' =>  $is_closure ? 'closure' : 'controller',
+                    'remote_address' => Server::remoteAddress(),
+                    'target_address' => Server::targetAddress(),
+                    'user_agent' => Server::userAgent(),
+                    'request_method' => Server::requestMethod(),
+                    'request_uri' => Server::requestUri(),
+                    'request_body' => json_encode($request->getParameters()),
+                    'endpoint' => $request->getAction()->getUri() ?? '',
+                ];
+                if (!$is_closure) {
+                    $log_data['class'] = $request->getAction()->getClass();
+                    $log_data['method'] = $request->getAction()->getMethod();
+                }
+                $logger->info('Request logged', $log_data);
+            } catch (Exception $e) {
+                throw new Exception("Error attempting to write the request log: {$e->getMessage()}");
             }
         }
     }
