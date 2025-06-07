@@ -151,11 +151,10 @@ class Request implements RequestInterface
     {
         if (DotEnv::get('API_LOGS')) {
             try {
-                $logger = new Logger('access_log');
-                
-                $log_file = Server::getRootDir()."/logs/access.log";
+                $logger = new Logger('api_log');
+                $log_file = Server::getRootDir()."/logs/api_access.log";
                 $logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
-                
+
                 $is_closure = $request->getAction()->isClosure();
                 $log_data = [
                     'subject' => 'rosa-router',

@@ -23,8 +23,8 @@ class Bootstrap
     {
         $this->request = $request;
 
-        $this->logger = new Logger('error_log');
-        $log_file = Server::getRootDir()."/logs/error.log";
+        $this->logger = new Logger('api_log');
+        $log_file = Server::getRootDir()."/logs/api_error.log";
         $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
     }
 
