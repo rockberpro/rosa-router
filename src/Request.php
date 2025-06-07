@@ -25,8 +25,15 @@ use Monolog\Handler\StreamHandler;
 class Request implements RequestInterface
 {
     private RequestAction $action;
-
     private array $parameters = [];
+    private Logger $logger;
+
+    public function __construct()
+    {
+        $this->logger = new Logger('api_log');
+        $log_file = Server::getRootDir() . "/logs/api_access.log";
+        $this->logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
+    }
 
     /**
      * Get the body data
@@ -151,10 +158,6 @@ class Request implements RequestInterface
     {
         if (DotEnv::get('API_LOGS')) {
             try {
-                $logger = new Logger('api_log');
-                $log_file = Server::getRootDir()."/logs/api_access.log";
-                $logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
-
                 $is_closure = $request->getAction()->isClosure();
                 $log_data = [
                     'subject' => 'rosa-router',
@@ -171,7 +174,7 @@ class Request implements RequestInterface
                     $log_data['class'] = $request->getAction()->getClass();
                     $log_data['method'] = $request->getAction()->getMethod();
                 }
-                $logger->info('Request log', $log_data);
+                $this->logger->info('Request log', $log_data);
             } catch (Exception $e) {
                 throw new Exception("Error attempting to write the request log: {$e->getMessage()}");
             }
