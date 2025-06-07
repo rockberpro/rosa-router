@@ -12,10 +12,11 @@ use Rockberpro\RestRouter\Helpers\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Database\Models\SysApiLogs;
-use Exception;
-use Monolog\Logger;
+use Rockberpro\RestRouter\Database\PDOConnection;
+use Rockberpro\RestRouter\Handlers\PDOLogHandler;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Exception;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -33,6 +34,13 @@ class Request implements RequestInterface
         $this->logger = new Logger('api_log');
         $log_file = Server::getRootDir() . "/logs/api_access.log";
         $this->logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
+        if (DotEnv::get('API_LOGS')) {
+            $this->logger->pushHandler(new PDOLogHandler(
+                (new PDOConnection())->getPDO(),
+                'logs',
+                Logger::INFO
+            ));
+        }
     }
 
     /**
