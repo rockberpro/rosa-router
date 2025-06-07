@@ -30,10 +30,10 @@ class Jwt
         if (!preg_match("/Bearer\s((.*)\.(.*)\.(.*))/", $token)) {
             throw new JwtException('Invalid token provided');
         }
-
+        
         $jwt_parts = explode('.', $token);
-        $json_header = base64_decode(explode(' ', $jwt_parts[0])[1]);
-        $json_payload = base64_decode($jwt_parts[1]);
+        $json_header = self::base64UrlDecode(explode(' ', $jwt_parts[0])[1]);
+        $json_payload = self::base64UrlDecode($jwt_parts[1]);
         $signature = ($jwt_parts[2]);
 
         $header = json_decode($json_header, true);
@@ -69,10 +69,10 @@ class Jwt
         }
 
         /** signature */
-        $val_header = $instance->base64UrlEncode($json_header);
-        $val_payload = $instance->base64UrlEncode($json_payload);
+        $val_header = self::base64UrlEncode($json_header);
+        $val_payload = self::base64UrlEncode($json_payload);
         $val_signature = hash_hmac('sha256', ($val_header.'.'.$val_payload), DotEnv::get('JWT_SECRET'), true);
-        $enc_val_sig = $instance->base64UrlEncode($val_signature);
+        $enc_val_sig = self::base64UrlEncode($val_signature);
 
         if (!hash_equals($signature, $enc_val_sig)) {
             throw new JwtException('Invalid token');
@@ -96,7 +96,7 @@ class Jwt
         $instance = new self();
 
         $header = $instance->base64UrlEncode($instance->getHeader());
-        $payload = $instance->base64UrlEncode($instance->getPayload($expires, 'refresh', $audience));
+        $payload = $instance->base64UrlEncode($instance->getPayload('refresh', $audience, $expires));
         $signature = hash_hmac('sha256', ($header.'.'.$payload), DotEnv::get('JWT_SECRET'), true);
         $enc_sig = $instance->base64UrlEncode($signature);
 
@@ -119,7 +119,7 @@ class Jwt
         $instance = new self();
 
         $header = $instance->base64UrlEncode($instance->getHeader());
-        $payload = $instance->base64UrlEncode($instance->getPayload($expires, 'access'));
+        $payload = $instance->base64UrlEncode($instance->getPayload('access', null, $expires));
         $signature = hash_hmac('sha256', ($header.'.'.$payload), DotEnv::get('JWT_SECRET'), true);
         $enc_sig = $instance->base64UrlEncode($signature);
 
@@ -149,7 +149,7 @@ class Jwt
      * @param string $audience
      * @return string payload
      */
-    private function getPayload($expires = null, $type, $audience = null)
+    private function getPayload($type, $audience = null, $expires = null)
     {
         $payload = [
             'iss' => DotEnv::get('JWT_ISSUER'),
@@ -176,15 +176,22 @@ class Jwt
      * @param string $text
      * @return string
      */
-    private function base64UrlEncode($text) : string
+    private static function base64UrlEncode($text) : string
     {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($text));
+    }
+
+    private static function base64UrlDecode(string $input): string
+    {
+        $replaced = str_replace(['-', '_'], ['+', '/'], $input);
+        $padded = str_pad($replaced, strlen($replaced) % 4, '=', STR_PAD_RIGHT);
+        return base64_decode($padded);
     }
 }
 
 class JwtException extends Exception
 {
-    public function __construct(string $message, int $code = 0, Throwable $previous = null)
+    public function __construct(string $message, int $code = 0, ?Throwable $previous = null) // Adicionado ?Throwable
     {
         parent::__construct($message, $code, $previous);
     }
