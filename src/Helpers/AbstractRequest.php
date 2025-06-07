@@ -315,20 +315,17 @@ abstract class AbstractRequest implements AbstractRequestInterface
             return false;
         }
 
-        foreach ($route_parts as $index => $route_part) {
-            $uri_part = $uri_parts[$index];
-
-            /** checks for dynamics params */
-            if (stripos($route_part, '{') !== false && stripos($route_part, '}') !== false) {
-                continue;
-            }
-
-            /** when param equals prefix */
-            if ($route_part !== $uri_part) {
-                return false;
-            }
-        }
-
-        return true;
+        return !array_diff(
+            array_filter(
+            $route_parts,
+                function($part) {
+                    return (
+                           stripos($part, '{') === false
+                        && stripos($part, '}') === false
+                    );
+                }
+            ),
+            $uri_parts
+        );
     }
 }
