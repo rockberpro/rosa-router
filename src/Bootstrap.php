@@ -2,43 +2,31 @@
 
 namespace Rockberpro\RestRouter;
 
+use Error;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use React\Http\Message\ServerRequest;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use stdClass;
 use Throwable;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private Logger $logger;
+    private ErrorLogHandler $error_logger;
 
     public function __construct(?ServerRequest $request = null)
     {
         $this->request = $request;
-
-        $this->logger = new Logger('api_log');
-        $log_file = Server::getRootDir()."/logs/api_error.log";
-        $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
-        if (DotEnv::get('API_LOGS_DB')) {
-            $this->logger->pushHandler(new PDOLogHandler(
-                (new PDOConnection())->getPDO(),
-                'logs'
-            ));
-        }
     }
 
     public function execute()
     {
-        if (!$this->isEventLoop()) {
+        if (!$this->isRunningCli()) {
             return $this->handleStateless();
         }
         return $this->handleStateful($this->request);
@@ -70,22 +58,23 @@ class Bootstrap
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
-        } catch (Throwable $th) {
-            if (DotEnv::get('API_LOGS')) {
-                $this->logger->error('Exception in handleStateful', [
+        }
+        catch (Throwable $th) {
+            $this->getErrorLogger()->write(
+                'Error', [
                     'message' => $th->getMessage(),
                     'file' => $th->getFile(),
                     'line' => $th->getLine(),
                     'trace' => $th->getTraceAsString(),
-                ]);
-            }
-
-            return new \React\Http\Message\Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                json_encode(['message' => $th->getMessage()])
+                ]
             );
         }
+
+        return new \React\Http\Message\Response(
+            500,
+            ['Content-Type' => 'application/json'],
+            json_encode(['message' => $th->getMessage()])
+        );
     }
 
     public function handleStateless()
@@ -162,7 +151,16 @@ class Bootstrap
         return $queryParams;
     }
 
-    public function isEventLoop(): bool {
+    public function setErrorLogger(ErrorLogHandler $logger) {
+        $this->error_logger = $logger;
+
+        return $this;
+    }
+    public function getErrorLogger(): ErrorLogHandler {
+        return $this->error_logger;
+    }
+
+    public function isRunningCli(): bool {
         return (php_sapi_name() === 'cli');
     }
 }
