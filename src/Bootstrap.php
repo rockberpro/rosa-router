@@ -2,14 +2,13 @@
 
 namespace Rockberpro\RestRouter;
 
-use Error;
+use Exception;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
 use stdClass;
@@ -37,15 +36,18 @@ class Bootstrap
     public function handleStateful(ServerRequest $request)
     {
         try {
-            $response = (new Request())->handle(
-                new RequestData(
-                    $request->getMethod(),
-                    $request->getUri()->getPath(),
-                    null, 
-                    (array) $request->getParsedBody(),
-                    (array) $request->getQueryParams()
-                )
-            );
+            $response = (new Request())
+                ->setInfoLogger($this->getInfoLogger())
+                ->setErrorLogger($this->getErrorLogger())
+                ->handle(
+                    new RequestData(
+                        $request->getMethod(),
+                        $request->getUri()->getPath(),
+                        null, 
+                        (array) $request->getParsedBody(),
+                        (array) $request->getQueryParams()
+                    )
+                );
 
             if ($response) {
                 return new \React\Http\Message\Response(
@@ -62,14 +64,12 @@ class Bootstrap
             );
         }
         catch (Throwable $th) {
-            $this->getErrorLogger()->write(
-                'Error', [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
-                ]
-            );
+            $this->writeErrorLog([
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
         }
 
         return new \React\Http\Message\Response(
@@ -104,15 +104,14 @@ class Bootstrap
             Response::json([
                 'message' => 'Not implemented'
             ], Response::NOT_IMPLEMENTED);
-        } catch (Throwable $th) {
-            $this->getErrorLogger()->write(
-                'Error', [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
-                ]
-            );
+        }
+        catch (Throwable $th) {
+            $this->writeErrorLog([
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
 
             Response::json([
                 'message' => $th->getMessage(),
@@ -151,6 +150,18 @@ class Bootstrap
         }
     
         return $queryParams;
+    }
+
+    private function writeErrorLog(array $data)
+    {
+        try {
+            $this->getErrorLogger()->write('Error', $data);
+        }
+        catch (Throwable $e) {
+            Response::json([
+                'message' => "Error writing error log: {$e->getMessage()}"
+            ], Response::INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function setErrorLogger(ErrorLogHandler $logger) {

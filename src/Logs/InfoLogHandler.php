@@ -30,7 +30,7 @@ class InfoLogHandler
     public function write($message, $data)
     {
         if (DotEnv::get('API_LOGS')) {
-            $this->logger->error($message, $data);
+            $this->logger->info($message, $data);
         }
     }
 

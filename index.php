@@ -14,7 +14,7 @@ if (Server::isRouteApi()) {
     require_once "routes/api.php";
 
     (new Bootstrap())
-        ->setInfoLogger(new InfoLogHandler(Server::getRootDir()."/logs/api_access.log"))
-        ->setErrorLogger(new ErrorLogHandler(Server::getRootDir()."/logs/api_error.log"))
+        ->setInfoLogger(new InfoLogHandler("logs/api_access.log"))
+        ->setErrorLogger(new ErrorLogHandler("logs/api_error.log"))
         ->execute();
 }
