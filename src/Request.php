@@ -25,8 +25,8 @@ class Request implements RequestInterface
 {
     private RequestAction $action;
     private array $parameters = [];
-    private ?ErrorLogHandler $errorLogHander;
-    private ?InfoLogHandler $infoLogHandler;
+    private ?ErrorLogHandler $errorLogHander = null;
+    private ?InfoLogHandler $infoLogHandler = null;
 
     /**
      * Get the body data
@@ -167,7 +167,12 @@ class Request implements RequestInterface
                 $log_data['method'] = $request->getAction()->getMethod();
             }
 
-            $this->getInfoLogger()->write('Request', $log_data);
+            if (!$this->getInfoLogger() && DotEnv::get('API_LOGS')) {
+                throw new Exception('Info logger is not set');
+            }
+            if (DotEnv::get('API_LOGS')) {
+                $this->getInfoLogger()->write('Request', $log_data);
+            }
         }
         catch (Exception $e) {
             Response::json([
@@ -199,21 +204,21 @@ class Request implements RequestInterface
         return $this->action;
     }
 
-    public function setErrorLogger(ErrorLogHandler $logger) {
+    public function setErrorLogger(?ErrorLogHandler $logger) {
         $this->errorLogHander = $logger;
 
         return $this;
     }
-    public function getErrorLogger(): ErrorLogHandler {
+    public function getErrorLogger(): ?ErrorLogHandler {
         return $this->errorLogHander;
     }
 
-    public function setInfoLogger(InfoLogHandler $logger) {
+    public function setInfoLogger(?InfoLogHandler $logger) {
         $this->infoLogHandler = $logger;
 
         return $this;
     }
-    public function getInfoLogger(): InfoLogHandler {
+    public function getInfoLogger(): ?InfoLogHandler {
         return $this->infoLogHandler;
     }
 

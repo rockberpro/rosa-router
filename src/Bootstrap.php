@@ -2,23 +2,24 @@
 
 namespace Rockberpro\RestRouter;
 
-use Exception;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
 use stdClass;
 use Throwable;
+use Exception;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ?ErrorLogHandler $errorLogHander;
-    private ?InfoLogHandler $infoLogHandler;
+    private ?ErrorLogHandler $errorLogHander = null;
+    private ?InfoLogHandler $infoLogHandler = null;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -158,30 +159,35 @@ class Bootstrap
     private function writeErrorLog(array $data)
     {
         try {
-            $this->getErrorLogger()->write('Error', $data);
+            if (!$this->getErrorLogger() && DotEnv::get('API_LOGS')) {
+                throw new Exception('Error logger is not set');
+            }
+            if (DotEnv::get('API_LOGS')) {
+                $this->getErrorLogger()->write('Error', $data);
+            }
         }
         catch (Throwable $e) {
             Response::json([
-                'message' => "Error writing error log: {$e->getMessage()}"
+                'message' => "Error writing exception log: {$e->getMessage()}"
             ], Response::INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function setErrorLogger(ErrorLogHandler $logger) {
+    public function setErrorLogger(?ErrorLogHandler $logger) {
         $this->errorLogHander = $logger;
 
         return $this;
     }
-    public function getErrorLogger(): ErrorLogHandler {
+    public function getErrorLogger(): ?ErrorLogHandler {
         return $this->errorLogHander;
     }
 
-    public function setInfoLogger(InfoLogHandler $logger) {
+    public function setInfoLogger(?InfoLogHandler $logger) {
         $this->infoLogHandler = $logger;
 
         return $this;
     }
-    public function getInfoLogger(): InfoLogHandler {
+    public function getInfoLogger(): ?InfoLogHandler {
         return $this->infoLogHandler;
     }
 
