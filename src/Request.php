@@ -14,10 +14,6 @@ use Rockberpro\RestRouter\Helpers\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Exception;
 
 /**
@@ -29,8 +25,8 @@ class Request implements RequestInterface
 {
     private RequestAction $action;
     private array $parameters = [];
-    private ErrorLogHandler $errorLogHander;
-    private InfoLogHandler $infoLogHandler;
+    private ?ErrorLogHandler $errorLogHander;
+    private ?InfoLogHandler $infoLogHandler;
 
     /**
      * Get the body data

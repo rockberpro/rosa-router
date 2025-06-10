@@ -13,7 +13,7 @@ class InfoLogHandler
 {
     private ?Logger $logger = null;
 
-    private function __construct($file_path = null)
+    public function __construct($file_path = null)
     {
         $this->logger = new Logger('api_log');
         $log_file = $file_path ?? Server::getRootDir()."/logs/api_access.log";

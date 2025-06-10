@@ -17,8 +17,8 @@ use Throwable;
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ErrorLogHandler $errorLogHander;
-    private InfoLogHandler $infoLogHandler;
+    private ?ErrorLogHandler $errorLogHander;
+    private ?InfoLogHandler $infoLogHandler;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -87,15 +87,18 @@ class Bootstrap
         $pathQuery = UrlParser::pathQuery(Server::query());
 
         try {
-            $response = (new Request())->handle(
-                new RequestData(
-                    $method, 
-                    $uri, 
-                    $pathQuery, 
-                    (array) $body,
-                    (array) $this->queryParams()
-                )
-            );
+            $response = (new Request())
+                ->setInfoLogger($this->getInfoLogger())
+                ->setErrorLogger($this->getErrorLogger())
+                ->handle(
+                    new RequestData(
+                        $method, 
+                        $uri, 
+                        $pathQuery, 
+                        (array) $body,
+                        (array) $this->queryParams()
+                    )
+                );
 
             if ($response) {
                 $response->response();
