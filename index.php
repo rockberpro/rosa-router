@@ -1,6 +1,8 @@
 <?php
 
 use Rockberpro\RestRouter\Bootstrap;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 
@@ -11,5 +13,8 @@ if (Server::isRouteApi()) {
 
     require_once "routes/api.php";
 
-    (new Bootstrap())->execute();
+    (new Bootstrap())
+        ->setInfoLogger(new InfoLogHandler("logs/api_access.log"))
+        ->setErrorLogger(new ErrorLogHandler("logs/api_error.log"))
+        ->execute();
 }

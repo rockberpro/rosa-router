@@ -2,43 +2,32 @@
 
 namespace Rockberpro\RestRouter;
 
+use Exception;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use React\Http\Message\ServerRequest;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use stdClass;
 use Throwable;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private Logger $logger;
+    private ?ErrorLogHandler $errorLogHander;
+    private ?InfoLogHandler $infoLogHandler;
 
     public function __construct(?ServerRequest $request = null)
     {
         $this->request = $request;
-
-        $this->logger = new Logger('api_log');
-        $log_file = Server::getRootDir()."/logs/api_error.log";
-        $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
-        if (DotEnv::get('API_LOGS_DB')) {
-            $this->logger->pushHandler(new PDOLogHandler(
-                (new PDOConnection())->getPDO(),
-                'logs'
-            ));
-        }
     }
 
     public function execute()
     {
-        if (!$this->isEventLoop()) {
+        if (!$this->isRunningCli()) {
             return $this->handleStateless();
         }
         return $this->handleStateful($this->request);
@@ -47,15 +36,18 @@ class Bootstrap
     public function handleStateful(ServerRequest $request)
     {
         try {
-            $response = (new Request())->handle(
-                new RequestData(
-                    $request->getMethod(),
-                    $request->getUri()->getPath(),
-                    null, 
-                    (array) $request->getParsedBody(),
-                    (array) $request->getQueryParams()
-                )
-            );
+            $response = (new Request())
+                ->setInfoLogger($this->getInfoLogger())
+                ->setErrorLogger($this->getErrorLogger())
+                ->handle(
+                    new RequestData(
+                        $request->getMethod(),
+                        $request->getUri()->getPath(),
+                        null, 
+                        (array) $request->getParsedBody(),
+                        (array) $request->getQueryParams()
+                    )
+                );
 
             if ($response) {
                 return new \React\Http\Message\Response(
@@ -70,22 +62,21 @@ class Bootstrap
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
-        } catch (Throwable $th) {
-            if (DotEnv::get('API_LOGS')) {
-                $this->logger->error('Exception in handleStateful', [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
-                ]);
-            }
-
-            return new \React\Http\Message\Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                json_encode(['message' => $th->getMessage()])
-            );
         }
+        catch (Throwable $th) {
+            $this->writeErrorLog([
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+        }
+
+        return new \React\Http\Message\Response(
+            500,
+            ['Content-Type' => 'application/json'],
+            json_encode(['message' => $th->getMessage()])
+        );
     }
 
     public function handleStateless()
@@ -96,15 +87,18 @@ class Bootstrap
         $pathQuery = UrlParser::pathQuery(Server::query());
 
         try {
-            $response = (new Request())->handle(
-                new RequestData(
-                    $method, 
-                    $uri, 
-                    $pathQuery, 
-                    (array) $body,
-                    (array) $this->queryParams()
-                )
-            );
+            $response = (new Request())
+                ->setInfoLogger($this->getInfoLogger())
+                ->setErrorLogger($this->getErrorLogger())
+                ->handle(
+                    new RequestData(
+                        $method, 
+                        $uri, 
+                        $pathQuery, 
+                        (array) $body,
+                        (array) $this->queryParams()
+                    )
+                );
 
             if ($response) {
                 $response->response();
@@ -113,15 +107,14 @@ class Bootstrap
             Response::json([
                 'message' => 'Not implemented'
             ], Response::NOT_IMPLEMENTED);
-        } catch (Throwable $th) {
-            if (DotEnv::get('API_LOGS')) {
-                $this->logger->error('Exception in handleStateless', [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
-                ]);
-            }
+        }
+        catch (Throwable $th) {
+            $this->writeErrorLog([
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
 
             Response::json([
                 'message' => $th->getMessage(),
@@ -162,7 +155,37 @@ class Bootstrap
         return $queryParams;
     }
 
-    public function isEventLoop(): bool {
+    private function writeErrorLog(array $data)
+    {
+        try {
+            $this->getErrorLogger()->write('Error', $data);
+        }
+        catch (Throwable $e) {
+            Response::json([
+                'message' => "Error writing error log: {$e->getMessage()}"
+            ], Response::INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function setErrorLogger(ErrorLogHandler $logger) {
+        $this->errorLogHander = $logger;
+
+        return $this;
+    }
+    public function getErrorLogger(): ErrorLogHandler {
+        return $this->errorLogHander;
+    }
+
+    public function setInfoLogger(InfoLogHandler $logger) {
+        $this->infoLogHandler = $logger;
+
+        return $this;
+    }
+    public function getInfoLogger(): InfoLogHandler {
+        return $this->infoLogHandler;
+    }
+
+    public function isRunningCli(): bool {
         return (php_sapi_name() === 'cli');
     }
 }
