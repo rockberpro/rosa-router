@@ -4,6 +4,7 @@ namespace Rockberpro\RestRouter;
 
 use Error;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Response;
@@ -17,7 +18,8 @@ use Throwable;
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ErrorLogHandler $error_logger;
+    private ErrorLogHandler $errorLogHander;
+    private InfoLogHandler $infoLogHandler;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -103,14 +105,14 @@ class Bootstrap
                 'message' => 'Not implemented'
             ], Response::NOT_IMPLEMENTED);
         } catch (Throwable $th) {
-            if (DotEnv::get('API_LOGS')) {
-                $this->logger->error('Exception in handleStateless', [
+            $this->getErrorLogger()->write(
+                'Error', [
                     'message' => $th->getMessage(),
                     'file' => $th->getFile(),
                     'line' => $th->getLine(),
                     'trace' => $th->getTraceAsString(),
-                ]);
-            }
+                ]
+            );
 
             Response::json([
                 'message' => $th->getMessage(),
@@ -152,12 +154,21 @@ class Bootstrap
     }
 
     public function setErrorLogger(ErrorLogHandler $logger) {
-        $this->error_logger = $logger;
+        $this->errorLogHander = $logger;
 
         return $this;
     }
     public function getErrorLogger(): ErrorLogHandler {
-        return $this->error_logger;
+        return $this->errorLogHander;
+    }
+
+    public function setInfoLogger(InfoLogHandler $logger) {
+        $this->infoLogHandler = $logger;
+
+        return $this;
+    }
+    public function getInfoLogger(): InfoLogHandler {
+        return $this->infoLogHandler;
     }
 
     public function isRunningCli(): bool {
