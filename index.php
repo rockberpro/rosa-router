@@ -1,10 +1,10 @@
 <?php
 
 use Rockberpro\RestRouter\Bootstrap;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 
 require_once "vendor/autoload.php";
 
