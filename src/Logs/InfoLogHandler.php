@@ -17,7 +17,7 @@ class InfoLogHandler
     {
         $this->logger = new Logger('api_log');
         $log_file = $file_path ?? Server::getRootDir()."/logs/api_access.log";
-        $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
+        $this->logger->pushHandler(new StreamHandler($log_file, Logger::INFO));
         if (DotEnv::get('API_LOGS_DB')) {
             $this->logger->pushHandler(new PDOLogHandler(
                 (new PDOConnection())->getPDO(),
