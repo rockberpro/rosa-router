@@ -18,7 +18,7 @@ class Server implements ServerInterface
 
     public static function isRouteApi(): bool
     {
-        return strpos(self::uri(), '/api/') === 0;
+        return strpos(self::uri(), '/api/') !== false;
     }
 
     public static function query(): string
