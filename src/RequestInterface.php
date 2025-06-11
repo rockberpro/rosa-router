@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Helpers\RequestAction;
+use Rockberpro\RestRouter\Core\RequestAction;
 
 /**
  * @author Samuel Oberger Rockenbach

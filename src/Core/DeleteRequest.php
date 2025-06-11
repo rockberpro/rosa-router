@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers;
+namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
@@ -8,7 +8,7 @@ use Rockberpro\RestRouter\RequestData;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers
+ * @package Rockberpro\RestRouter\Core
  */
 class DeleteRequest extends AbstractRequest 
 {

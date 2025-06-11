@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers;
+namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Request;
 use Rockberpro\RestRouter\RequestData;
@@ -8,12 +8,12 @@ use Rockberpro\RestRouter\RequestData;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers
+ * @package Rockberpro\RestRouter\Core
  */
-class GetRequest extends AbstractRequest 
+class PutRequest extends AbstractRequest 
 {
     /**
-     * Build the request for Get method
+     * Build the request for Put method
      * 
      * @method buildRequest
      * @param array $routes
@@ -22,6 +22,6 @@ class GetRequest extends AbstractRequest
      */
     public function buildRequest($routes, RequestData $requestData): Request
     {
-        return parent::buildUriRequest($routes, $requestData);
+        return parent::buildBodyRequest($routes, $requestData);
     }
 }

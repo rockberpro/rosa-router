@@ -1,8 +1,9 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Helpers\AbstractRequestInterface;
+use Rockberpro\RestRouter\Core\AbstractRequestInterface;
+use Rockberpro\RestRouter\Helpers\RouteHelper;
 use Rockberpro\RestRouter\RequestData;
 use Rockberpro\RestRouter\Request;
 use Closure;
@@ -11,7 +12,7 @@ use Exception;
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers
+ * @package Rockberpro\RestRouter\Core
  */
 abstract class AbstractRequest implements AbstractRequestInterface
 {
