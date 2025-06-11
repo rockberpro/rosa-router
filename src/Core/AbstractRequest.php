@@ -1,17 +1,18 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Helpers\AbstractRequestInterface;
-use Rockberpro\RestRouter\RequestData;
-use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\Core\AbstractRequestInterface;
+use Rockberpro\RestRouter\Helpers\RouteHelper;
+use Rockberpro\RestRouter\Core\RequestData;
+use Rockberpro\RestRouter\Core\Request;
 use Closure;
 use Exception;
 
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers
+ * @package Rockberpro\RestRouter\Core
  */
 abstract class AbstractRequest implements AbstractRequestInterface
 {
@@ -96,11 +97,9 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
     /**
      * Handle the path params
-     * 
+     *
      * @method pathParams
      * @param Request $request
-     * @param array $route_parts
-     * @param array $uri_parts
      * @return Request
      */
     private function pathParams(Request &$request): Request
@@ -108,27 +107,27 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $parts = $this->getRouteParts($request);
         [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
 
-        foreach ($route_parts as $key => $value) {
-            $attribute = substr($value, 1, -1);
+        if (sizeof($route_parts) !== sizeof($uri_parts)) {
+            throw new Exception('Route does not match: different number of segments');
+        }
 
-            if (!isset($uri_parts[$key])) {
-                throw new Exception('Route does not match');
-            }
+        foreach ($route_parts as $key => $route_part) {
+            $uri_part = $uri_parts[$key] ?? null;
 
-            if ($value === $uri_parts[$key]) {
-                continue;
-            }
-
-            if (stripos($value, '{') === false || stripos($value, '}') === false) {
-                if ($value !== $uri_parts[$key]) {
-                    throw new Exception('Route does not match');
+            $matches = [];
+            /* Check if it's a parameter (e.g., {id}) */
+            if (preg_match('/^{(\w+)}$/', $route_part, $matches)) {
+                $attribute = $matches[1];
+                if (!isset($uri_part) || !RouteHelper::isAlphaNumeric($uri_part)) {
+                    throw new Exception("Invalid or missing value for route parameter: {$attribute}");
                 }
+                $request->$attribute = $uri_part;
             }
             else {
-                if (!RouteHelper::isAlphaNumeric($uri_parts[$key])) {
-                    throw new Exception('Route contains invalid characters');
+                /* Static segment must match exactly */
+                if ($route_part !== $uri_part) {
+                    throw new Exception("Route segment mismatch: expected '{$route_part}', got '{$uri_part}'");
                 }
-                $request->$attribute = $uri_parts[$key];
             }
         }
 
@@ -196,30 +195,41 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $action->setUri($uri);
         $action->setRoute($match);
 
-        if (array_key_exists(array_key_first($action->getRoute()), $routes[$method])) {
-            $call = $routes[$method][array_key_first($action->getRoute())];
+        $routeKeys = array_keys($action->getRoute());
+        if (empty($routeKeys)) {
+            throw new Exception('No route found for the given method.');
+        }
 
-            if ($call['target'] instanceof Closure) {
-                $action->setClosure($call['target']);
+        $routeKey = $routeKeys[0];
+
+        if (!isset($routes[$method][$routeKey])) {
+            throw new Exception('No route defined for the given method and key.');
+        }
+
+        $call = $routes[$method][$routeKey];
+
+        if (!isset($call['target'])) {
+            throw new Exception('Target not defined for the route.');
+        }
+
+        $target = $call['target'];
+
+        if ($target instanceof Closure) {
+            $action->setClosure($target);
+        }
+        elseif (is_array($target) && sizeof($target) === 2) {
+            [$class, $methodName] = $target;
+            if (!class_exists($class)) {
+                throw new Exception("Class not found: {$class}");
             }
-            else if (gettype($call['target']) === 'array') {
-                $class = $call['target'][0];
-                $method = $call['target'][1];
-                if (!class_exists($class)) {
-                    throw new Exception("Class not found: {$class}");
-                }
-                if (!method_exists($class, $method)) {
-                    throw new Exception("Method not found: {$method}");
-                }
-                $action->setClass($class);
-                $action->setMethod($method);
+            if (!method_exists($class, $methodName)) {
+                throw new Exception("Method not found: {$methodName} in {$class}");
             }
-            else {
-                throw new Exception('Invalid route target');
-            }
+            $action->setClass($class);
+            $action->setMethod($methodName);
         }
         else {
-            throw new Exception('No method defined for the route');
+            throw new Exception('Invalid route target.');
         }
 
         return $action;
@@ -256,27 +266,29 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     public function map($routes, $method, $uri): array
     {
-        if (!isset($routes[$method]))
+        if (!isset($routes[$method])) {
             throw new Exception("No routes for method {$method}");
+        }
 
-        $filter = array_filter(
+        $filtered_routes = array_filter(
             $routes[$method],
-            function($route) use (&$uri) {
-                $parts = explode($route['prefix'], $uri);
-                if ($parts[0] === '') {
-                    return $route['route'];
+            function ($route) use ($uri) {
+                if (!isset($route['prefix']) || !isset($route['route'])) {
+                    return false;
                 }
+                /* Map to return only the route value */
+                return strpos($uri, $route['prefix']) === 0;
             }
         );
 
-        $map = array_map(
-            function($route) {
+        $mapped_routes = array_map(
+            function ($route) {
                 return $route['route'];
             },
-            $filter
+            $filtered_routes
         );
-   
-        return $map;
+
+        return $mapped_routes;
     }
 
     /**

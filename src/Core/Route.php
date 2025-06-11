@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\RouteInterface;
+use Rockberpro\RestRouter\Core\RouteInterface;
 use Closure;
 use Exception;
 
@@ -86,25 +86,37 @@ class Route implements RouteInterface
     /**
      * Build the route
      * 
-     * @param mixed $method
-     * @param mixed $route
-     * @param mixed $target
+     * @param string $method
+     * @param string $route
+     * @param string|array|Closure $target
      * @return void
      */
     private static function buildRoute($method, $route, $target): void
     {
-        $_route = self::route($route);
+        if (!is_string($method) || empty($method)) {
+            throw new Exception('HTTP invalid method.');
+        }
+        if (!is_string($route) || empty($route)) {
+            throw new Exception('Route invalid.');
+        }
+        if (empty($target)) {
+            throw new Exception('Target route cannot be empty.');
+        }
+
+        $full_route = self::route($route);
+        $prefix = rtrim(explode('{', $full_route)[0], '/');
+        $routePath = rtrim($full_route, '/');
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
-        $_prefix = explode('{', $_route)[0];        
-        self::$instance->prefix = rtrim($_prefix, '/');
-        self::$instance->route = rtrim($_route, '/');
-        self::$instance->method = $method;
-        self::$instance->target = self::$instance->buildTarget($target);
+        $instance = self::$instance;
+        $instance->prefix = $prefix;
+        $instance->route = $routePath;
+        $instance->method = strtoupper($method);
+        $instance->target = $instance->buildTarget($target);
 
-        self::$instance->build();
+        $instance->build();
     }
 
     /**
@@ -190,14 +202,18 @@ class Route implements RouteInterface
             self::$groupPrefix[] = null;
         }
 
+        /* stack route context */
         self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
 
+        /* clear static properties to avoid context leakage */
         self::clear();
 
+        /* execute route group context */
         $closure();
 
+        /* unstack route context */
         array_pop(self::$groupPrefix);
         array_pop(self::$groupNamespace);
         array_pop(self::$groupController);
@@ -208,44 +224,42 @@ class Route implements RouteInterface
      * Build the target for the route
      * 
      * @method buildTarget
-     * @param string|array $target
+     * @param string|array|Closure $target
      * @return array|Closure|string
      */
     private function buildTarget($target)
     {
+        /* if target is a Closure, return it directly */
         if ($target instanceof Closure) {
             return $target;
         }
-        else if (gettype($target) === 'array') {
+
+        /* if target is an array, return it directly */
+        if (is_array($target)) {
             return $target;
         }
-        else if (gettype($target) === 'string' && stripos($target, '@') === false) {
-            if (!isset(self::$controller))
-            {
-                $_controller = end(self::$groupController);
-            }
-            else {
-                $_controller = self::$controller;
-            }
 
-            $controller = $_controller;
+        /* if target is a string without '@', assume it's a method of the current controller */
+        if (is_string($target) && strpos($target, '@') === false) {
+            $controller = self::$controller ?? end(self::$groupController);
+            if (!$controller) {
+                throw new Exception('Controller not defined for the route.');
+            }
             $method = $target;
+            return [$controller, $method];
         }
-        else if (stripos($target, '@') !== false) {
-            $_namespace = self::$namespace ?? end(self::$groupNamespace);
-            if (isset($_namespace)) {
-                $namespace = $_namespace;
-                $parts = explode('@', $target);
 
-                $controller = $namespace.'\\'.$parts[0];
-                $method = $parts[1];
+        /* if target is a string with '@', assume format Controller@method */
+        if (is_string($target) && strpos($target, '@') !== false) {
+            list($controller, $method) = explode('@', $target, 2);
+            $namespace = self::$namespace ?? end(self::$groupNamespace);
+            if ($namespace) {
+                $controller = $namespace . '\\' . $controller;
             }
-        }
-        else {
-            throw new Exception('Error trying to determine the route target');
+            return [$controller, $method];
         }
 
-        return [$controller, $method];
+        throw new Exception('Invalid or unsupported route target.');
     }
 
     /**
@@ -256,36 +270,32 @@ class Route implements RouteInterface
      */
     private function build(): void
     {
-        $route = [
-            'prefix' => self::$instance->prefix,
-            'route' => self::$instance->route,
-            'target' => self::$instance->target
-        ];
-
-        if (!isset(self::$namespace))
-        {
-            $namespace = end(self::$groupNamespace);
-            if ($namespace) {
-                $route['namespace'] = $namespace;
-            }
-        }
-        else {
-            $route['namespace'] = self::$namespace;
-        }
-
-        if (!isset(self::$middleware))
-        {
-            $middleware = end(self::$groupMiddleware);
-            if ($middleware) {
-                $route['middleware'] = $middleware;
-            }
-        }
-        else {
-            $route['middleware'] = self::$middleware;
-        }
-
         global $routes;
+        if (!isset($routes) || !is_array($routes)) {
+            $routes = [];
+        }
+
+        /* determine namespace and middleware for current context */
+        $namespace = self::$namespace ?? end(self::$groupNamespace) ?: null;
+        $middleware = self::$middleware ?? end(self::$groupMiddleware) ?: null;
+
+        $route = [
+            'method'     => self::$instance->method,
+            'prefix'     => self::$instance->prefix,
+            'route'      => self::$instance->route,
+            'target'     => self::$instance->target,
+        ];
+        if ($namespace) {
+            $route['namespace'] = $namespace;
+        }
+        if ($middleware) {
+            $route['middleware'] = $middleware;
+        }
+
         $routes[self::$instance->method][] = $route;
+
+        /* clear static properties to avoid context leakage */
+        self::clear();
     }
 
     /**

@@ -1,19 +1,19 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Request;
-use Rockberpro\RestRouter\RequestData;
+use Rockberpro\RestRouter\Core\Request;
+use Rockberpro\RestRouter\Core\RequestData;
 
 /**
  * @author Samuel Oberger Rockenbach
  * 
- * @package Rockberpro\RestRouter\Helpers
+ * @package Rockberpro\RestRouter\Core
  */
-class PatchRequest extends AbstractRequest 
+class PutRequest extends AbstractRequest 
 {
     /**
-     * Build the request for Patch method
+     * Build the request for Put method
      * 
      * @method buildRequest
      * @param array $routes
