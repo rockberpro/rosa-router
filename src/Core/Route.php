@@ -220,44 +220,42 @@ class Route implements RouteInterface
      * Build the target for the route
      * 
      * @method buildTarget
-     * @param string|array $target
+     * @param string|array|Closure $target
      * @return array|Closure|string
      */
     private function buildTarget($target)
     {
+        /* if target is a Closure, return it directly */
         if ($target instanceof Closure) {
             return $target;
         }
-        else if (gettype($target) === 'array') {
+
+        /* if target is an array, return it directly */
+        if (is_array($target)) {
             return $target;
         }
-        else if (gettype($target) === 'string' && stripos($target, '@') === false) {
-            if (!isset(self::$controller))
-            {
-                $_controller = end(self::$groupController);
-            }
-            else {
-                $_controller = self::$controller;
-            }
 
-            $controller = $_controller;
+        /* if target is a string without '@', assume it's a method of the current controller */
+        if (is_string($target) && strpos($target, '@') === false) {
+            $controller = self::$controller ?? end(self::$groupController);
+            if (!$controller) {
+                throw new Exception('Controller not defined for the route.');
+            }
             $method = $target;
+            return [$controller, $method];
         }
-        else if (stripos($target, '@') !== false) {
-            $_namespace = self::$namespace ?? end(self::$groupNamespace);
-            if (isset($_namespace)) {
-                $namespace = $_namespace;
-                $parts = explode('@', $target);
 
-                $controller = $namespace.'\\'.$parts[0];
-                $method = $parts[1];
+        /* if target is a string with '@', assume format Controller@method */
+        if (is_string($target) && strpos($target, '@') !== false) {
+            list($controller, $method) = explode('@', $target, 2);
+            $namespace = self::$namespace ?? end(self::$groupNamespace);
+            if ($namespace) {
+                $controller = $namespace . '\\' . $controller;
             }
-        }
-        else {
-            throw new Exception('Error trying to determine the route target');
+            return [$controller, $method];
         }
 
-        return [$controller, $method];
+        throw new Exception('Invalid or unsupported route target.');
     }
 
     /**
