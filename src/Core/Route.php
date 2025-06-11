@@ -291,10 +291,7 @@ class Route implements RouteInterface
         $routes[self::$instance->method][] = $route;
 
         /* clear static properties to avoid context leakage */
-        self::$namespace = null;
-        self::$controller = null;
-        self::$middleware = null;
-        self::$prefixHandler = null;
+        self::clear();
     }
 
     /**
