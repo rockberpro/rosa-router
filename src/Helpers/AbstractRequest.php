@@ -96,11 +96,9 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
     /**
      * Handle the path params
-     * 
+     *
      * @method pathParams
      * @param Request $request
-     * @param array $route_parts
-     * @param array $uri_parts
      * @return Request
      */
     private function pathParams(Request &$request): Request
@@ -108,27 +106,27 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $parts = $this->getRouteParts($request);
         [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
 
-        foreach ($route_parts as $key => $value) {
-            $attribute = substr($value, 1, -1);
+        if (sizeof($route_parts) !== sizeof($uri_parts)) {
+            throw new Exception('Route does not match: different number of segments');
+        }
 
-            if (!isset($uri_parts[$key])) {
-                throw new Exception('Route does not match');
-            }
+        foreach ($route_parts as $key => $route_part) {
+            $uri_part = $uri_parts[$key] ?? null;
 
-            if ($value === $uri_parts[$key]) {
-                continue;
-            }
-
-            if (stripos($value, '{') === false || stripos($value, '}') === false) {
-                if ($value !== $uri_parts[$key]) {
-                    throw new Exception('Route does not match');
+            $matches = [];
+            /* Check if it's a parameter (e.g., {id}) */
+            if (preg_match('/^{(\w+)}$/', $route_part, $matches)) {
+                $attribute = $matches[1];
+                if (!isset($uri_part) || !RouteHelper::isAlphaNumeric($uri_part)) {
+                    throw new Exception("Invalid or missing value for route parameter: {$attribute}");
                 }
+                $request->$attribute = $uri_part;
             }
             else {
-                if (!RouteHelper::isAlphaNumeric($uri_parts[$key])) {
-                    throw new Exception('Route contains invalid characters');
+                /* Static segment must match exactly */
+                if ($route_part !== $uri_part) {
+                    throw new Exception("Route segment mismatch: expected '{$route_part}', got '{$uri_part}'");
                 }
-                $request->$attribute = $uri_parts[$key];
             }
         }
 
