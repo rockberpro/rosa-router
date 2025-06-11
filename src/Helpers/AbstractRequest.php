@@ -217,7 +217,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
         if ($target instanceof Closure) {
             $action->setClosure($target);
-        } elseif (is_array($target) && count($target) === 2) {
+        }
+        elseif (is_array($target) && sizeof($target) === 2) {
             [$class, $methodName] = $target;
             if (!class_exists($class)) {
                 throw new Exception("Class not found: {$class}");
@@ -227,7 +228,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
             }
             $action->setClass($class);
             $action->setMethod($methodName);
-        } else {
+        }
+        else {
             throw new Exception('Invalid route target.');
         }
 
