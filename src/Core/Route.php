@@ -266,36 +266,35 @@ class Route implements RouteInterface
      */
     private function build(): void
     {
-        $route = [
-            'prefix' => self::$instance->prefix,
-            'route' => self::$instance->route,
-            'target' => self::$instance->target
-        ];
-
-        if (!isset(self::$namespace))
-        {
-            $namespace = end(self::$groupNamespace);
-            if ($namespace) {
-                $route['namespace'] = $namespace;
-            }
-        }
-        else {
-            $route['namespace'] = self::$namespace;
-        }
-
-        if (!isset(self::$middleware))
-        {
-            $middleware = end(self::$groupMiddleware);
-            if ($middleware) {
-                $route['middleware'] = $middleware;
-            }
-        }
-        else {
-            $route['middleware'] = self::$middleware;
-        }
-
         global $routes;
+        if (!isset($routes) || !is_array($routes)) {
+            $routes = [];
+        }
+
+        /* determine namespace and middleware for current context */
+        $namespace = self::$namespace ?? end(self::$groupNamespace) ?: null;
+        $middleware = self::$middleware ?? end(self::$groupMiddleware) ?: null;
+
+        $route = [
+            'method'     => self::$instance->method,
+            'prefix'     => self::$instance->prefix,
+            'route'      => self::$instance->route,
+            'target'     => self::$instance->target,
+        ];
+        if ($namespace) {
+            $route['namespace'] = $namespace;
+        }
+        if ($middleware) {
+            $route['middleware'] = $middleware;
+        }
+
         $routes[self::$instance->method][] = $route;
+
+        /* clear static properties to avoid context leakage */
+        self::$namespace = null;
+        self::$controller = null;
+        self::$middleware = null;
+        self::$prefixHandler = null;
     }
 
     /**
