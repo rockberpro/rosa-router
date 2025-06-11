@@ -86,25 +86,37 @@ class Route implements RouteInterface
     /**
      * Build the route
      * 
-     * @param mixed $method
-     * @param mixed $route
-     * @param mixed $target
+     * @param string $method
+     * @param string $route
+     * @param string|array|Closure $target
      * @return void
      */
     private static function buildRoute($method, $route, $target): void
     {
-        $_route = self::route($route);
+        if (!is_string($method) || empty($method)) {
+            throw new Exception('HTTP invalid method.');
+        }
+        if (!is_string($route) || empty($route)) {
+            throw new Exception('Route invalid.');
+        }
+        if (empty($target)) {
+            throw new Exception('Target route cannot be empty.');
+        }
+
+        $full_route = self::route($route);
+        $prefix = rtrim(explode('{', $full_route)[0], '/');
+        $routePath = rtrim($full_route, '/');
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
-        $_prefix = explode('{', $_route)[0];        
-        self::$instance->prefix = rtrim($_prefix, '/');
-        self::$instance->route = rtrim($_route, '/');
-        self::$instance->method = $method;
-        self::$instance->target = self::$instance->buildTarget($target);
+        $instance = self::$instance;
+        $instance->prefix = $prefix;
+        $instance->route = $routePath;
+        $instance->method = strtoupper($method);
+        $instance->target = $instance->buildTarget($target);
 
-        self::$instance->build();
+        $instance->build();
     }
 
     /**
