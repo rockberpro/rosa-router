@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\ServerInterface;
+use Rockberpro\RestRouter\Core\ServerInterface;
 
 /**
  * @author Samuel Oberger Rockenbach

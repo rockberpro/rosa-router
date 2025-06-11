@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\RouteInterface;
+use Rockberpro\RestRouter\Core\RouteInterface;
 use Closure;
 use Exception;
 

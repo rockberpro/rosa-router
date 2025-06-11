@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Core\RequestAction;
 

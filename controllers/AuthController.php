@@ -10,7 +10,7 @@ use Rockberpro\RestRouter\JwtException;
 use Rockberpro\RestRouter\Response;
 use Rockberpro\RestRouter\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Request;
+use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Controllers\Controller;
 use Exception;
 

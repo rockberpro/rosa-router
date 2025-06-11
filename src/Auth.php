@@ -2,6 +2,8 @@
 
 namespace Rockberpro\RestRouter;
 
+use Rockberpro\RestRouter\Core\Response;
+
 /**
  * @author Samuel Oberger Rockenbach
  * 
