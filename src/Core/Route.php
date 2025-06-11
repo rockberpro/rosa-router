@@ -202,14 +202,18 @@ class Route implements RouteInterface
             self::$groupPrefix[] = null;
         }
 
+        /* stack route context */
         self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
         self::$groupController[] = self::$controller ?? end(self::$groupController);
         self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
 
+        /* clear static properties to avoid context leakage */
         self::clear();
 
+        /* execute route group context */
         $closure();
 
+        /* unstack route context */
         array_pop(self::$groupPrefix);
         array_pop(self::$groupNamespace);
         array_pop(self::$groupController);
