@@ -105,14 +105,14 @@ class Route implements RouteInterface
 
         $full_route = self::route($route);
         $prefix = rtrim(explode('{', $full_route)[0], '/');
-        $routePath = rtrim($full_route, '/');
+        $route_path = rtrim($full_route, '/');
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
         $instance = self::$instance;
         $instance->prefix = $prefix;
-        $instance->route = $routePath;
+        $instance->route = $route_path;
         $instance->method = strtoupper($method);
         $instance->target = $instance->buildTarget($target);
 
