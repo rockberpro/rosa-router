@@ -265,27 +265,29 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     public function map($routes, $method, $uri): array
     {
-        if (!isset($routes[$method]))
+        if (!isset($routes[$method])) {
             throw new Exception("No routes for method {$method}");
+        }
 
-        $filter = array_filter(
+        $filtered_routes = array_filter(
             $routes[$method],
-            function($route) use (&$uri) {
-                $parts = explode($route['prefix'], $uri);
-                if ($parts[0] === '') {
-                    return $route['route'];
+            function ($route) use ($uri) {
+                if (!isset($route['prefix']) || !isset($route['route'])) {
+                    return false;
                 }
+                /* Map to return only the route value */
+                return strpos($uri, $route['prefix']) === 0;
             }
         );
 
-        $map = array_map(
-            function($route) {
+        $mapped_routes = array_map(
+            function ($route) {
                 return $route['route'];
             },
-            $filter
+            $filtered_routes
         );
-   
-        return $map;
+
+        return $mapped_routes;
     }
 
     /**
