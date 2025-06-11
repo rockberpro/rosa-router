@@ -2,16 +2,16 @@
 
 namespace Rockberpro\RestRouter\Controllers;
 
+use Rockberpro\RestRouter\Jwt;
+use Rockberpro\RestRouter\JwtException;
+use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Core\Request;
+use Rockberpro\RestRouter\Core\Response;
+use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Controllers\Controller;
 use Rockberpro\RestRouter\Database\PDOConnection;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
-use Rockberpro\RestRouter\Jwt;
-use Rockberpro\RestRouter\JwtException;
-use Rockberpro\RestRouter\Response;
-use Rockberpro\RestRouter\Server;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Controllers\Controller;
 use Exception;
 
 /**
