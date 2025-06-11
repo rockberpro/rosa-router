@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter\Utils;
 
-use Rockberpro\RestRouter\Server;
+use Rockberpro\RestRouter\Core\Server;
 
 /**
  * Cross-origin Resource Sharing

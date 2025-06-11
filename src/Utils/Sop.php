@@ -3,7 +3,7 @@
 namespace Rockberpro\RestRouter\Utils;
 
 use Rockberpro\RestRouter\Response;
-use Rockberpro\RestRouter\Server;
+use Rockberpro\RestRouter\Core\Server;
 
 /**
  * Same Origin Policy

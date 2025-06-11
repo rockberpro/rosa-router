@@ -4,7 +4,7 @@ namespace Rockberpro\RestRouter\Middleware;
 
 use Rockberpro\RestRouter\Database\PDOConnection;
 use Rockberpro\RestRouter\Response;
-use Rockberpro\RestRouter\Server;
+use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\Cors;
 use Rockberpro\RestRouter\Utils\Sop;
 use Rockberpro\RestRouter\Utils\DotEnv;

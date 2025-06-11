@@ -4,7 +4,7 @@ namespace Rockberpro\RestRouter\Logs;
 
 use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Server;
+use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;

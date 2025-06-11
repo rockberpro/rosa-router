@@ -1,6 +1,6 @@
 <?php
 
-use Rockberpro\RestRouter\Route;
+use Rockberpro\RestRouter\Core\Route;
 use Rockberpro\RestRouter\Controllers\AuthController;
 
 Route::prefix('auth')->group(function() {
