@@ -196,30 +196,39 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $action->setUri($uri);
         $action->setRoute($match);
 
-        if (array_key_exists(array_key_first($action->getRoute()), $routes[$method])) {
-            $call = $routes[$method][array_key_first($action->getRoute())];
+        $route_keys = array_keys($action->getRoute());
+        if (empty($route_keys)) {
+            throw new Exception('Nenhuma rota encontrada para o método informado.');
+        }
 
-            if ($call['target'] instanceof Closure) {
-                $action->setClosure($call['target']);
+        $route_key = $route_keys[0];
+
+        if (!isset($routes[$method][$route_key])) {
+            throw new Exception('Nenhuma rota definida para o método e chave informados.');
+        }
+
+        $call = $routes[$method][$route_key];
+
+        if (!isset($call['target'])) {
+            throw new Exception('Target não definido para a rota.');
+        }
+
+        if ($call['target'] instanceof Closure) {
+            $action->setClosure($call['target']);
+        }
+        elseif (is_array($call['target']) && count($call['target']) === 2) {
+            [$class, $methodName] = $call['target'];
+            if (!class_exists($class)) {
+                throw new Exception("Classe não encontrada: {$class}");
             }
-            else if (gettype($call['target']) === 'array') {
-                $class = $call['target'][0];
-                $method = $call['target'][1];
-                if (!class_exists($class)) {
-                    throw new Exception("Class not found: {$class}");
-                }
-                if (!method_exists($class, $method)) {
-                    throw new Exception("Method not found: {$method}");
-                }
-                $action->setClass($class);
-                $action->setMethod($method);
+            if (!method_exists($class, $methodName)) {
+                throw new Exception("Método não encontrado: {$methodName} em {$class}");
             }
-            else {
-                throw new Exception('Invalid route target');
-            }
+            $action->setClass($class);
+            $action->setMethod($methodName);
         }
         else {
-            throw new Exception('No method defined for the route');
+            throw new Exception('Target da rota inválido.');
         }
 
         return $action;
