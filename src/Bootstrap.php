@@ -34,6 +34,49 @@ class Bootstrap
         return $this->handleStateful($this->request);
     }
 
+    public function handleStateless()
+    {
+        $uri = Server::uri();
+        $body = Request::body();
+        $method = Server::method();
+        $pathQuery = UrlParser::pathQuery(Server::query());
+
+        try {
+            $response = (new Request())
+                ->setInfoLogger($this->getInfoLogger())
+                ->setErrorLogger($this->getErrorLogger())
+                ->handle(
+                    new RequestData(
+                        $method, 
+                        $uri, 
+                        $pathQuery, 
+                        (array) $body,
+                        (array) $this->queryParams()
+                    )
+                );
+
+            if ($response) {
+                $response->response();
+            }
+
+            Response::json([
+                'message' => 'Not implemented'
+            ], Response::NOT_IMPLEMENTED);
+        }
+        catch (Throwable $th) {
+            $this->writeErrorLog([
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+
+            Response::json([
+                'message' => $th->getMessage(),
+            ], Response::INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function handleStateful(ServerRequest $request)
     {
         try {
@@ -78,49 +121,6 @@ class Bootstrap
             ['Content-Type' => 'application/json'],
             json_encode(['message' => $th->getMessage()])
         );
-    }
-
-    public function handleStateless()
-    {
-        $uri = Server::uri();
-        $body = Request::body();
-        $method = Server::method();
-        $pathQuery = UrlParser::pathQuery(Server::query());
-
-        try {
-            $response = (new Request())
-                ->setInfoLogger($this->getInfoLogger())
-                ->setErrorLogger($this->getErrorLogger())
-                ->handle(
-                    new RequestData(
-                        $method, 
-                        $uri, 
-                        $pathQuery, 
-                        (array) $body,
-                        (array) $this->queryParams()
-                    )
-                );
-
-            if ($response) {
-                $response->response();
-            }
-
-            Response::json([
-                'message' => 'Not implemented'
-            ], Response::NOT_IMPLEMENTED);
-        }
-        catch (Throwable $th) {
-            $this->writeErrorLog([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
-
-            Response::json([
-                'message' => $th->getMessage(),
-            ], Response::INTERNAL_SERVER_ERROR);
-        }
     }
 
     public function queryParams()
