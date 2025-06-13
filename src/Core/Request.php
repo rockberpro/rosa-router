@@ -167,12 +167,7 @@ class Request implements RequestInterface
                 $log_data['method'] = $request->getAction()->getMethod();
             }
 
-            if (!$this->getInfoLogger() && DotEnv::get('API_LOGS')) {
-                throw new Exception('Info logger is not set');
-            }
-            if (DotEnv::get('API_LOGS')) {
-                $this->getInfoLogger()->write('Request', $log_data);
-            }
+            $this->getInfoLogger()->write('Request', $log_data);
         }
         catch (Exception $e) {
             Response::json([

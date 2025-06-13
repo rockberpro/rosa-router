@@ -159,12 +159,7 @@ class Bootstrap
     private function writeErrorLog(array $data)
     {
         try {
-            if (!$this->getErrorLogger() && DotEnv::get('API_LOGS')) {
-                throw new Exception('Error logger is not set');
-            }
-            if (DotEnv::get('API_LOGS')) {
-                $this->getErrorLogger()->write('Error', $data);
-            }
+            $this->getErrorLogger()->write('Error', $data);
         }
         catch (Throwable $e) {
             Response::json([

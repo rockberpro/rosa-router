@@ -17,7 +17,9 @@ class ErrorLogHandler
     {
         $this->logger = new Logger('api_log');
         $log_file = $file_path ?? Server::getRootDir()."/logs/api_error.log";
-        $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
+        if (DotEnv::get('API_LOGS')) {
+            $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
+        }
         if (DotEnv::get('API_LOGS_DB')) {
             $this->logger->pushHandler(new PDOLogHandler(
                 (new PDOConnection())->getPDO(),
@@ -29,9 +31,7 @@ class ErrorLogHandler
 
     public function write($message, $data)
     {
-        if (DotEnv::get('API_LOGS')) {
-            $this->logger->error($message, $data);
-        }
+        $this->logger->error($message, $data);
     }
 
     public function getLooger(): Logger
