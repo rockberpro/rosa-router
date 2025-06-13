@@ -39,7 +39,6 @@ class Bootstrap
         $pathQuery = UrlParser::pathQuery(Server::query());
 
         try {
-            throw new \Exception('Test');
             $response = (new Request())
                 ->setInfoLogger($this->getInfoLogger())
                 ->setErrorLogger($this->getErrorLogger())
