@@ -6,14 +6,11 @@ use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
-use Rockberpro\RestRouter\Core\Response;
 use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
 use stdClass;
 use Throwable;
-use Exception;
 
 class Bootstrap
 {
@@ -42,6 +39,7 @@ class Bootstrap
         $pathQuery = UrlParser::pathQuery(Server::query());
 
         try {
+            throw new \Exception('Test');
             $response = (new Request())
                 ->setInfoLogger($this->getInfoLogger())
                 ->setErrorLogger($this->getErrorLogger())
@@ -59,9 +57,9 @@ class Bootstrap
                 $response->response();
             }
 
-            Response::json([
+            \Rockberpro\RestRouter\Core\Response::json([
                 'message' => 'Not implemented'
-            ], Response::NOT_IMPLEMENTED);
+            ], \Rockberpro\RestRouter\Core\Response::NOT_IMPLEMENTED);
         }
         catch (Throwable $th) {
             $this->writeErrorLog([
@@ -71,9 +69,9 @@ class Bootstrap
                 'trace' => $th->getTraceAsString(),
             ]);
 
-            Response::json([
+            \Rockberpro\RestRouter\Core\Response::json([
                 'message' => $th->getMessage(),
-            ], Response::INTERNAL_SERVER_ERROR);
+            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -162,9 +160,9 @@ class Bootstrap
             $this->getErrorLogger()->write('Error', $data);
         }
         catch (Throwable $e) {
-            Response::json([
+            \Rockberpro\RestRouter\Core\Response::json([
                 'message' => "Error writing exception log: {$e->getMessage()}"
-            ], Response::INTERNAL_SERVER_ERROR);
+            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
         }
     }
 
