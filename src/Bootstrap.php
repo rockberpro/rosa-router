@@ -6,7 +6,7 @@ use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\RequestLogger;
-use Rockberpro\RestRouter\Logs\RouterLogger;
+use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
@@ -18,7 +18,7 @@ use Throwable;
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ?RouterLogger $routerLogger = null;
+    private ?ExceptionLogger $exceptionLogger = null;
     private ?RequestLogger $requestLogger = null;
 
     public function __construct(?ServerRequest $request = null)
@@ -63,8 +63,8 @@ class Bootstrap
             ], RouterResponse::NOT_IMPLEMENTED);
         }
         catch (Throwable $t) {
-            if ($this->getRouterLogger()) {
-                $this->getRouterLogger()->writeLog($t);
+            if ($this->getExceptionLogger()) {
+                $this->getExceptionLogger()->writeLog($t);
             }
 
             if (DotEnv::get('API_DEBUG')) {
@@ -112,8 +112,8 @@ class Bootstrap
             );
         }
         catch (Throwable $t) {
-            if ($this->getRouterLogger()) {
-                $this->getRouterLogger()->writeLog($t);
+            if ($this->getExceptionLogger()) {
+                $this->getExceptionLogger()->writeLog($t);
             }
 
             if (DotEnv::get('API_DEBUG')) {
@@ -170,14 +170,14 @@ class Bootstrap
         return $queryParams;
     }
 
-    public function setRouterLogger(?RouterLogger $logger)
+    public function setExceptionLogger(?ExceptionLogger $logger)
     {
-        $this->routerLogger = $logger;
+        $this->exceptionLogger = $logger;
         return $this;
     }
-    public function getRouterLogger(): ?RouterLogger
+    public function getExceptionLogger(): ?ExceptionLogger
     {
-        return $this->routerLogger;
+        return $this->exceptionLogger;
     }
 
     public function setRequestLogger(?RequestLogger $logger)

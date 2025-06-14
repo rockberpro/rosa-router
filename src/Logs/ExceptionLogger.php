@@ -6,7 +6,7 @@ use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use RuntimeException;
 use Throwable;
 
-class RouterLogger
+class ExceptionLogger
 {
     private ?ErrorLogHandler $errorLogHandler = null;
 
