@@ -2,24 +2,32 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Logs\RequestLogger;
+use Rockberpro\RestRouter\Logs\ExceptionLogger;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
+use React\Http\Message\Response as ReactResponse;
+use Rockberpro\RestRouter\Core\Response as RouterResponse;
 use stdClass;
 use Throwable;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ?ErrorLogHandler $errorLogHander = null;
-    private ?InfoLogHandler $infoLogHandler = null;
+    private ?ExceptionLogger $exceptionLogger = null;
+    private ?RequestLogger $requestLogger = null;
 
     public function __construct(?ServerRequest $request = null)
     {
+        if (DotEnv::get('API_DEBUG')) {
+            error_reporting(E_ALL);
+            ini_set('display_errors', '1');
+        }
+
         $this->request = $request;
     }
 
@@ -40,8 +48,7 @@ class Bootstrap
 
         try {
             $response = (new Request())
-                ->setInfoLogger($this->getInfoLogger())
-                ->setErrorLogger($this->getErrorLogger())
+                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     new RequestData(
                         $method, 
@@ -56,21 +63,27 @@ class Bootstrap
                 $response->response();
             }
 
-            \Rockberpro\RestRouter\Core\Response::json([
+            RouterResponse::json([
                 'message' => 'Not implemented'
-            ], \Rockberpro\RestRouter\Core\Response::NOT_IMPLEMENTED);
+            ], RouterResponse::NOT_IMPLEMENTED);
         }
-        catch (Throwable $th) {
-            $this->writeErrorLog([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+        catch (Throwable $t) {
+            if ($this->getExceptionLogger()) {
+                $this->getExceptionLogger()->writeLog($t);
+            }
 
-            \Rockberpro\RestRouter\Core\Response::json([
-                'message' => $th->getMessage(),
-            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
+            if (DotEnv::get('API_DEBUG')) {
+                return RouterResponse::json([
+                    'message' => $t->getMessage(),
+                    'file' => $t->getFile(),
+                    'line' => $t->getLine(),
+                    'trace' => $t->getTraceAsString(),
+                ], RouterResponse::INTERNAL_SERVER_ERROR);
+            }
+
+            RouterResponse::json([
+                'message' => 'Internal server error'
+            ], RouterResponse::INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -78,8 +91,7 @@ class Bootstrap
     {
         try {
             $response = (new Request())
-                ->setInfoLogger($this->getInfoLogger())
-                ->setErrorLogger($this->getErrorLogger())
+                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     new RequestData(
                         $request->getMethod(),
@@ -91,32 +103,42 @@ class Bootstrap
                 );
 
             if ($response) {
-                return new \React\Http\Message\Response(
+                return new ReactResponse(
                     $response->status,
                     ['Content-Type' => 'application/json'],
                     json_encode($response->data)
                 );
             }
 
-            return new \React\Http\Message\Response(
+            return new ReactResponse(
                 501,
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
         }
-        catch (Throwable $th) {
-            $this->writeErrorLog([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+        catch (Throwable $t) {
+            if ($this->getExceptionLogger()) {
+                $this->getExceptionLogger()->writeLog($t);
+            }
+
+            if (DotEnv::get('API_DEBUG')) {
+                return new ReactResponse(
+                    500,
+                    ['Content-Type' => 'application/json'],
+                    json_encode([
+                        'message' => $t->getMessage(),
+                        'file' => $t->getFile(),
+                        'line' => $t->getLine(),
+                        'trace' => $t->getTraceAsString(),
+                    ])
+                );
+            }
         }
 
-        return new \React\Http\Message\Response(
+        return new ReactResponse(
             500,
             ['Content-Type' => 'application/json'],
-            json_encode(['message' => $th->getMessage()])
+            json_encode(['message' => 'Internal server error'])
         );
     }
 
@@ -153,34 +175,24 @@ class Bootstrap
         return $queryParams;
     }
 
-    private function writeErrorLog(array $data)
+    public function setExceptionLogger(?ExceptionLogger $logger)
     {
-        try {
-            $this->getErrorLogger()->write('Error', $data);
-        }
-        catch (Throwable $e) {
-            \Rockberpro\RestRouter\Core\Response::json([
-                'message' => "Error writing exception log: {$e->getMessage()}"
-            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function setErrorLogger(?ErrorLogHandler $logger) {
-        $this->errorLogHander = $logger;
-
+        $this->exceptionLogger = $logger;
         return $this;
     }
-    public function getErrorLogger(): ?ErrorLogHandler {
-        return $this->errorLogHander;
+    public function getExceptionLogger(): ?ExceptionLogger
+    {
+        return $this->exceptionLogger;
     }
 
-    public function setInfoLogger(?InfoLogHandler $logger) {
-        $this->infoLogHandler = $logger;
-
+    public function setRequestLogger(?RequestLogger $logger)
+    {
+        $this->requestLogger = $logger;
         return $this;
     }
-    public function getInfoLogger(): ?InfoLogHandler {
-        return $this->infoLogHandler;
+    public function getRequestLogger(): ?RequestLogger
+    {
+        return $this->requestLogger;
     }
 
     public function isRunningCli(): bool {

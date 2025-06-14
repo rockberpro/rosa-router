@@ -11,10 +11,8 @@ use Rockberpro\RestRouter\Core\PutRequest;
 use Rockberpro\RestRouter\Core\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Exception;
+use Rockberpro\RestRouter\Logs\RequestLogger;
+use RuntimeException;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -25,8 +23,7 @@ class Request implements RequestInterface
 {
     private RequestAction $action;
     private array $parameters = [];
-    private ?ErrorLogHandler $errorLogHander = null;
-    private ?InfoLogHandler $infoLogHandler = null;
+    private ?RequestLogger $requestLogger = null;
 
     /**
      * Get the body data
@@ -97,10 +94,12 @@ class Request implements RequestInterface
         }
 
         if ($request === null) {
-            throw new Exception('It was not possible to match your request');
+            throw new RuntimeException('It was not possible to match your request');
         }
 
-        $this->writeInfoLog($request);
+        if ($this->getRequestLogger()) {
+            $this->getRequestLogger()->writeLog($request);
+        }
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
@@ -141,42 +140,6 @@ class Request implements RequestInterface
     }
 
     /**
-     * Write the request log
-     * 
-     * @method writeLog
-     * @param Request $request
-     * @return void
-     */
-    private function writeInfoLog(Request $request): void
-    {
-        try {
-            $is_closure = $request->getAction()->isClosure();
-            $log_data = [
-                'subject' => DotEnv::get('APP_NAME'),
-                'type' =>  $is_closure ? 'closure' : 'controller',
-                'remote_address' => Server::remoteAddress(),
-                'target_address' => Server::targetAddress(),
-                'user_agent' => Server::userAgent(),
-                'request_method' => Server::requestMethod(),
-                'request_uri' => Server::requestUri(),
-                'request_body' => json_encode($request->getParameters()),
-                'endpoint' => $request->getAction()->getUri() ?? '',
-            ];
-            if (!$is_closure) {
-                $log_data['class'] = $request->getAction()->getClass();
-                $log_data['method'] = $request->getAction()->getMethod();
-            }
-
-            $this->getInfoLogger()->write('Request', $log_data);
-        }
-        catch (Exception $e) {
-            Response::json([
-                'message' => "Error writing request log: {$e->getMessage()}"
-            ], Response::INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
      * Set the route action
      * 
      * @method setAction
@@ -199,22 +162,14 @@ class Request implements RequestInterface
         return $this->action;
     }
 
-    public function setErrorLogger(?ErrorLogHandler $logger) {
-        $this->errorLogHander = $logger;
-
+    public function setRequestLogger(?RequestLogger $logger)
+    {
+        $this->requestLogger = $logger;
         return $this;
     }
-    public function getErrorLogger(): ?ErrorLogHandler {
-        return $this->errorLogHander;
-    }
-
-    public function setInfoLogger(?InfoLogHandler $logger) {
-        $this->infoLogHandler = $logger;
-
-        return $this;
-    }
-    public function getInfoLogger(): ?InfoLogHandler {
-        return $this->infoLogHandler;
+    public function getRequestLogger(): ?RequestLogger
+    {
+        return $this->requestLogger;
     }
 
     /**
