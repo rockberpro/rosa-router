@@ -9,6 +9,7 @@ use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\RouterLogger;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
@@ -25,6 +26,7 @@ class Bootstrap
     private ?ErrorLogHandler $errorLogHander = null;
     private ?InfoLogHandler $infoLogHandler = null;
     private ?RouterLogger $routerLogger = null;
+    private ?RequestLogger $requestLogger = null;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -48,8 +50,7 @@ class Bootstrap
 
         try {
             $response = (new Request())
-                ->setInfoLogger($this->getInfoLogger())
-                ->setErrorLogger($this->getErrorLogger())
+                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     new RequestData(
                         $method, 
@@ -59,7 +60,7 @@ class Bootstrap
                         (array) $this->queryParams()
                     )
                 );
-            throw new Exception('Test');
+
             if ($response) {
                 $response->response();
             }
@@ -206,6 +207,17 @@ class Bootstrap
     {
         return $this->routerLogger;
     }
+
+    public function setRequestLogger(?RequestLogger $logger)
+    {
+        $this->requestLogger = $logger;
+        return $this;
+    }
+    public function getRequestLogger(): ?RequestLogger
+    {
+        return $this->requestLogger;
+    }
+
 
     public function isRunningCli(): bool {
         return (php_sapi_name() === 'cli');

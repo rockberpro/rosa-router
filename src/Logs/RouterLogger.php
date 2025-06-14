@@ -10,9 +10,9 @@ class RouterLogger
 {
     private ?ErrorLogHandler $errorLogHandler = null;
 
-    public function __construct(?ErrorLogHandler $errorLogHandler = null)
+    public function __construct($file_path)
     {
-        $this->errorLogHandler = $errorLogHandler;
+        $this->errorLogHandler = new ErrorLogHandler($file_path);
     }
 
     public function setErrorLogger(?ErrorLogHandler $logger)

@@ -12,9 +12,9 @@ class RequestLogger
 {
     private ?InfoLogHandler $infoLogHandler = null;
 
-    public function __construct(?InfoLogHandler $infoLogHandler = null)
+    public function __construct($file_path)
     {
-        $this->infoLogHandler = $infoLogHandler;
+        $this->infoLogHandler = new InfoLogHandler($file_path);
     }
 
     public function setInfoLogger(?InfoLogHandler $logger)
