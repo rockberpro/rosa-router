@@ -2,10 +2,6 @@
 
 namespace Rockberpro\RestRouter;
 
-use Exception;
-use Rockberpro\RestRouter\Logs\ErrorLogger;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
@@ -16,15 +12,12 @@ use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
 use React\Http\Message\Response as ReactResponse;
 use Rockberpro\RestRouter\Core\Response as RouterResponse;
-use RuntimeException;
 use stdClass;
 use Throwable;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ?ErrorLogHandler $errorLogHander = null;
-    private ?InfoLogHandler $infoLogHandler = null;
     private ?RouterLogger $routerLogger = null;
     private ?RequestLogger $requestLogger = null;
 
@@ -93,8 +86,7 @@ class Bootstrap
     {
         try {
             $response = (new Request())
-                ->setInfoLogger($this->getInfoLogger())
-                ->setErrorLogger($this->getErrorLogger())
+                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     new RequestData(
                         $request->getMethod(),
@@ -178,26 +170,6 @@ class Bootstrap
         return $queryParams;
     }
 
-    public function setErrorLogger(?ErrorLogHandler $logger) {
-        $this->errorLogHander = $logger;
-        $this->routerLogger = new RouterLogger(
-            $this->getErrorLogger()
-        );
-        return $this;
-    }
-    public function getErrorLogger(): ?ErrorLogHandler {
-        return $this->errorLogHander;
-    }
-
-    public function setInfoLogger(?InfoLogHandler $logger) {
-        $this->infoLogHandler = $logger;
-
-        return $this;
-    }
-    public function getInfoLogger(): ?InfoLogHandler {
-        return $this->infoLogHandler;
-    }
-
     public function setRouterLogger(?RouterLogger $logger)
     {
         $this->routerLogger = $logger;
@@ -217,7 +189,6 @@ class Bootstrap
     {
         return $this->requestLogger;
     }
-
 
     public function isRunningCli(): bool {
         return (php_sapi_name() === 'cli');

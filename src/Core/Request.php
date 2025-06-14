@@ -11,8 +11,6 @@ use Rockberpro\RestRouter\Core\PutRequest;
 use Rockberpro\RestRouter\Core\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use RuntimeException;
 
@@ -25,8 +23,6 @@ class Request implements RequestInterface
 {
     private RequestAction $action;
     private array $parameters = [];
-    private ?ErrorLogHandler $errorLogHander = null;
-    private ?InfoLogHandler $infoLogHandler = null;
     private ?RequestLogger $requestLogger = null;
 
     /**
@@ -164,26 +160,6 @@ class Request implements RequestInterface
     public function getAction(): RequestAction
     {
         return $this->action;
-    }
-
-    public function setErrorLogger(?ErrorLogHandler $logger) {
-        $this->errorLogHander = $logger;
-
-        return $this;
-    }
-    public function getErrorLogger(): ?ErrorLogHandler {
-        return $this->errorLogHander;
-    }
-
-    public function setInfoLogger(?InfoLogHandler $logger) {
-        $this->infoLogHandler = $logger;
-        $this->requestLogger = new RequestLogger(
-            $this->getInfoLogger()
-        );
-        return $this;
-    }
-    public function getInfoLogger(): ?InfoLogHandler {
-        return $this->infoLogHandler;
     }
 
     public function setRequestLogger(?RequestLogger $logger)
