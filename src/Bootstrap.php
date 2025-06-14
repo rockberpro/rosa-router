@@ -10,7 +10,7 @@ use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
-use \React\Http\Message\Response as ReactResponse;
+use React\Http\Message\Response as ReactResponse;
 use Rockberpro\RestRouter\Core\Response as RouterResponse;
 use RuntimeException;
 use stdClass;
