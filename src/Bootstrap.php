@@ -7,8 +7,12 @@ use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
+use \React\Http\Message\Response as ReactResponse;
+use Rockberpro\RestRouter\Core\Response as RouterResponse;
+use RuntimeException;
 use stdClass;
 use Throwable;
 
@@ -56,21 +60,45 @@ class Bootstrap
                 $response->response();
             }
 
-            \Rockberpro\RestRouter\Core\Response::json([
+            RouterResponse::json([
                 'message' => 'Not implemented'
-            ], \Rockberpro\RestRouter\Core\Response::NOT_IMPLEMENTED);
+            ], RouterResponse::NOT_IMPLEMENTED);
         }
         catch (Throwable $th) {
-            $this->writeErrorLog([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+            try {
+                $this->writeErrorLog([
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTraceAsString(),
+                ]);
+            }
+            catch (Throwable $logError) {
+                if (DotEnv::get('APP_DEBUG')) {
+                    return RouterResponse::json([
+                        'message' => 'Error writing log: '.$logError->getMessage(),
+                        'file' => $logError->getFile(),
+                        'line' => $logError->getLine(),
+                        'trace' => $logError->getTraceAsString(),
+                    ], RouterResponse::INTERNAL_SERVER_ERROR);
+                }
+                return RouterResponse::json([
+                    'message' => 'Error writing log: '.$logError->getMessage(),
+                ], RouterResponse::INTERNAL_SERVER_ERROR);
+            }
 
-            \Rockberpro\RestRouter\Core\Response::json([
+            if (DotEnv::get('APP_DEBUG')) {
+                return RouterResponse::json([
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTraceAsString(),
+                ], RouterResponse::INTERNAL_SERVER_ERROR);
+            }
+
+            RouterResponse::json([
                 'message' => $th->getMessage(),
-            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
+            ], RouterResponse::INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -91,29 +119,59 @@ class Bootstrap
                 );
 
             if ($response) {
-                return new \React\Http\Message\Response(
+                return new ReactResponse(
                     $response->status,
                     ['Content-Type' => 'application/json'],
                     json_encode($response->data)
                 );
             }
 
-            return new \React\Http\Message\Response(
+            return new ReactResponse(
                 501,
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
         }
         catch (Throwable $th) {
-            $this->writeErrorLog([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+            try {
+                $this->writeErrorLog([
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTraceAsString(),
+                ]);
+            }
+            catch (Throwable $logError) {
+                if (DotEnv::get('APP_DEBUG')) {
+                    return new ReactResponse(
+                        501, [
+                        'message' => 'Error writing log: '.$logError->getMessage(),
+                        'file' => $logError->getFile(),
+                        'line' => $logError->getLine(),
+                        'trace' => $logError->getTraceAsString()]
+                    );
+                }
+                return new ReactResponse(
+                    501, [
+                    'message' => 'Error writing log: '.$logError->getMessage()]
+                );
+            }
+
+            if (DotEnv::get('APP_DEBUG')) {
+                return new ReactResponse(
+                    500,
+                    ['Content-Type' => 'application/json'],
+                    json_encode([
+                        'message' => $th->getMessage(),
+                        'file' => $th->getFile(),
+                        'line' => $th->getLine(),
+                        'trace' => $th->getTraceAsString(),
+                    ])
+                );
+            }
         }
 
-        return new \React\Http\Message\Response(
+        return new ReactResponse(
             500,
             ['Content-Type' => 'application/json'],
             json_encode(['message' => $th->getMessage()])
@@ -155,14 +213,10 @@ class Bootstrap
 
     private function writeErrorLog(array $data)
     {
-        try {
-            $this->getErrorLogger()->write('Error', $data);
+        if (!$this->getErrorLogger()) {
+            throw new RuntimeException('Error logger is not set');
         }
-        catch (Throwable $e) {
-            \Rockberpro\RestRouter\Core\Response::json([
-                'message' => "Error writing exception log: {$e->getMessage()}"
-            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
-        }
+        $this->getErrorLogger()->write('Error', $data);
     }
 
     public function setErrorLogger(?ErrorLogHandler $logger) {

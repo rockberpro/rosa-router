@@ -1,7 +1,6 @@
 <?php
 
 use Rockberpro\RestRouter\Bootstrap;
-use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
@@ -11,15 +10,15 @@ use React\Http\HttpServer;
 
 require_once "vendor/autoload.php";
 
-DotEnv::load(Server::getRootDir()."/.env");
+DotEnv::load(".env");
 
-require_once Server::getRootDir()."/routes/api.php";
+require_once "routes/api.php";
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
     return (new Bootstrap($request))
-            ->setInfoLogger(new InfoLogHandler("logs/api_access.log"))
-            ->setErrorLogger(new ErrorLogHandler("logs/api_error.log"))
+            // ->setInfoLogger(new InfoLogHandler("logs/api_access.log"))
+            // ->setErrorLogger(new ErrorLogHandler("logs/api_error.log"))
             ->execute();
 });
 $server->on('error', function (Throwable $e) {

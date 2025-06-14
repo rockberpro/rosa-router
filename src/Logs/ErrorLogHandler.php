@@ -4,7 +4,6 @@ namespace Rockberpro\RestRouter\Logs;
 
 use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -13,12 +12,11 @@ class ErrorLogHandler
 {
     private ?Logger $logger = null;
 
-    public function __construct($file_path = null)
+    public function __construct($file_path)
     {
         $this->logger = new Logger('api_log');
-        $log_file = $file_path ?? Server::getRootDir()."/logs/api_error.log";
         if (DotEnv::get('API_LOGS')) {
-            $this->logger->pushHandler(new StreamHandler($log_file, Logger::ERROR));
+            $this->logger->pushHandler(new StreamHandler($file_path, Logger::ERROR));
         }
         if (DotEnv::get('API_LOGS_DB')) {
             $this->logger->pushHandler(new PDOLogHandler(

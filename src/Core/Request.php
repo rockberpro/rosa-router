@@ -14,7 +14,8 @@ use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Exception;
+use RuntimeException;
+use Throwable;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -97,7 +98,7 @@ class Request implements RequestInterface
         }
 
         if ($request === null) {
-            throw new Exception('It was not possible to match your request');
+            throw new RuntimeException('It was not possible to match your request');
         }
 
         $this->writeInfoLog($request);
@@ -149,31 +150,27 @@ class Request implements RequestInterface
      */
     private function writeInfoLog(Request $request): void
     {
-        try {
-            $is_closure = $request->getAction()->isClosure();
-            $log_data = [
-                'subject' => DotEnv::get('APP_NAME'),
-                'type' =>  $is_closure ? 'closure' : 'controller',
-                'remote_address' => Server::remoteAddress(),
-                'target_address' => Server::targetAddress(),
-                'user_agent' => Server::userAgent(),
-                'request_method' => Server::requestMethod(),
-                'request_uri' => Server::requestUri(),
-                'request_body' => json_encode($request->getParameters()),
-                'endpoint' => $request->getAction()->getUri() ?? '',
-            ];
-            if (!$is_closure) {
-                $log_data['class'] = $request->getAction()->getClass();
-                $log_data['method'] = $request->getAction()->getMethod();
-            }
+        $is_closure = $request->getAction()->isClosure();
+        $log_data = [
+            'subject' => DotEnv::get('APP_NAME'),
+            'type' =>  $is_closure ? 'closure' : 'controller',
+            'remote_address' => Server::remoteAddress(),
+            'target_address' => Server::targetAddress(),
+            'user_agent' => Server::userAgent(),
+            'request_method' => Server::requestMethod(),
+            'request_uri' => Server::requestUri(),
+            'request_body' => json_encode($request->getParameters()),
+            'endpoint' => $request->getAction()->getUri() ?? '',
+        ];
+        if (!$is_closure) {
+            $log_data['class'] = $request->getAction()->getClass();
+            $log_data['method'] = $request->getAction()->getMethod();
+        }
 
-            $this->getInfoLogger()->write('Request', $log_data);
+        if (!$this->getInfoLogger()) {
+            throw new RuntimeException('Info logger is not set');
         }
-        catch (Exception $e) {
-            Response::json([
-                'message' => "Error writing request log: {$e->getMessage()}"
-            ], Response::INTERNAL_SERVER_ERROR);
-        }
+        $this->getInfoLogger()->write('Request', $log_data);
     }
 
     /**
