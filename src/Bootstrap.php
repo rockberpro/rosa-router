@@ -6,14 +6,11 @@ use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
-use Rockberpro\RestRouter\Core\Response;
 use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
 use stdClass;
 use Throwable;
-use Exception;
 
 class Bootstrap
 {
@@ -32,6 +29,49 @@ class Bootstrap
             return $this->handleStateless();
         }
         return $this->handleStateful($this->request);
+    }
+
+    public function handleStateless()
+    {
+        $uri = Server::uri();
+        $body = Request::body();
+        $method = Server::method();
+        $pathQuery = UrlParser::pathQuery(Server::query());
+
+        try {
+            $response = (new Request())
+                ->setInfoLogger($this->getInfoLogger())
+                ->setErrorLogger($this->getErrorLogger())
+                ->handle(
+                    new RequestData(
+                        $method, 
+                        $uri, 
+                        $pathQuery, 
+                        (array) $body,
+                        (array) $this->queryParams()
+                    )
+                );
+
+            if ($response) {
+                $response->response();
+            }
+
+            \Rockberpro\RestRouter\Core\Response::json([
+                'message' => 'Not implemented'
+            ], \Rockberpro\RestRouter\Core\Response::NOT_IMPLEMENTED);
+        }
+        catch (Throwable $th) {
+            $this->writeErrorLog([
+                'message' => $th->getMessage(),
+                'file' => $th->getFile(),
+                'line' => $th->getLine(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+
+            \Rockberpro\RestRouter\Core\Response::json([
+                'message' => $th->getMessage(),
+            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function handleStateful(ServerRequest $request)
@@ -80,49 +120,6 @@ class Bootstrap
         );
     }
 
-    public function handleStateless()
-    {
-        $uri = Server::uri();
-        $body = Request::body();
-        $method = Server::method();
-        $pathQuery = UrlParser::pathQuery(Server::query());
-
-        try {
-            $response = (new Request())
-                ->setInfoLogger($this->getInfoLogger())
-                ->setErrorLogger($this->getErrorLogger())
-                ->handle(
-                    new RequestData(
-                        $method, 
-                        $uri, 
-                        $pathQuery, 
-                        (array) $body,
-                        (array) $this->queryParams()
-                    )
-                );
-
-            if ($response) {
-                $response->response();
-            }
-
-            Response::json([
-                'message' => 'Not implemented'
-            ], Response::NOT_IMPLEMENTED);
-        }
-        catch (Throwable $th) {
-            $this->writeErrorLog([
-                'message' => $th->getMessage(),
-                'file' => $th->getFile(),
-                'line' => $th->getLine(),
-                'trace' => $th->getTraceAsString(),
-            ]);
-
-            Response::json([
-                'message' => $th->getMessage(),
-            ], Response::INTERNAL_SERVER_ERROR);
-        }
-    }
-
     public function queryParams()
     {
         $queryParams = new stdClass();
@@ -159,17 +156,12 @@ class Bootstrap
     private function writeErrorLog(array $data)
     {
         try {
-            if (!$this->getErrorLogger() && DotEnv::get('API_LOGS')) {
-                throw new Exception('Error logger is not set');
-            }
-            if (DotEnv::get('API_LOGS')) {
-                $this->getErrorLogger()->write('Error', $data);
-            }
+            $this->getErrorLogger()->write('Error', $data);
         }
         catch (Throwable $e) {
-            Response::json([
+            \Rockberpro\RestRouter\Core\Response::json([
                 'message' => "Error writing exception log: {$e->getMessage()}"
-            ], Response::INTERNAL_SERVER_ERROR);
+            ], \Rockberpro\RestRouter\Core\Response::INTERNAL_SERVER_ERROR);
         }
     }
 

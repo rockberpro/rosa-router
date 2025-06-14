@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\RequestInterface;
 use Rockberpro\RestRouter\Core\DeleteRequest;
 use Rockberpro\RestRouter\Core\GetRequest;
@@ -14,6 +12,8 @@ use Rockberpro\RestRouter\Core\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Exception;
 
 /**
@@ -167,12 +167,7 @@ class Request implements RequestInterface
                 $log_data['method'] = $request->getAction()->getMethod();
             }
 
-            if (!$this->getInfoLogger() && DotEnv::get('API_LOGS')) {
-                throw new Exception('Info logger is not set');
-            }
-            if (DotEnv::get('API_LOGS')) {
-                $this->getInfoLogger()->write('Request', $log_data);
-            }
+            $this->getInfoLogger()->write('Request', $log_data);
         }
         catch (Exception $e) {
             Response::json([
