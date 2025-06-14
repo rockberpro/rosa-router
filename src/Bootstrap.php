@@ -74,6 +74,14 @@ class Bootstrap
                 ]);
             }
             catch (Throwable $logError) {
+                if (DotEnv::get('API_DEBUG')) {
+                    return RouterResponse::json([
+                        'message' => 'Error writing log: ' . $logError->getMessage(),
+                        'file' => $logError->getFile(),
+                        'line' => $logError->getLine(),
+                        'trace' => $logError->getTraceAsString(),
+                    ], RouterResponse::INTERNAL_SERVER_ERROR);
+                }
                 return RouterResponse::json([
                     'message' => 'Internal server error'
                 ], RouterResponse::INTERNAL_SERVER_ERROR);
@@ -134,6 +142,18 @@ class Bootstrap
                 ]);
             }
             catch (Throwable $logError) {
+                if (DotEnv::get('API_DEBUG')) {
+                    return new ReactResponse(
+                        500,
+                        ['Content-Type' => 'application/json'],
+                        json_encode([
+                            'message' => 'Error writing log: ' . $logError->getMessage(),
+                            'file' => $logError->getFile(),
+                            'line' => $logError->getLine(),
+                            'trace' => $logError->getTraceAsString(),
+                        ])
+                    );
+                }
                 return new ReactResponse(
                     500,
                     ['Content-Type' => 'application/json'],
