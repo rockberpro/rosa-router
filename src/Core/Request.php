@@ -11,11 +11,10 @@ use Rockberpro\RestRouter\Core\PutRequest;
 use Rockberpro\RestRouter\Core\RequestAction;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use Rockberpro\RestRouter\Utils\Json;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
+use Rockberpro\RestRouter\Logs\RequestLogger;
 use RuntimeException;
-use Throwable;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -28,6 +27,7 @@ class Request implements RequestInterface
     private array $parameters = [];
     private ?ErrorLogHandler $errorLogHander = null;
     private ?InfoLogHandler $infoLogHandler = null;
+    private ?RequestLogger $requestLogger = null;
 
     /**
      * Get the body data
@@ -101,7 +101,9 @@ class Request implements RequestInterface
             throw new RuntimeException('It was not possible to match your request');
         }
 
-        $this->writeInfoLog($request);
+        if ($this->getRequestLogger()) {
+            $this->getRequestLogger()->writeLog($request);
+        }
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
@@ -142,38 +144,6 @@ class Request implements RequestInterface
     }
 
     /**
-     * Write the request log
-     * 
-     * @method writeLog
-     * @param Request $request
-     * @return void
-     */
-    private function writeInfoLog(Request $request): void
-    {
-        $is_closure = $request->getAction()->isClosure();
-        $log_data = [
-            'subject' => DotEnv::get('APP_NAME'),
-            'type' =>  $is_closure ? 'closure' : 'controller',
-            'remote_address' => Server::remoteAddress(),
-            'target_address' => Server::targetAddress(),
-            'user_agent' => Server::userAgent(),
-            'request_method' => Server::requestMethod(),
-            'request_uri' => Server::requestUri(),
-            'request_body' => json_encode($request->getParameters()),
-            'endpoint' => $request->getAction()->getUri() ?? '',
-        ];
-        if (!$is_closure) {
-            $log_data['class'] = $request->getAction()->getClass();
-            $log_data['method'] = $request->getAction()->getMethod();
-        }
-
-        if (!$this->getInfoLogger()) {
-            throw new RuntimeException('Info logger is not set');
-        }
-        $this->getInfoLogger()->write('Request', $log_data);
-    }
-
-    /**
      * Set the route action
      * 
      * @method setAction
@@ -207,11 +177,23 @@ class Request implements RequestInterface
 
     public function setInfoLogger(?InfoLogHandler $logger) {
         $this->infoLogHandler = $logger;
-
+        $this->requestLogger = new RequestLogger(
+            $this->getInfoLogger()
+        );
         return $this;
     }
     public function getInfoLogger(): ?InfoLogHandler {
         return $this->infoLogHandler;
+    }
+
+    public function setRequestLogger(?RequestLogger $logger)
+    {
+        $this->requestLogger = $logger;
+        return $this;
+    }
+    public function getRequestLogger(): ?RequestLogger
+    {
+        return $this->requestLogger;
     }
 
     /**

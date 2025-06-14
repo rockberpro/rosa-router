@@ -2,11 +2,14 @@
 
 namespace Rockberpro\RestRouter;
 
+use Exception;
+use Rockberpro\RestRouter\Logs\ErrorLogger;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Logs\RouterLogger;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
@@ -21,6 +24,7 @@ class Bootstrap
     private ?ServerRequest $request;
     private ?ErrorLogHandler $errorLogHander = null;
     private ?InfoLogHandler $infoLogHandler = null;
+    private ?RouterLogger $routerLogger = null;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -55,7 +59,7 @@ class Bootstrap
                         (array) $this->queryParams()
                     )
                 );
-
+            throw new Exception('Test');
             if ($response) {
                 $response->response();
             }
@@ -64,35 +68,17 @@ class Bootstrap
                 'message' => 'Not implemented'
             ], RouterResponse::NOT_IMPLEMENTED);
         }
-        catch (Throwable $th) {
-            try {
-                $this->writeErrorLog([
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
-                ]);
-            }
-            catch (Throwable $logError) {
-                if (DotEnv::get('API_DEBUG')) {
-                    return RouterResponse::json([
-                        'message' => 'Error writing log: ' . $logError->getMessage(),
-                        'file' => $logError->getFile(),
-                        'line' => $logError->getLine(),
-                        'trace' => $logError->getTraceAsString(),
-                    ], RouterResponse::INTERNAL_SERVER_ERROR);
-                }
-                return RouterResponse::json([
-                    'message' => 'Internal server error'
-                ], RouterResponse::INTERNAL_SERVER_ERROR);
+        catch (Throwable $t) {
+            if ($this->getRouterLogger()) {
+                $this->getRouterLogger()->writeLog($t);
             }
 
             if (DotEnv::get('API_DEBUG')) {
                 return RouterResponse::json([
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
+                    'message' => $t->getMessage(),
+                    'file' => $t->getFile(),
+                    'line' => $t->getLine(),
+                    'trace' => $t->getTraceAsString(),
                 ], RouterResponse::INTERNAL_SERVER_ERROR);
             }
 
@@ -132,33 +118,9 @@ class Bootstrap
                 json_encode(['message' => 'Not implemented'])
             );
         }
-        catch (Throwable $th) {
-            try {
-                $this->writeErrorLog([
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine(),
-                    'trace' => $th->getTraceAsString(),
-                ]);
-            }
-            catch (Throwable $logError) {
-                if (DotEnv::get('API_DEBUG')) {
-                    return new ReactResponse(
-                        500,
-                        ['Content-Type' => 'application/json'],
-                        json_encode([
-                            'message' => 'Error writing log: ' . $logError->getMessage(),
-                            'file' => $logError->getFile(),
-                            'line' => $logError->getLine(),
-                            'trace' => $logError->getTraceAsString(),
-                        ])
-                    );
-                }
-                return new ReactResponse(
-                    500,
-                    ['Content-Type' => 'application/json'],
-                    json_encode(['message' => 'Internal server error'])
-                );
+        catch (Throwable $t) {
+            if ($this->getRouterLogger()) {
+                $this->getRouterLogger()->writeLog($t);
             }
 
             if (DotEnv::get('API_DEBUG')) {
@@ -166,10 +128,10 @@ class Bootstrap
                     500,
                     ['Content-Type' => 'application/json'],
                     json_encode([
-                        'message' => $th->getMessage(),
-                        'file' => $th->getFile(),
-                        'line' => $th->getLine(),
-                        'trace' => $th->getTraceAsString(),
+                        'message' => $t->getMessage(),
+                        'file' => $t->getFile(),
+                        'line' => $t->getLine(),
+                        'trace' => $t->getTraceAsString(),
                     ])
                 );
             }
@@ -215,17 +177,11 @@ class Bootstrap
         return $queryParams;
     }
 
-    private function writeErrorLog(array $data)
-    {
-        if (!$this->getErrorLogger()) {
-            throw new RuntimeException('Error logger is not set');
-        }
-        $this->getErrorLogger()->write('Error', $data);
-    }
-
     public function setErrorLogger(?ErrorLogHandler $logger) {
         $this->errorLogHander = $logger;
-
+        $this->routerLogger = new RouterLogger(
+            $this->getErrorLogger()
+        );
         return $this;
     }
     public function getErrorLogger(): ?ErrorLogHandler {
@@ -239,6 +195,16 @@ class Bootstrap
     }
     public function getInfoLogger(): ?InfoLogHandler {
         return $this->infoLogHandler;
+    }
+
+    public function setRouterLogger(?RouterLogger $logger)
+    {
+        $this->routerLogger = $logger;
+        return $this;
+    }
+    public function getRouterLogger(): ?RouterLogger
+    {
+        return $this->routerLogger;
     }
 
     public function isRunningCli(): bool {
