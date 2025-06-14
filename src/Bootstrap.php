@@ -74,20 +74,12 @@ class Bootstrap
                 ]);
             }
             catch (Throwable $logError) {
-                if (DotEnv::get('APP_DEBUG')) {
-                    return RouterResponse::json([
-                        'message' => 'Error writing log: '.$logError->getMessage(),
-                        'file' => $logError->getFile(),
-                        'line' => $logError->getLine(),
-                        'trace' => $logError->getTraceAsString(),
-                    ], RouterResponse::INTERNAL_SERVER_ERROR);
-                }
                 return RouterResponse::json([
-                    'message' => 'Error writing log: '.$logError->getMessage(),
+                    'message' => 'Internal server error'
                 ], RouterResponse::INTERNAL_SERVER_ERROR);
             }
 
-            if (DotEnv::get('APP_DEBUG')) {
+            if (DotEnv::get('API_DEBUG')) {
                 return RouterResponse::json([
                     'message' => $th->getMessage(),
                     'file' => $th->getFile(),
@@ -97,7 +89,7 @@ class Bootstrap
             }
 
             RouterResponse::json([
-                'message' => $th->getMessage(),
+                'message' => 'Internal server error'
             ], RouterResponse::INTERNAL_SERVER_ERROR);
         }
     }
@@ -142,22 +134,14 @@ class Bootstrap
                 ]);
             }
             catch (Throwable $logError) {
-                if (DotEnv::get('APP_DEBUG')) {
-                    return new ReactResponse(
-                        501, [
-                        'message' => 'Error writing log: '.$logError->getMessage(),
-                        'file' => $logError->getFile(),
-                        'line' => $logError->getLine(),
-                        'trace' => $logError->getTraceAsString()]
-                    );
-                }
                 return new ReactResponse(
-                    501, [
-                    'message' => 'Error writing log: '.$logError->getMessage()]
+                    500,
+                    ['Content-Type' => 'application/json'],
+                    json_encode(['message' => 'Internal server error'])
                 );
             }
 
-            if (DotEnv::get('APP_DEBUG')) {
+            if (DotEnv::get('API_DEBUG')) {
                 return new ReactResponse(
                     500,
                     ['Content-Type' => 'application/json'],
@@ -174,7 +158,7 @@ class Bootstrap
         return new ReactResponse(
             500,
             ['Content-Type' => 'application/json'],
-            json_encode(['message' => $th->getMessage()])
+            json_encode(['message' => 'Internal server error'])
         );
     }
 
