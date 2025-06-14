@@ -23,6 +23,11 @@ class Bootstrap
 
     public function __construct(?ServerRequest $request = null)
     {
+        if (DotEnv::get('API_DEBUG')) {
+            error_reporting(E_ALL);
+            ini_set('display_errors', '1');
+        }
+
         $this->request = $request;
     }
 
