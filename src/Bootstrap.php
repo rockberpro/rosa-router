@@ -68,7 +68,7 @@ class Bootstrap
             }
 
             if (DotEnv::get('API_DEBUG')) {
-                return RouterResponse::json([
+                RouterResponse::json([
                     'message' => $t->getMessage(),
                     'file' => $t->getFile(),
                     'line' => $t->getLine(),
