@@ -17,16 +17,16 @@ class PDOLogHandler extends AbstractProcessingHandler
         $this->table = $table;
     }
 
-    protected function write(\Monolog\LogRecord $record): void
+    protected function write(array $record): void
     {
         $sql = "INSERT INTO {$this->table} (channel, level, message, context, created_at) VALUES (:channel, :level, :message, :context, :created_at)";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-            ':channel' => $record->channel,
-            ':level' => $record->level->value,
-            ':message' => $record->message,
-            ':context' => json_encode($record->context),
+            ':channel' => $record['channel'],
+            ':level' => $record['level_name'],
+            ':message' => $record['message'],
+            ':context' => json_encode($record['context']),
             ':created_at' => date('Y-m-d H:i:s'),
         ]);
     }
