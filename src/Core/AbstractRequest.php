@@ -87,7 +87,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $action = $this->buildAction($routes, $method, $uri, $match);
         $match = $routes[$method][array_key_first($action->getRoute())];
 
-        /** middleware */
+        /* middleware */
         if (isset($match['middleware'])) {
             $action->setMiddleware($match['middleware']);
         }
@@ -115,7 +115,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
             $uri_part = $uri_parts[$key] ?? null;
 
             $matches = [];
-            /* Check if it's a parameter (e.g., {id}) */
+            /* check if it's a parameter (e.g., {id}) */
             if (preg_match('/^{(\w+)}$/', $route_part, $matches)) {
                 $attribute = $matches[1];
                 if (!isset($uri_part) || !RouteHelper::isAlphaNumeric($uri_part)) {
@@ -124,7 +124,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                 $request->$attribute = $uri_part;
             }
             else {
-                /* Static segment must match exactly */
+                /* static segment must match exactly */
                 if ($route_part !== $uri_part) {
                     throw new Exception("Route segment mismatch: expected '{$route_part}', got '{$uri_part}'");
                 }
@@ -276,7 +276,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
                 if (!isset($route['prefix']) || !isset($route['route'])) {
                     return false;
                 }
-                /* Map to return only the route value */
+                /* map to return only the route value */
                 return strpos($uri, $route['prefix']) === 0;
             }
         );
