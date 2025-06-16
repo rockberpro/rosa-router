@@ -35,7 +35,7 @@ class RequestLogger
 
         $is_closure = $request->getAction()->isClosure();
         $log_data = [
-            'subject' => DotEnv::get('APP_NAME'),
+            'subject' => DotEnv::get('API_NAME'),
             'type' =>  $is_closure ? 'closure' : 'controller',
             'remote_address' => Server::remoteAddress(),
             'target_address' => Server::targetAddress(),
