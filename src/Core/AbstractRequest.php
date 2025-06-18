@@ -195,18 +195,18 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $action->setUri($uri);
         $action->setRoute($match);
 
-        $routeKeys = array_keys($action->getRoute());
-        if (empty($routeKeys)) {
+        $route_keys = array_keys($action->getRoute());
+        if (empty($route_keys)) {
             throw new Exception('No route found for the given method.');
         }
 
-        $routeKey = $routeKeys[0];
+        $route_key = $route_keys[0];
 
-        if (!isset($routes[$method][$routeKey])) {
+        if (!isset($routes[$method][$route_key])) {
             throw new Exception('No route defined for the given method and key.');
         }
 
-        $call = $routes[$method][$routeKey];
+        $call = $routes[$method][$route_key];
 
         if (!isset($call['target'])) {
             throw new Exception('Target not defined for the route.');
@@ -218,15 +218,15 @@ abstract class AbstractRequest implements AbstractRequestInterface
             $action->setClosure($target);
         }
         elseif (is_array($target) && sizeof($target) === 2) {
-            [$class, $methodName] = $target;
+            [$class, $method_name] = $target;
             if (!class_exists($class)) {
                 throw new Exception("Class not found: {$class}");
             }
-            if (!method_exists($class, $methodName)) {
-                throw new Exception("Method not found: {$methodName} in {$class}");
+            if (!method_exists($class, $method_name)) {
+                throw new Exception("Method not found: {$method_name} in {$class}");
             }
             $action->setClass($class);
-            $action->setMethod($methodName);
+            $action->setMethod($method_name);
         }
         else {
             throw new Exception('Invalid route target.');
