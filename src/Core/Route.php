@@ -15,16 +15,13 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
-    private static ?string $namespace;
-    private static ?string $controller;
-    private static ?string $middleware;
-
-    private static ?string $prefixHandler;
-
-    private static array $groupPrefix = [];
-    private static array $groupNamespace = [];
-    private static array $groupController = [];
-    private static array $groupMiddleware = [];
+    private static array $contextStack = [];
+    private static array $currentContext = [
+        'prefix'     => null,
+        'namespace'  => null,
+        'controller' => null,
+        'middleware' => null,
+    ];
 
     private static self $instance;
 
@@ -128,8 +125,11 @@ class Route implements RouteInterface
      */
     public static function prefix($prefix): Route
     {
-        self::$prefixHandler = "/{$prefix}";
-        self::$groupPrefix[] = "/{$prefix}";
+        self::$currentContext['prefix'] = "/{$prefix}";
+
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
 
         return new self();
     }
@@ -143,7 +143,7 @@ class Route implements RouteInterface
      */
     public static function namespace($namespace): Route
     {
-        self::$namespace = $namespace;
+        self::$currentContext['namespace'] = $namespace;
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -161,7 +161,7 @@ class Route implements RouteInterface
      */
     public static function controller($controller): Route
     {
-        self::$controller = $controller;
+        self::$currentContext['controller'] = $controller;
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -179,7 +179,7 @@ class Route implements RouteInterface
      */
     public static function middleware($middleware): Route
     {
-        self::$middleware = $middleware;
+        self::$currentContext['middleware'] = $middleware;
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -197,27 +197,17 @@ class Route implements RouteInterface
      */
     public function group($closure): void
     {
-        /** group function has no prefix */
-        if (!self::$prefixHandler) {
-            self::$groupPrefix[] = null;
-        }
+        // Push current context to stack
+        self::$contextStack[] = self::$currentContext;
 
-        /* stack route context */
-        self::$groupNamespace[]  = self::$namespace  ?? end(self::$groupNamespace);
-        self::$groupController[] = self::$controller ?? end(self::$groupController);
-        self::$groupMiddleware[] = self::$middleware ?? end(self::$groupMiddleware);
-
-        /* clear static properties to avoid context leakage */
         self::clear();
 
-        /* execute route group context */
+        // Execute route group
         $closure();
 
-        /* unstack route context */
-        array_pop(self::$groupPrefix);
-        array_pop(self::$groupNamespace);
-        array_pop(self::$groupController);
-        array_pop(self::$groupMiddleware);
+        // Pop context from stack
+        self::$currentContext = array_pop(self::$contextStack);
+
     }
 
     /**
@@ -229,19 +219,19 @@ class Route implements RouteInterface
      */
     private function buildTarget($target)
     {
-        /* if target is a Closure, return it directly */
+        // if target is a Closure, return it directly
         if ($target instanceof Closure) {
             return $target;
         }
 
-        /* if target is an array, return it directly */
+        // if target is an array, return it directly
         if (is_array($target)) {
             return $target;
         }
 
-        /* if target is a string without '@', assume it's a method of the current controller */
+        // if target is a string without '@', assume it's a method of the current controller
         if (is_string($target) && strpos($target, '@') === false) {
-            $controller = self::$controller ?? end(self::$groupController);
+            $controller = self::$currentContext['controller'];
             if (!$controller) {
                 throw new Exception('Controller not defined for the route.');
             }
@@ -249,10 +239,10 @@ class Route implements RouteInterface
             return [$controller, $method];
         }
 
-        /* if target is a string with '@', assume format Controller@method */
+        // if target is a string with '@', assume format Controller@method
         if (is_string($target) && strpos($target, '@') !== false) {
             list($controller, $method) = explode('@', $target, 2);
-            $namespace = self::$namespace ?? end(self::$groupNamespace);
+            $namespace = self::$currentContext['namespace'];
             if ($namespace) {
                 $controller = $namespace . '\\' . $controller;
             }
@@ -275,9 +265,9 @@ class Route implements RouteInterface
             $routes = [];
         }
 
-        /* determine namespace and middleware for current context */
-        $namespace = self::$namespace ?? end(self::$groupNamespace) ?: null;
-        $middleware = self::$middleware ?? end(self::$groupMiddleware) ?: null;
+        // determine namespace and middleware for current context
+        $namespace = self::$currentContext['namespace'];
+        $middleware = self::$currentContext['middleware'];
 
         $route = [
             'method'     => self::$instance->method,
@@ -294,7 +284,7 @@ class Route implements RouteInterface
 
         $routes[self::$instance->method][] = $route;
 
-        /* clear static properties to avoid context leakage */
+        // clear static properties to avoid context leakage
         self::clear();
     }
 
@@ -306,26 +296,33 @@ class Route implements RouteInterface
      */
     private static function route($route): string
     {
-        $_route = Route::PREFIX.$route;
-        if (self::$groupPrefix) {
-            $routeStack = self::routeStack();
-            $_route = Route::PREFIX.implode($routeStack).$route;
-        }
-
-        return $_route;
+        $prefixes = self::collectPrefixes();
+        return self::PREFIX . implode('', $prefixes) . $route;
     }
 
     /**
-     * Get the route call stack
+     * Collect route prefixes from the context stack
      * 
      * @method routeStack
      * @return array
      */
-    private static function routeStack(): array
+    private static function collectPrefixes(): array
     {
-        return array_filter(self::$groupPrefix, function($value) {
-            return $value !== null;
-        });
+        $prefixes = [];
+
+        // Collect from stack
+        foreach (self::$contextStack as $context) {
+            if ($context['prefix'] !== null) {
+                $prefixes[] = $context['prefix'];
+            }
+        }
+
+        // Add current context prefix
+        if (self::$currentContext['prefix'] !== null) {
+            $prefixes[] = self::$currentContext['prefix'];
+        }
+
+        return $prefixes;
     }
 
     /**
@@ -336,10 +333,12 @@ class Route implements RouteInterface
      */
     private function clear(): void
     {
-        self::$prefixHandler = null;
-        self::$namespace = null;
-        self::$controller = null;
-        self::$middleware = null;
+      self::$currentContext = [
+            'prefix' => null,
+            'namespace' => null,
+            'controller' => null,
+            'middleware' => null,
+        ];
     }
 
     /**
