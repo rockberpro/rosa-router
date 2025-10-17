@@ -197,17 +197,18 @@ class Route implements RouteInterface
      */
     public function group($closure): void
     {
-        // Push current context to stack
+        // push current context to stack
         self::$contextStack[] = self::$currentContext;
+        var_dump(self::$contextStack);die;
 
-        self::clear();
+        // clear current context
+        self::clearContext();
 
-        // Execute route group
+        // execute route group
         $closure();
 
-        // Pop context from stack
-        self::$currentContext = array_pop(self::$contextStack);
-
+        // pop context from stack
+        array_pop(self::$contextStack);
     }
 
     /**
@@ -283,9 +284,6 @@ class Route implements RouteInterface
         }
 
         $routes[self::$instance->method][] = $route;
-
-        // clear static properties to avoid context leakage
-        self::clear();
     }
 
     /**
@@ -326,12 +324,12 @@ class Route implements RouteInterface
     }
 
     /**
-     * Clears the route properties
+     * Clears current context
      * 
      * @method clear
      * @return void
      */
-    private function clear(): void
+    private function clearContext(): void
     {
       self::$currentContext = [
             'prefix' => null,
