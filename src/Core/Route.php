@@ -199,7 +199,6 @@ class Route implements RouteInterface
     {
         // push current context to stack
         self::$contextStack[] = self::$currentContext;
-        var_dump(self::$contextStack);die;
 
         // clear current context
         self::clearContext();
