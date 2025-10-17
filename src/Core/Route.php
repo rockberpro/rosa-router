@@ -135,7 +135,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * Adds prefix to the route group
+     * Adds namespace to the route group
      * 
      * @method namespace
      * @param string $namespace
@@ -189,10 +189,9 @@ class Route implements RouteInterface
     }
 
     /**
-     * Group routes under the same prefix
+     * Group routes under the same context
      * 
      * @method group
-     * @param string $prefix
      * @param closure $closure()
      */
     public function group($closure): void
@@ -200,14 +199,27 @@ class Route implements RouteInterface
         // push current context to stack
         self::$contextStack[] = self::$currentContext;
 
-        // clear current context
-        self::clearContext();
+        // reset context for the group scope
+        self::$currentContext = [
+            'prefix'     => null,
+            'namespace'  => null,
+            'controller' => null,
+            'middleware' => null,
+        ];
 
         // execute route group
         $closure();
 
         // pop context from stack
         array_pop(self::$contextStack);
+
+        // clear current context completely after exiting group
+        self::$currentContext = [
+            'prefix'     => null,
+            'namespace'  => null,
+            'controller' => null,
+            'middleware' => null,
+        ];
     }
 
     /**
@@ -229,20 +241,19 @@ class Route implements RouteInterface
             return $target;
         }
 
-        // if target is a string without '@', assume it's a method of the current controller
+        // if target is a string without '@', use current controller
         if (is_string($target) && strpos($target, '@') === false) {
-            $controller = self::$currentContext['controller'];
+            $controller = self::getContextValue('controller');
             if (!$controller) {
                 throw new Exception('Controller not defined for the route.');
             }
-            $method = $target;
-            return [$controller, $method];
+            return [$controller, $target];
         }
 
-        // if target is a string with '@', assume format Controller@method
+        // if target is a string with '@', parse Controller@method
         if (is_string($target) && strpos($target, '@') !== false) {
             list($controller, $method) = explode('@', $target, 2);
-            $namespace = self::$currentContext['namespace'];
+            $namespace = self::getContextValue('namespace');
             if ($namespace) {
                 $controller = $namespace . '\\' . $controller;
             }
@@ -250,6 +261,29 @@ class Route implements RouteInterface
         }
 
         throw new Exception('Invalid or unsupported route target.');
+    }
+
+    /**
+     * Get a context value with inheritance from parent contexts
+     * 
+     * @param string $key
+     * @return mixed|null
+     */
+    private static function getContextValue(string $key)
+    {
+        // check current context first
+        if (self::$currentContext[$key] !== null) {
+            return self::$currentContext[$key];
+        }
+
+        // walk back through the stack to find the value (inheritance)
+        for ($i = count(self::$contextStack) - 1; $i >= 0; $i--) {
+            if (self::$contextStack[$i][$key] !== null) {
+                return self::$contextStack[$i][$key];
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -265,9 +299,9 @@ class Route implements RouteInterface
             $routes = [];
         }
 
-        // determine namespace and middleware for current context
-        $namespace = self::$currentContext['namespace'];
-        $middleware = self::$currentContext['middleware'];
+        // get values with inheritance
+        $namespace = self::getContextValue('namespace');
+        $middleware = self::getContextValue('middleware');
 
         $route = [
             'method'     => self::$instance->method,
@@ -275,6 +309,7 @@ class Route implements RouteInterface
             'route'      => self::$instance->route,
             'target'     => self::$instance->target,
         ];
+
         if ($namespace) {
             $route['namespace'] = $namespace;
         }
@@ -300,42 +335,26 @@ class Route implements RouteInterface
     /**
      * Collect route prefixes from the context stack
      * 
-     * @method routeStack
+     * @method collectPrefixes
      * @return array
      */
     private static function collectPrefixes(): array
     {
         $prefixes = [];
 
-        // Collect from stack
+        // collect from stack
         foreach (self::$contextStack as $context) {
             if ($context['prefix'] !== null) {
                 $prefixes[] = $context['prefix'];
             }
         }
 
-        // Add current context prefix
+        // add current context prefix
         if (self::$currentContext['prefix'] !== null) {
             $prefixes[] = self::$currentContext['prefix'];
         }
 
         return $prefixes;
-    }
-
-    /**
-     * Clears current context
-     * 
-     * @method clear
-     * @return void
-     */
-    private function clearContext(): void
-    {
-      self::$currentContext = [
-            'prefix' => null,
-            'namespace' => null,
-            'controller' => null,
-            'middleware' => null,
-        ];
     }
 
     /**
@@ -347,6 +366,6 @@ class Route implements RouteInterface
     public static function getRoutes(): array
     {
         global $routes;
-        return $routes;
+        return $routes ?? [];
     }
 }
