@@ -277,7 +277,7 @@ class Route implements RouteInterface
         }
 
         // walk back through the stack to find the value (inheritance)
-        for ($i = count(self::$contextStack) - 1; $i >= 0; $i--) {
+        for ($i = sizeof(self::$contextStack) - 1; $i >= 0; $i--) {
             if (self::$contextStack[$i][$key] !== null) {
                 return self::$contextStack[$i][$key];
             }
@@ -299,16 +299,16 @@ class Route implements RouteInterface
             $routes = [];
         }
 
+        $route = [
+          'method'     => self::$instance->method,
+          'prefix'     => self::$instance->prefix,
+          'route'      => self::$instance->route,
+          'target'     => self::$instance->target,
+        ];
+
         // get values with inheritance
         $namespace = self::getContextValue('namespace');
         $middleware = self::getContextValue('middleware');
-
-        $route = [
-            'method'     => self::$instance->method,
-            'prefix'     => self::$instance->prefix,
-            'route'      => self::$instance->route,
-            'target'     => self::$instance->target,
-        ];
 
         if ($namespace) {
             $route['namespace'] = $namespace;
