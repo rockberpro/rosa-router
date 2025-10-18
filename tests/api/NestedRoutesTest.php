@@ -9,7 +9,7 @@ class NestedRoutesTest extends TestCase
     {
         require_once getRootDir()."/vendor/autoload.php";
         require_once getRootDir().'/tests/middleware/TestMiddleware.php';
-        require_once getRootDir().'/tests/stubs/api.php';
+        require_once getRootDir().'/tests/mock/api.php';
     }
 
     public function testNestedRoutes()
