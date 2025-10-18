@@ -70,5 +70,5 @@ class NestedRoutesTest extends TestCase
 }
 
 function getRootDir() {
-    return __DIR__ . '/../../';
+    return __DIR__ . '/../';
 }
