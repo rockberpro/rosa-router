@@ -1,6 +1,7 @@
 {
     "name": "rockberpro/rosa-router",
     "description": "Smart REST router for PHP",
+    "license": "MIT",
     "require": {
         "php": ">=7.4",
         "react/http": "^1.11",
