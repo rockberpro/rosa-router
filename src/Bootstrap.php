@@ -3,7 +3,6 @@
 namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
