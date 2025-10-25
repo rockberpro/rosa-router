@@ -9,7 +9,6 @@ namespace Rockberpro\RestRouter\Core;
  */
 interface ServerInterface
 {
-    public static function uri(): string;
     public static function query(): string;
     public static function method(): string;
     public static function key(): string;

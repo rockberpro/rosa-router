@@ -9,8 +9,6 @@ use Rockberpro\RestRouter\Core\PatchRequest;
 use Rockberpro\RestRouter\Core\PostRequest;
 use Rockberpro\RestRouter\Core\PutRequest;
 use Rockberpro\RestRouter\Core\RequestAction;
-use Rockberpro\RestRouter\Utils\UrlParser;
-use Rockberpro\RestRouter\Utils\Json;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use RuntimeException;
 
@@ -26,33 +24,6 @@ class Request implements RequestInterface
     private ?RequestLogger $requestLogger = null;
 
     /**
-     * Get the body data
-     * 
-     * @method body
-     * @param bool $parse
-     * @return array|bool|string|null
-     */
-    public static function body($parse = true)
-    {
-        $input = file_get_contents("php://input");
-
-        if (Json::isJson($input)) {
-            return (array) json_decode($input, true);
-        }
-        if (!$parse) {
-            return $input;
-        }
-
-        $data = [];
-        parse_str($input, $data);
-        if (empty($data)) {
-            return null;
-        }
-
-        return (array) $data;
-    }
-
-    /**
      * @method handle
      * @param string $method
      * @param string $uri
@@ -60,7 +31,7 @@ class Request implements RequestInterface
      * @param array $body
      * @param array $queryParams
      */
-    public function handle(RequestData $requestData)
+    public function handle(RequestData $requestData): Response
     {
         global $routes;
         if ($routes === null) {
@@ -71,8 +42,6 @@ class Request implements RequestInterface
         if (!$path) {
             return new Response(['message' => 'Not found'], Response::NOT_FOUND);
         }
-        $requestData->setUri($path);
-
         $request = null;
         switch ($requestData->getMethod()) {
             case 'GET':
@@ -118,25 +87,13 @@ class Request implements RequestInterface
     /**
      * Get the route path
      * 
-     * @param RequestData $requestData
+     * @param RequestData $data
      * @return string|null
      */
-    private function getPath(RequestData $requestData)
+    private function getPath(RequestData $data)
     {
-        if ($requestData->getPathQuery()) {
-            $path = UrlParser::path($requestData->getPathQuery());
-            return $path;
-        }
-
-        $path = UrlParser::path($requestData->getUri());
-
-        $segments = explode('/', $path ?? '');
-        array_shift($segments);
-        if ($segments[0] !== 'api') {
-            return null;
-        }
-
-        return $path;
+        if ($data->getPathQuery()): return $data->getPathQuery(); endif;
+        return $data->getUri();
     }
 
     /**

@@ -8,7 +8,8 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 
 require_once "vendor/autoload.php";
 
-if (Server::isApiEndpoint()) {
+$server = new Server();
+if ($server->isApiEndpoint()) {
     DotEnv::load(".env");
 
     require_once "routes/api.php";

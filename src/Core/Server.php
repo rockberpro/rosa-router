@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Core\ServerInterface;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -11,14 +12,23 @@ use Rockberpro\RestRouter\Core\ServerInterface;
  */
 class Server implements ServerInterface
 {
-    public static function uri(): string
-    {
-        return urldecode(parse_url($_SERVER["REQUEST_URI"] ?? '', PHP_URL_PATH));
+    /**
+     * Cached HttpFoundation Request instance (singleton)
+     *
+     * @var HttpRequest|null
+     */
+    private ?HttpRequest $httpRequest = null;
+
+    private static Server $instance;
+
+    public function __construct() {
+        self::$instance = $this;
+        $this->httpRequest = HttpRequest::createFromGlobals();
     }
 
-    public static function isApiEndpoint(): bool
+    public function isApiEndpoint(): bool
     {
-        return strpos(self::uri(), '/api/') !== false;
+        return strpos($this->httpRequest->getPathInfo(), '/api/') !== false;
     }
 
     public static function query(): string
@@ -92,5 +102,44 @@ class Server implements ServerInterface
     public static function getRootDir()
     {
         return dirname(__DIR__, 1);
+    }
+
+    /**
+     * Get the request data
+     * 
+     * @return RequestData
+     */
+    public function getRequestData(): RequestData
+    {
+        $httpRequest = self::getHttpRequest();
+        return new RequestData(
+            $httpRequest->getMethod(),
+            $httpRequest->getRequestUri(),
+            $httpRequest->getQueryString(),
+            json_decode($httpRequest->getContent(), true),
+            $httpRequest->query->all()
+        );
+    }
+
+    /**
+     * Return a singleton Symfony HttpFoundation Request created from globals.
+     *
+     * Usage: $req = \Rockberpro\RestRouter\Core\Server::getHttpRequest();
+     *
+     * @return HttpRequest
+     */
+    public function getHttpRequest(): HttpRequest
+    {
+        return $this->httpRequest;
+    }
+
+    /**
+     * Get the Server instance
+     * 
+     * @return Server
+     */
+    public static function getInstance(): Server
+    {
+        return self::$instance;
     }
 }
