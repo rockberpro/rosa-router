@@ -8,8 +8,8 @@ use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Utils\UrlParser;
 use React\Http\Message\ServerRequest;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use React\Http\Message\Response as ReactResponse;
 use Rockberpro\RestRouter\Core\Response as RouterResponse;
 use stdClass;
@@ -36,21 +36,17 @@ class Bootstrap
 
     public function handleStateless()
     {
-        $uri = Server::uri();
-        $body = Request::body();
-        $method = Server::method();
-        $pathQuery = UrlParser::pathQuery(Server::query());
-
+        $request = HttpRequest::createFromGlobals();
         try {
             $response = (new Request())
                 ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     new RequestData(
-                        $method, 
-                        $uri, 
-                        $pathQuery, 
-                        (array) $body,
-                        (array) $this->queryParams()
+                        $request->getMethod(),
+                        $request->getRequestUri(),
+                        $request->getQueryString(),
+                        json_decode($request->getContent(), true),
+                        $request->query->all()
                     )
                 );
 
@@ -84,16 +80,17 @@ class Bootstrap
 
     public function handleStateful(ServerRequest $request)
     {
+        $request = HttpRequest::createFromGlobals();
         try {
             $response = (new Request())
                 ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     new RequestData(
                         $request->getMethod(),
-                        $request->getUri()->getPath(),
-                        null, 
-                        (array) $request->getParsedBody(),
-                        (array) $request->getQueryParams()
+                        $request->getRequestUri(),
+                        $request->getQueryString(),
+                        json_decode($request->getContent(), true),
+                        $request->query->all()
                     )
                 );
 
