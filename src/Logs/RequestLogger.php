@@ -42,7 +42,7 @@ class RequestLogger
             'user_agent' => Server::userAgent(),
             'request_method' => Server::requestMethod(),
             'request_uri' => Server::requestUri(),
-            'request_body' => json_encode($request->getParameters()),
+            'request_body' => json_encode($request->getParams()),
             'endpoint' => $request->getAction()->getUri() ?? '',
         ];
         if (!$is_closure) {

@@ -128,13 +128,18 @@ class Request implements RequestInterface
 
     /**
      * Get all route parameters
-     * 
+     *
      * @method getParameters
      * @return array
      */
-    public function getParameters(): array
+    public function getParams(): array
     {
-        return [];
+        return array_merge(
+            ['body_params' => $this->getAllBodyParams()],
+            ['path_params' => $this->getAllPathParams()],
+            ['query_params' => $this->getAllQueryParams()],
+            ['url_encoded_params' => $this->getAllUrlEncodedParams()]
+        );
     }
 
     /**
@@ -149,15 +154,29 @@ class Request implements RequestInterface
         $body_param = $this->getBodyParam($key);
         $path_param = $this->getPathParam($key);
         $query_param = $this->getQueryParam($key);
+        $url_encoded_param = $this->getUrlEncodedParam($key);
 
-        return $body_param ?? $path_param ?? $query_param ?? null;
+        return $body_param
+            ?? $path_param
+            ?? $query_param
+            ?? $url_encoded_param
+            ?? null;
     }
 
+    /**
+     * @param string $key
+     * @param string $param
+     * @return void
+     */
     public function setQueryParam(string $key, string $param): void
     {
         $this->queryParams[$key] = $param;
     }
 
+    /**
+     * @param string $key
+     * @return void
+     */
     public function getQueryParam(string $key): ?string
     {
         if (!array_key_exists($key, $this->queryParams ?? [])) {
@@ -166,16 +185,28 @@ class Request implements RequestInterface
         return $this->queryParams[$key];
     }
 
+    /**
+     * @return array
+     */
     public function getAllQueryParams(): array
     {
         return $this->queryParams;
     }
 
+    /**
+     * @param string $key
+     * @param string $param
+     * @return void
+     */
     public function setPathParam(string $key, string $param): void
     {
         $this->pathParams[$key] = $param;
     }
 
+    /**
+     * @param string $key
+     * @return void
+     */
     public function getPathParam(string $key): ?string
     {
         if (!array_key_exists($key, $this->pathParams ?? [])) {
@@ -184,9 +215,29 @@ class Request implements RequestInterface
         return $this->pathParams[$key] ?? null;
     }
 
+    /**
+     * @return array
+     */
     public function getAllPathParams(): array
     {
         return $this->pathParams;
+    }
+
+    /**
+     * @param string $key
+     * @return void
+     */
+    public function getUrlEncodedParam(string $key): ?string
+    {
+        return Server::getInstance()->getHttpRequest()->request->get($key);
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllUrlEncodedParams(): array
+    {
+        return Server::getInstance()->getHttpRequest()->request->all();
     }
 
     /**
@@ -204,6 +255,9 @@ class Request implements RequestInterface
         return $body[$key] ?: null;
     }
 
+    /**
+     * @return array
+     */
     public function getAllBodyParams(): array
     {
         $content = Server::getInstance()->getHttpRequest()->getContent();
@@ -211,6 +265,4 @@ class Request implements RequestInterface
 
         return $body ?? [];
     }
-
-
 }
