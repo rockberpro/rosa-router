@@ -69,14 +69,14 @@ class Request implements RequestInterface
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
-            $response = $closure($request); /// Response
+            $response = $closure($request); // response
             return $response;
         }
 
         $class = $request->getAction()->getClass();
         $method = $request->getAction()->getMethod();
 
-        /** call the controller */
+        // call the controller
         $response = (new $class)->$method($request);
         return $response;
     }
