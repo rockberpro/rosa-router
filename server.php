@@ -9,10 +9,9 @@ use React\Socket\SocketServer;
 use React\Http\HttpServer;
 
 require_once "vendor/autoload.php";
+require_once "routes/api.php";
 
 DotEnv::load(".env");
-
-require_once "routes/api.php";
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
