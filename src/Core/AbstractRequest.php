@@ -17,49 +17,28 @@ use Exception;
 abstract class AbstractRequest implements AbstractRequestInterface
 {
     /**
-     * Build the request from the URL
+     * Build the request
      * 
-     * @method buildUriRequest
-     * @param array $routes
+     * @method buildRequest
      * @param RequestData $requestData
      * @return Request
      */
-    public function buildUriRequest($routes, RequestData $requestData): Request
+    public function buildRequest(RequestData $requestData): Request
     {
+        $method = Server::getInstance()->getRequestData()->getMethod();
+        $routes = Server::getInstance()->getRoutes()[$method];
+        if (!$routes) {
+            throw new Exception("No routes defined for the given method: {$method}");
+        }
+
         $request = new Request();
-        $request->setAction($this->handle($routes, $requestData->getMethod(), $requestData->getUri()));
+        $action = $this->handle($routes, $requestData->getMethod(), $requestData->getUri());
+        $request->setAction($action);
 
         $request = $this->pathParams($request);
         $request = $this->queryParams($request, $requestData->getQueryParams());
 
-        if ($middleware = $request->getAction()->getMiddleware()) {
-            $this->middleware($middleware, $request);
-        }
-
-        return $request;
-    }
-
-    /**
-     * Build the request from form data
-     * 
-     * @method buildBodyRequest
-     * @param array $routes
-     * @param RequestData $requestData
-     * @return Request
-     */
-    public function buildBodyRequest($routes, RequestData $requestData): Request
-    {
-        $request = new Request();
-        $request->setAction($this->handle($routes, $requestData->getMethod(), $requestData->getUri()));
-
-        $request = $this->pathParams($request);
-        $request = $this->queryParams($request, $requestData->getQueryParams());
-
-        /** form params */
-        foreach((array) $requestData->getBody() as $key => $value) {
-            $request->$key = $value;
-        }
-
+        // execute the middleware
         if ($middleware = $request->getAction()->getMiddleware()) {
             $this->middleware($middleware, $request);
         }
@@ -79,20 +58,12 @@ abstract class AbstractRequest implements AbstractRequestInterface
     public function handle($routes, $method, $uri): RequestAction
     {
         $routes_map = $this->map($routes, $method, $uri);
-        $match = $this->match($routes_map, $uri);
-        if (empty($match)) {
+        $match = $this->match($routes, $routes_map, $uri);
+        if (!$match) {
             throw new Exception('No matching route');
         }
 
-        $action = $this->buildAction($routes, $method, $uri, $match);
-        $match = $routes[$method][array_key_first($action->getRoute())];
-
-        /* middleware */
-        if (isset($match['middleware'])) {
-            $action->setMiddleware($match['middleware']);
-        }
-
-        return $action;
+        return $this->buildAction($uri, $match);
     }
 
     /**
@@ -163,8 +134,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     private function getRouteParts(Request $request): array
     {
-        $route = $request->getAction()->getRoute();
-        $route = end($route);
+        $route = $request->getAction()->getRoute()['route'];
         $prefix = RouteHelper::routeMatchArgs($route)[0];
 
         $_uri = str_replace($prefix, '', $request->getAction()->getUri());
@@ -183,37 +153,20 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * Build the action
      * 
      * @method buildAction
-     * @param array $routes
-     * @param string $method
      * @param string $uri
      * @param array $match
      * @return RequestAction
      */
-    private function buildAction($routes, $method, $uri, $match): RequestAction
+    private function buildAction($uri, $match): RequestAction
     {
         $action = new RequestAction();
         $action->setUri($uri);
         $action->setRoute($match);
 
-        $route_keys = array_keys($action->getRoute());
-        if (empty($route_keys)) {
-            throw new Exception('No route found for the given method.');
-        }
-
-        $route_key = $route_keys[0];
-
-        if (!isset($routes[$method][$route_key])) {
-            throw new Exception('No route defined for the given method and key.');
-        }
-
-        $call = $routes[$method][$route_key];
-
-        if (!isset($call['target'])) {
+        $target = $action->getRoute()['target'];
+        if (!$target) {
             throw new Exception('Target not defined for the route.');
         }
-
-        $target = $call['target'];
-
         if ($target instanceof Closure) {
             $action->setClosure($target);
         }
@@ -266,12 +219,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     public function map($routes, $method, $uri): array
     {
-        if (!isset($routes[$method])) {
-            throw new Exception("No routes for method {$method}");
-        }
-
         $filtered_routes = array_filter(
-            $routes[$method],
+            $routes,
             function ($route) use ($uri) {
                 if (!isset($route['prefix']) || !isset($route['route'])) {
                     return false;
@@ -296,18 +245,30 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method match
      * @param array $mapped_routes
+     * @param array $routes
      * @param string $method
      * @param string $uri
      * @return array
      */
-    public function match($mapped_routes, $uri): array
+    public function match($routes, $mapped_routes, $uri): array
     {
-        return array_filter(
+        $filtered = array_filter(
             $mapped_routes,
             function($route) use ($uri) {
                 return $this->matchCondition($route, $uri);
             }
         );
+        $match = reset($filtered);
+
+        $macthing_route = array_filter($routes, function($route) use ($match) {
+            return $route['route'] === $match;
+        });
+        $macthing_route = array_shift($macthing_route);
+        if (!$macthing_route) {
+            throw new Exception('No matching route found.');
+        }
+
+        return $macthing_route;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Core\ServerInterface;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
+use Rockberpro\RestRouter\Core\Route;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -24,11 +25,22 @@ class Server implements ServerInterface
     public function __construct() {
         self::$instance = $this;
         $this->httpRequest = HttpRequest::createFromGlobals();
+        $this->httpRequest->attributes->set('routes', Route::getRoutes());
     }
 
     public function isApiEndpoint(): bool
     {
         return strpos($this->httpRequest->getPathInfo(), '/api/') !== false;
+    }
+
+    private function setRoutes(array $routes): void
+    {
+        $this->httpRequest->attributes->set('routes', $routes);
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->httpRequest->attributes->get('routes', []);
     }
 
     public static function query(): string

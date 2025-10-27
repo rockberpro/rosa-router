@@ -33,11 +33,6 @@ class Request implements RequestInterface
      */
     public function handle(RequestData $requestData): Response
     {
-        global $routes;
-        if ($routes === null) {
-            return new Response(['message' => 'No registered routes'], Response::NOT_FOUND);
-        }
-
         $path = $this->getPath($requestData);
         if (!$path) {
             return new Response(['message' => 'Not found'], Response::NOT_FOUND);
@@ -45,19 +40,19 @@ class Request implements RequestInterface
         $request = null;
         switch ($requestData->getMethod()) {
             case 'GET':
-                $request = (new GetRequest())->buildRequest($routes, $requestData);
+                $request = (new GetRequest())->buildRequest($requestData);
                 break;
             case 'POST':
-                $request = (new PostRequest())->buildRequest($routes, $requestData);
+                $request = (new PostRequest())->buildRequest($requestData);
                 break;
             case 'PUT':
-                $request = (new PutRequest())->buildRequest($routes, $requestData);
+                $request = (new PutRequest())->buildRequest($requestData);
                 break;
             case 'PATCH':
-                $request = (new PatchRequest())->buildRequest($routes, $requestData);
+                $request = (new PatchRequest())->buildRequest($requestData);
                 break;
             case 'DELETE':
-                $request = (new DeleteRequest())->buildRequest($routes, $requestData);
+                $request = (new DeleteRequest())->buildRequest($requestData);
                 break;
             default: break;
         }
@@ -149,32 +144,11 @@ class Request implements RequestInterface
      */
     public function get($key)
     {
-        if (isset($this->parameters[$key])) {
-            return $this->parameters[$key];
-        }
+        $content = Server::getInstance()->getHttpRequest()->getContent();
+        $body = json_decode($content, true);
 
-        return null;
-    }
+        //FIXME: handle also form-data and x-www-form-urlencoded
 
-    /**
-     * Set the route parameters
-     * 
-     * @method parameters
-     * @return array
-     */
-    public function __set($key, $value)
-    {
-        return $this->parameters[$key] = $value;
-    }
-
-    /**
-     * Get the route parameters
-     * 
-     * @method parameters
-     * @return array
-     */
-    public function __get($key)
-    {
-        return $this->parameters[$key];
+        return $body[$key] ?? null;
     }
 }

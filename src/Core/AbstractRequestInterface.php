@@ -13,9 +13,8 @@ use Rockberpro\RestRouter\Core\RequestData;
  */
 interface AbstractRequestInterface
 {
-    public function buildUriRequest($routes, RequestData $requestData): Request;
-    public function buildBodyRequest($routes, RequestData $requestData): Request;
+    public function buildRequest(RequestData $requestData): Request;
     public function handle($routes, $method, $uri): RequestAction;
     public function map($routes, $method, $uri): array;
-    public function match($mapped_routes, $uri): array;
+    public function match($routes, $mapped_routes, $uri): array;
 }

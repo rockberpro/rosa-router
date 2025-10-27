@@ -16,12 +16,11 @@ class GetRequest extends AbstractRequest
      * Build the request for Get method
      * 
      * @method buildRequest
-     * @param array $routes
      * @param RequestData $requestData
      * @return Request
      */
-    public function buildRequest($routes, RequestData $requestData): Request
+    public function buildRequest(RequestData $requestData): Request
     {
-        return parent::buildUriRequest($routes, $requestData);
+        return parent::buildRequest($requestData);
     }
 }

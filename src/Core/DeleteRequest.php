@@ -16,12 +16,11 @@ class DeleteRequest extends AbstractRequest
      * Build the request for Delete method
      * 
      * @method buildRequest
-     * @param array $routes
      * @param RequestData $requestData
      * @return Request
      */
-    public function buildRequest($routes, RequestData $requestData): Request
+    public function buildRequest(RequestData $requestData): Request
     {
-        return parent::buildUriRequest($routes, $requestData);
+        return parent::buildRequest($requestData);
     }
 }
