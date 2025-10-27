@@ -126,7 +126,7 @@ class Server implements ServerInterface
         $httpRequest = self::getHttpRequest();
         return new RequestData(
             $httpRequest->getMethod(),
-            $httpRequest->getRequestUri(),
+            $httpRequest->getPathInfo(),
             $httpRequest->getQueryString(),
             json_decode($httpRequest->getContent(), true),
             $httpRequest->query->all()

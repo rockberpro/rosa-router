@@ -20,7 +20,9 @@ use RuntimeException;
 class Request implements RequestInterface
 {
     private RequestAction $action;
-    private array $parameters = [];
+    private array $pathParams = [];
+    private array $queryParams = [];
+    private array $bodyParams = [];
     private ?RequestLogger $requestLogger = null;
 
     /**
@@ -132,7 +134,7 @@ class Request implements RequestInterface
      */
     public function getParameters(): array
     {
-        return $this->parameters;
+        return [];
     }
 
     /**
@@ -144,11 +146,71 @@ class Request implements RequestInterface
      */
     public function get($key)
     {
+        $body_param = $this->getBodyParam($key);
+        $path_param = $this->getPathParam($key);
+        $query_param = $this->getQueryParam($key);
+
+        return $body_param ?? $path_param ?? $query_param ?? null;
+    }
+
+    public function setQueryParam(string $key, string $param): void
+    {
+        $this->queryParams[$key] = $param;
+    }
+
+    public function getQueryParam(string $key): ?string
+    {
+        if (!array_key_exists($key, $this->queryParams ?? [])) {
+            return null;
+        }
+        return $this->queryParams[$key];
+    }
+
+    public function getAllQueryParams(): array
+    {
+        return $this->queryParams;
+    }
+
+    public function setPathParam(string $key, string $param): void
+    {
+        $this->pathParams[$key] = $param;
+    }
+
+    public function getPathParam(string $key): ?string
+    {
+        if (!array_key_exists($key, $this->pathParams ?? [])) {
+            return null;
+        }
+        return $this->pathParams[$key] ?? null;
+    }
+
+    public function getAllPathParams(): array
+    {
+        return $this->pathParams;
+    }
+
+    /**
+     * @param string $key
+     * @return void
+     */
+    public function getBodyParam(string $key): ?string
+    {
         $content = Server::getInstance()->getHttpRequest()->getContent();
         $body = json_decode($content, true);
 
-        //FIXME: handle also form-data and x-www-form-urlencoded
-
-        return $body[$key] ?? null;
+        if (!array_key_exists($key, $body ?? [])) {
+            return null;
+        }
+        return $body[$key] ?: null;
     }
+
+    public function getAllBodyParams(): array
+    {
+        $content = Server::getInstance()->getHttpRequest()->getContent();
+        $body = json_decode($content, true);
+
+        return $body ?? [];
+    }
+
+
 }

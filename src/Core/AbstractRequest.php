@@ -26,10 +26,8 @@ abstract class AbstractRequest implements AbstractRequestInterface
     public function buildRequest(RequestData $requestData): Request
     {
         $method = Server::getInstance()->getRequestData()->getMethod();
-        $routes = Server::getInstance()->getRoutes()[$method];
-        if (!$routes) {
-            throw new Exception("No routes defined for the given method: {$method}");
-        }
+        $all_routes = Server::getInstance()->getRoutes();
+        $routes = $this->getRoutes($all_routes, $method);
 
         $request = new Request();
         $action = $this->handle($routes, $requestData->getMethod(), $requestData->getUri());
@@ -85,17 +83,17 @@ abstract class AbstractRequest implements AbstractRequestInterface
         foreach ($route_parts as $key => $route_part) {
             $uri_part = $uri_parts[$key] ?? null;
 
-            $matches = [];
-            /* check if it's a parameter (e.g., {id}) */
-            if (preg_match('/^{(\w+)}$/', $route_part, $matches)) {
-                $attribute = $matches[1];
+            // check if it's a parameter (e.g., {id})
+            $route_matches = [];
+            if (preg_match('/^{(\w+)}$/', $route_part, $route_matches)) {
+                $attribute = $route_matches[1];
                 if (!isset($uri_part) || !RouteHelper::isAlphaNumeric($uri_part)) {
                     throw new Exception("Invalid or missing value for route parameter: {$attribute}");
                 }
-                $request->$attribute = $uri_part;
+                $request->setPathParam($attribute, $uri_part);
             }
             else {
-                /* static segment must match exactly */
+                // static segment must match exactly
                 if ($route_part !== $uri_part) {
                     throw new Exception("Route segment mismatch: expected '{$route_part}', got '{$uri_part}'");
                 }
@@ -116,7 +114,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
     private function queryParams(Request &$request, $queryParams): Request
     {
         foreach ($queryParams as $key => $value) {
-            $request->$key = $value;
+            $request->setQueryParam($key, $value);
         }
 
         return $request;
@@ -135,13 +133,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
     private function getRouteParts(Request $request): array
     {
         $route = $request->getAction()->getRoute()['route'];
-        $prefix = RouteHelper::routeMatchArgs($route)[0];
+        $uri = $request->getAction()->getUri();
 
-        $_uri = str_replace($prefix, '', $request->getAction()->getUri());
-        $_route = str_replace($prefix, '', $route);
-
-        $uri_parts = explode('/', $_uri);
-        $route_parts = explode('/', $_route);
+        $uri_parts = explode('/', $uri);
+        $route_parts = explode('/', $route);
 
         return [
             'route_parts' => $route_parts,
@@ -306,5 +301,24 @@ abstract class AbstractRequest implements AbstractRequestInterface
             ),
             $uri_parts
         );
+    }
+
+    /**
+     * @param array $all_routes
+     * @param string $method
+     * @return mixed
+     * @throws Exception
+     */
+    public function getRoutes(array $all_routes, string $method): mixed
+    {
+        if (!$all_routes) {
+            throw new Exception("No routes defined for the given method: {$method}");
+        }
+        if (!array_key_exists($method, $all_routes)) {
+            throw new Exception("No routes defined for the given method: {$method}");
+        }
+        $routes = $all_routes[$method];
+
+        return $routes;
     }
 }
