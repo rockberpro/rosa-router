@@ -13,7 +13,6 @@ interface ServerInterface
     public static function method(): string;
     public static function key(): string;
     public static function authorization(): string;
-    public static function routeArgv(): string;
     public static function documentRoot(): string;
     public static function serverName(): string;
     public static function serverAddress(): string;

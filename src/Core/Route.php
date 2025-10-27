@@ -294,11 +294,6 @@ class Route implements RouteInterface
      */
     private function build(): void
     {
-        global $routes;
-        if (!isset($routes) || !is_array($routes)) {
-            $routes = [];
-        }
-
         $route = [
           'method'     => self::$instance->method,
           'prefix'     => self::$instance->prefix,
@@ -317,7 +312,10 @@ class Route implements RouteInterface
             $route['middleware'] = $middleware;
         }
 
+        $routes = Server::getInstance()->getRoutes();
         $routes[self::$instance->method][] = $route;
+
+        Server::getInstance()->setRoutes($routes);
     }
 
     /**
@@ -365,7 +363,6 @@ class Route implements RouteInterface
      */
     public static function getRoutes(): array
     {
-        global $routes;
-        return $routes ?? [];
+        return Server::getInstance()->getRoutes();
     }
 }

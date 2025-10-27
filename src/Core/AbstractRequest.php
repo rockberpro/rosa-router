@@ -27,7 +27,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
     {
         $method = Server::getInstance()->getRequestData()->getMethod();
         $all_routes = Server::getInstance()->getRoutes();
-        $routes = $this->getRoutes($all_routes, $method);
+        $routes = $this->getRoutesForMethod($all_routes, $method);
 
         $request = new Request();
         $action = $this->handle($routes, $requestData->getMethod(), $requestData->getUri());
@@ -309,7 +309,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @return mixed
      * @throws Exception
      */
-    public function getRoutes(array $all_routes, string $method): mixed
+    public function getRoutesForMethod(array $all_routes, string $method): mixed
     {
         if (!$all_routes) {
             throw new Exception("No routes defined for the given method: {$method}");

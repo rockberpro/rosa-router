@@ -22,25 +22,21 @@ class Server implements ServerInterface
 
     private static Server $instance;
 
-    public function __construct() {
-        self::$instance = $this;
-        $this->httpRequest = HttpRequest::createFromGlobals();
-        $this->httpRequest->attributes->set('routes', Route::getRoutes());
-    }
+    public function __construct() {}
 
     public function isApiEndpoint(): bool
     {
-        return strpos($this->httpRequest->getPathInfo(), '/api/') !== false;
+        return strpos(self::getInstance()->getHttpRequest()->getPathInfo(), '/api/') !== false;
     }
 
-    private function setRoutes(array $routes): void
+    public function setRoutes(array $routes): void
     {
-        $this->httpRequest->attributes->set('routes', $routes);
+        self::getInstance()->getHttpRequest()->attributes->set('routes', $routes);
     }
 
     public function getRoutes(): array
     {
-        return $this->httpRequest->attributes->get('routes', []);
+        return self::getInstance()->getHttpRequest()->attributes->get('routes', []);
     }
 
     public static function query(): string
@@ -66,14 +62,6 @@ class Server implements ServerInterface
     public static function userAgent(): string
     {
         return $_SERVER['HTTP_USER_AGENT'] ?? '';
-    }
-
-    public static function routeArgv(): string
-    {
-        if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
-            return explode('path=', $_SERVER['argv'][0])[1] ?? '';
-        }
-        return '';
     }
 
     public static function documentRoot(): string
@@ -152,6 +140,11 @@ class Server implements ServerInterface
      */
     public static function getInstance(): Server
     {
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+            self::$instance->httpRequest = HttpRequest::createFromGlobals();
+        }
+
         return self::$instance;
     }
 }
