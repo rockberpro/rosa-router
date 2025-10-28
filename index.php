@@ -4,8 +4,6 @@ use Rockberpro\RestRouter\Bootstrap;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Rockberpro\RestRouter\Logs\RequestLogger;
-use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Utils\DotEnv;
 
 require_once "vendor/autoload.php";
