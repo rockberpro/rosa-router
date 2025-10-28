@@ -263,9 +263,7 @@ class Request implements RequestInterface
      */
     public function getAllBodyParams(): array
     {
-        $content = Server::getInstance()->getHttpRequest()->toArray();
-
-        return $content ?? [];
+        return Server::getInstance()->getHttpRequest()->toArray() ?? [];;
     }
 
     /**
