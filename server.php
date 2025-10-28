@@ -16,13 +16,14 @@ require_once "routes/api.php";
 
 DotEnv::load(".env");
 
-$server = new Server();
 InfoLogHandler::register("logs/info.log");
 ErrorLogHandler::register("logs/error.log");
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
-    return (new Bootstrap($request))->execute();
+    if (Server::getInstance()->isApiEndpoint()) {
+        return (new Bootstrap($request))->execute();
+    }
 });
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);

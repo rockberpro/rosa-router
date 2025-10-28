@@ -9,8 +9,7 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 require_once "vendor/autoload.php";
 require_once "routes/api.php";
 
-$server = new Server();
-if ($server->isApiEndpoint()) {
+if (Server::getInstance()->isApiEndpoint()) {
     DotEnv::load(".env");
 
     InfoLogHandler::register("logs/info.log");
