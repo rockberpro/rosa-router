@@ -236,13 +236,11 @@ class Request implements RequestInterface
      */
     public function getBodyParam(string $key): ?string
     {
-        $content = Server::getInstance()->getHttpRequest()->getContent();
-        $body = json_decode($content, true);
-
+        $content = Server::getInstance()->getHttpRequest()->isFromTrustedProxy();
         if (!array_key_exists($key, $body ?? [])) {
             return null;
         }
-        return $body[$key] ?: null;
+        return $content[$key] ?: null;
     }
 
     /**
@@ -250,10 +248,9 @@ class Request implements RequestInterface
      */
     public function getAllBodyParams(): array
     {
-        $content = Server::getInstance()->getHttpRequest()->getContent();
-        $body = json_decode($content, true);
+        $content = Server::getInstance()->getHttpRequest()->toArray();
 
-        return $body ?? [];
+        return $content ?? [];
     }
 
     /**
@@ -272,7 +269,7 @@ class Request implements RequestInterface
             'user_agent' => Server::userAgent(),
             'request_method' => Server::requestMethod(),
             'request_uri' => Server::requestUri(),
-            'request_body' => $request->getParams(),
+            'request_data' => $request->getParams(),
             'endpoint' => $request->getAction()->getUri() ?? '',
         ];
         if (!$is_closure) {

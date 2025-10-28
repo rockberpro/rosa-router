@@ -120,7 +120,7 @@ final class Server implements ServerInterface
             $httpRequest->getMethod(),
             $httpRequest->getPathInfo(),
             $httpRequest->getQueryString(),
-            json_decode($httpRequest->getContent(), true),
+            !empty($httpRequest->getContent()) ? $httpRequest->toArray() : [],
             $httpRequest->query->all()
         );
     }
