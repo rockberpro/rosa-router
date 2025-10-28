@@ -3,7 +3,6 @@
 namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use RuntimeException;
@@ -252,7 +251,7 @@ class Request implements RequestInterface
      */
     public function getBodyParam(string $key): ?string
     {
-        $content = Server::getInstance()->getHttpRequest()->isFromTrustedProxy();
+        $content = Server::getInstance()->getHttpRequest()->toArray();
         if (!array_key_exists($key, $body ?? [])) {
             return null;
         }
