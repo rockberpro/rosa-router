@@ -8,11 +8,7 @@ use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Service\Container;
-use Rockberpro\RestRouter\Utils\DotEnv;
 use React\Http\Message\ServerRequest;
-use React\Http\Message\Response as ReactResponse;
-use Rockberpro\RestRouter\Core\Response as RouterResponse;
-use stdClass;
 use Throwable;
 
 class Bootstrap
@@ -44,23 +40,17 @@ class Bootstrap
                 $response->response();
             }
 
-            RouterResponse::json([
+            \Rockberpro\RestRouter\Core\Response::json([
                 'message' => 'Not implemented'
-            ], RouterResponse::NOT_IMPLEMENTED);
+            ], 501);
         }
         catch (Throwable $t) {
             $this->writeLog($t);
-
-            if (DotEnv::get('API_DEBUG')) {
-                RouterResponse::json([
-                    'message' => $t->getMessage(),
-                ], RouterResponse::INTERNAL_SERVER_ERROR);
-            }
-
-            RouterResponse::json([
-                'message' => 'Internal server error'
-            ], RouterResponse::INTERNAL_SERVER_ERROR);
         }
+
+        \Rockberpro\RestRouter\Core\Response::json([
+            'message' => 'Internal server error'
+        ], 500);
     }
 
     public function handleStateful(ServerRequest $request)
@@ -72,14 +62,14 @@ class Bootstrap
                 );
 
             if ($response) {
-                return new ReactResponse(
+                return new \React\Http\Message\Response(
                     $response->status,
                     ['Content-Type' => 'application/json'],
                     json_encode($response->data)
                 );
             }
 
-            return new ReactResponse(
+            return new \React\Http\Message\Response(
                 501,
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
@@ -87,56 +77,13 @@ class Bootstrap
         }
         catch (Throwable $t) {
             $this->writeLog($t);
-
-            if (DotEnv::get('API_DEBUG')) {
-                return new ReactResponse(
-                    500,
-                    ['Content-Type' => 'application/json'],
-                    json_encode([
-                        'message' => $t->getMessage(),
-                    ])
-                );
-            }
         }
 
-        return new ReactResponse(
+        return new \React\Http\Message\Response(
             500,
             ['Content-Type' => 'application/json'],
             json_encode(['message' => 'Internal server error'])
         );
-    }
-
-    public function queryParams()
-    {
-        $queryParams = new stdClass();
-        if (empty(Server::query())) {
-            return $queryParams;
-        }
-    
-        if (stripos(Server::query(), 'path=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($parts)) {
-                foreach($parts as $key => $value) {
-                    if ($key !== 'path') {
-                        $queryParams->$key = $value;
-                    }
-                }
-            }
-        }
-        else if (stripos(Server::query(), '=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($query)) {
-                foreach($parts as $key => $value) {
-                    $queryParams->$key = $value;
-                }
-            }
-        }
-    
-        return $queryParams;
     }
 
     public function isRunningCli(): bool {
