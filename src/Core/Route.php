@@ -312,10 +312,7 @@ class Route implements RouteInterface
             $route['middleware'] = $middleware;
         }
 
-        $routes = Server::getInstance()->getRoutes();
-        $routes[self::$instance->method][] = $route;
-
-        Server::getInstance()->setRoutes($routes);
+        $this->createRoute($route);
     }
 
     /**
@@ -353,6 +350,17 @@ class Route implements RouteInterface
         }
 
         return $prefixes;
+    }
+
+    /**
+     * @param array $route
+     * @return void
+     */
+    private function createRoute(array $route): void
+    {
+        $routes = Server::getInstance()->getRoutes();
+        $routes[self::$instance->method][] = $route;
+        Server::getInstance()->setRoutes($routes);
     }
 
     /**

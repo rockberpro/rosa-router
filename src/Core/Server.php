@@ -20,6 +20,7 @@ class Server implements ServerInterface
      */
     private ?HttpRequest $httpRequest = null;
 
+    private array $routes = [];
     private static Server $instance;
 
     public function __construct() {}
@@ -31,12 +32,12 @@ class Server implements ServerInterface
 
     public function setRoutes(array $routes): void
     {
-        self::getInstance()->getHttpRequest()->attributes->set('routes', $routes);
+        self::getInstance()->routes = $routes;
     }
 
     public function getRoutes(): array
     {
-        return self::getInstance()->getHttpRequest()->attributes->get('routes', []);
+        return self::getInstance()->routes;
     }
 
     public static function query(): string
