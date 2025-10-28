@@ -2,14 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\RequestInterface;
-use Rockberpro\RestRouter\Core\DeleteRequest;
-use Rockberpro\RestRouter\Core\GetRequest;
-use Rockberpro\RestRouter\Core\PatchRequest;
-use Rockberpro\RestRouter\Core\PostRequest;
-use Rockberpro\RestRouter\Core\PutRequest;
-use Rockberpro\RestRouter\Core\RequestAction;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Service\Container;
@@ -23,7 +15,8 @@ use RuntimeException;
  */
 class Request implements RequestInterface
 {
-    private RequestAction $action;
+    private RequestAction $requestAction;
+    private RequestData $requestData;
     private array $pathParams = [];
     private array $queryParams = [];
 
@@ -94,7 +87,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * Set the route action
+     * Set the request action
      * 
      * @method setAction
      * @param RequestAction $action
@@ -102,18 +95,41 @@ class Request implements RequestInterface
      */
     public function setAction(RequestAction $action): void
     {
-        $this->action = $action;
+        $this->requestAction = $action;
     }
 
     /**
-     * Get the route action
+     * Get the request action
      * 
      * @method getAction
      * @return RequestAction
      */
     public function getAction(): RequestAction
     {
-        return $this->action;
+        return $this->requestAction;
+    }
+
+    /**
+     * Set the request data
+     *
+     * @method setData
+     * @param RequestData $data
+     * @return void
+     */
+    public function setData(RequestData $data)
+    {
+        $this->requestData = $data;
+    }
+
+    /**
+     * Get the request data
+     *
+     * @method getData
+     * @return RequestData
+     */
+    public function getData(): RequestData
+    {
+        return $this->requestData;
     }
 
     /**
@@ -270,7 +286,7 @@ class Request implements RequestInterface
             'request_method' => Server::requestMethod(),
             'request_uri' => Server::requestUri(),
             'request_data' => $request->getParams(),
-            'endpoint' => $request->getAction()->getUri() ?? '',
+            'endpoint' => $request->getAction()->getUri(),
         ];
         if (!$is_closure) {
             $log_data['class'] = $request->getAction()->getClass();

@@ -20,21 +20,22 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * Build the request
      * 
      * @method buildRequest
-     * @param RequestData $requestData
+     * @param RequestData $data
      * @return Request
      */
-    public function buildRequest(RequestData $requestData): Request
+    public function buildRequest(RequestData $data): Request
     {
         $method = Server::getInstance()->getRequestData()->getMethod();
         $all_routes = Server::getInstance()->getRoutes();
         $routes = $this->getRoutesForMethod($all_routes, $method);
 
         $request = new Request();
-        $action = $this->handle($routes, $requestData->getMethod(), $requestData->getUri());
+        $action = $this->handle($routes, $data->getMethod(), $data->getUri());
+        $request->setData($data);
         $request->setAction($action);
 
         $request = $this->pathParams($request);
-        $request = $this->queryParams($request, $requestData->getQueryParams());
+        $request = $this->queryParams($request, $data->getQueryParams());
 
         // execute the middleware
         if ($middleware = $request->getAction()->getMiddleware()) {
