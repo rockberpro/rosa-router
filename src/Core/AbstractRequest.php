@@ -26,11 +26,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
     public function buildRequest(RequestData $data): Request
     {
         $method = Server::getInstance()->getRequestData()->getMethod();
-        $all_routes = Server::getInstance()->getRoutes();
-        $routes = $this->getRoutesForMethod($all_routes, $method);
+        $routes = $this->getRoutesForMethod(Server::getInstance()->getRoutes(), $method);
 
         $request = new Request();
-        $action = $this->handle($routes, $data->getMethod(), $data->getUri());
+        $action = $this->handle($routes, $data->getUri());
         $request->setData($data);
         $request->setAction($action);
 
@@ -50,13 +49,12 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method handle
      * @param array $routes
-     * @param string $method
      * @param string $uri
      * @return RequestAction
      */
-    public function handle($routes, $method, $uri): RequestAction
+    public function handle($routes, $uri): RequestAction
     {
-        $routes_map = $this->map($routes, $method, $uri);
+        $routes_map = $this->map($routes, $uri);
         $match = $this->match($routes, $routes_map, $uri);
         if (!$match) {
             throw new Exception('No matching route');
@@ -209,11 +207,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * 
      * @method map
      * @param array $routes
-     * @param string $method
-     * * @param string $uri
+     * @param string $uri
      * @return array mapped_routes
      */
-    public function map($routes, $method, $uri): array
+    public function map($routes, $uri): array
     {
         $filtered_routes = array_filter(
             $routes,

@@ -21,34 +21,29 @@ class Request implements RequestInterface
 
     /**
      * @method handle
-     * @param string $method
-     * @param string $uri
-     * @param string $queryPath
-     * @param array $body
-     * @param array $queryParams
+     * @param RequestData $data
      */
-    public function handle(RequestData $requestData): Response
+    public function handle(RequestData $data): Response
     {
-        $path = $this->getPath($requestData);
-        if (!$path) {
+        if (!$this->getPath($data)) {
             return new Response(['message' => 'Not found'], Response::NOT_FOUND);
         }
         $request = null;
-        switch ($requestData->getMethod()) {
+        switch ($data->getMethod()) {
             case 'GET':
-                $request = (new GetRequest())->buildRequest($requestData);
+                $request = (new GetRequest())->buildRequest($data);
                 break;
             case 'POST':
-                $request = (new PostRequest())->buildRequest($requestData);
+                $request = (new PostRequest())->buildRequest($data);
                 break;
             case 'PUT':
-                $request = (new PutRequest())->buildRequest($requestData);
+                $request = (new PutRequest())->buildRequest($data);
                 break;
             case 'PATCH':
-                $request = (new PatchRequest())->buildRequest($requestData);
+                $request = (new PatchRequest())->buildRequest($data);
                 break;
             case 'DELETE':
-                $request = (new DeleteRequest())->buildRequest($requestData);
+                $request = (new DeleteRequest())->buildRequest($data);
                 break;
             default: break;
         }
