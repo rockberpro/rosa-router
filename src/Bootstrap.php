@@ -9,6 +9,7 @@ use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Service\Container;
 use React\Http\Message\ServerRequest;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use Throwable;
 
 class Bootstrap
@@ -48,6 +49,12 @@ class Bootstrap
             $this->writeLog($t);
         }
 
+        if (DotEnv::get('API_DEBUG')) {
+            \Rockberpro\RestRouter\Core\Response::json([
+                'message' => $t->getMessage()
+            ], 500);
+        }
+
         \Rockberpro\RestRouter\Core\Response::json([
             'message' => 'Internal server error'
         ], 500);
@@ -77,6 +84,14 @@ class Bootstrap
         }
         catch (Throwable $t) {
             $this->writeLog($t);
+        }
+
+        if (DotEnv::get('API_DEBUG')) {
+            return new \React\Http\Message\Response(
+                500,
+                ['Content-Type' => 'application/json'],
+                json_encode(['message' => $t->getMessage()])
+            );
         }
 
         return new \React\Http\Message\Response(
