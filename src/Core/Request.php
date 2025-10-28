@@ -251,8 +251,12 @@ class Request implements RequestInterface
      */
     public function getBodyParam(string $key): ?string
     {
-        $content = Server::getInstance()->getHttpRequest()->toArray();
-        if (!array_key_exists($key, $body ?? [])) {
+        $content = [];
+        $raw = Server::getInstance()->getHttpRequest()->getContent();
+        if ($raw !== '' && $raw !== null) {
+            $content = Server::getInstance()->getHttpRequest()->toArray();
+        }
+        if (!array_key_exists($key, $content ?? [])) {
             return null;
         }
         return $content[$key] ?: null;
@@ -263,7 +267,11 @@ class Request implements RequestInterface
      */
     public function getAllBodyParams(): array
     {
-        return Server::getInstance()->getHttpRequest()->toArray() ?? [];;
+        $raw = Server::getInstance()->getHttpRequest()->getContent();
+        if ($raw !== '' && $raw !== null) {
+            return Server::getInstance()->getHttpRequest()->toArray();
+        }
+        return [];
     }
 
     /**
