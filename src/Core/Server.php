@@ -3,6 +3,8 @@
 namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Core\ServerInterface;
+use Rockberpro\RestRouter\Logs\ExceptionLogger;
+use Rockberpro\RestRouter\Logs\RequestLogger;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Rockberpro\RestRouter\Core\Route;
 
@@ -11,7 +13,7 @@ use Rockberpro\RestRouter\Core\Route;
  * 
  * @package Rockberpro\RestRouter
  */
-class Server implements ServerInterface
+final class Server implements ServerInterface
 {
     /**
      * Cached HttpFoundation Request instance (singleton)
@@ -21,6 +23,7 @@ class Server implements ServerInterface
     private ?HttpRequest $httpRequest = null;
 
     private array $routes = [];
+
     private static Server $instance;
 
     public function __construct() {}

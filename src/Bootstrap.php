@@ -4,8 +4,10 @@ namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
+use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use React\Http\Message\ServerRequest;
 use React\Http\Message\Response as ReactResponse;
@@ -16,8 +18,6 @@ use Throwable;
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ?ExceptionLogger $exceptionLogger = null;
-    private ?RequestLogger $requestLogger = null;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -36,7 +36,6 @@ class Bootstrap
     {
         try {
             $response = (new Request())
-                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     Server::getInstance()->getRequestData()
                 );
@@ -50,16 +49,11 @@ class Bootstrap
             ], RouterResponse::NOT_IMPLEMENTED);
         }
         catch (Throwable $t) {
-            if ($this->getExceptionLogger()) {
-                $this->getExceptionLogger()->writeLog($t);
-            }
+            $this->writeLog($t);
 
             if (DotEnv::get('API_DEBUG')) {
                 RouterResponse::json([
                     'message' => $t->getMessage(),
-                    'file' => $t->getFile(),
-                    'line' => $t->getLine(),
-                    'trace' => $t->getTraceAsString(),
                 ], RouterResponse::INTERNAL_SERVER_ERROR);
             }
 
@@ -73,7 +67,6 @@ class Bootstrap
     {
         try {
             $response = (new Request())
-                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
                     Server::getInstance()->getRequestData()
                 );
@@ -93,9 +86,7 @@ class Bootstrap
             );
         }
         catch (Throwable $t) {
-            if ($this->getExceptionLogger()) {
-                $this->getExceptionLogger()->writeLog($t);
-            }
+            $this->writeLog($t);
 
             if (DotEnv::get('API_DEBUG')) {
                 return new ReactResponse(
@@ -103,9 +94,6 @@ class Bootstrap
                     ['Content-Type' => 'application/json'],
                     json_encode([
                         'message' => $t->getMessage(),
-                        'file' => $t->getFile(),
-                        'line' => $t->getLine(),
-                        'trace' => $t->getTraceAsString(),
                     ])
                 );
             }
@@ -151,27 +139,22 @@ class Bootstrap
         return $queryParams;
     }
 
-    public function setExceptionLogger(?ExceptionLogger $logger)
-    {
-        $this->exceptionLogger = $logger;
-        return $this;
-    }
-    public function getExceptionLogger(): ?ExceptionLogger
-    {
-        return $this->exceptionLogger;
-    }
-
-    public function setRequestLogger(?RequestLogger $logger)
-    {
-        $this->requestLogger = $logger;
-        return $this;
-    }
-    public function getRequestLogger(): ?RequestLogger
-    {
-        return $this->requestLogger;
-    }
-
     public function isRunningCli(): bool {
         return (php_sapi_name() === 'cli');
+    }
+
+    /**
+     * @param Throwable $t
+     * @return void
+     */
+    public function writeLog(Throwable $t): void
+    {
+        $logger = Container::getInstance()->get(ErrorLogHandler::class);
+        $logger->write('error', [
+            'message' => $t->getMessage(),
+            'file' => $t->getFile(),
+            'line' => $t->getLine(),
+            'trace' => $t->getTraceAsString(),
+        ]);
     }
 }

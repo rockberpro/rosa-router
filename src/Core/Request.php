@@ -9,7 +9,11 @@ use Rockberpro\RestRouter\Core\PatchRequest;
 use Rockberpro\RestRouter\Core\PostRequest;
 use Rockberpro\RestRouter\Core\PutRequest;
 use Rockberpro\RestRouter\Core\RequestAction;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Logs\RequestLogger;
+use Rockberpro\RestRouter\Service\Container;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use RuntimeException;
 
 /**
@@ -22,8 +26,6 @@ class Request implements RequestInterface
     private RequestAction $action;
     private array $pathParams = [];
     private array $queryParams = [];
-    private array $bodyParams = [];
-    private ?RequestLogger $requestLogger = null;
 
     /**
      * @method handle
@@ -63,9 +65,7 @@ class Request implements RequestInterface
             throw new RuntimeException('It was not possible to match your request');
         }
 
-        if ($this->getRequestLogger()) {
-            $this->getRequestLogger()->writeLog($request);
-        }
+        $this->writeLog($request);
 
         $closure = $request->getAction()->getClosure();
         if ($closure) {
@@ -114,16 +114,6 @@ class Request implements RequestInterface
     public function getAction(): RequestAction
     {
         return $this->action;
-    }
-
-    public function setRequestLogger(?RequestLogger $logger)
-    {
-        $this->requestLogger = $logger;
-        return $this;
-    }
-    public function getRequestLogger(): ?RequestLogger
-    {
-        return $this->requestLogger;
     }
 
     /**
@@ -264,5 +254,32 @@ class Request implements RequestInterface
         $body = json_decode($content, true);
 
         return $body ?? [];
+    }
+
+    /**
+     * @param Request $request
+     * @return void
+     */
+    public function writeLog(Request $request): void
+    {
+        $logger = Container::getInstance()->get(InfoLogHandler::class);
+        $is_closure = $request->getAction()->isClosure();
+        $log_data = [
+            'subject' => DotEnv::get('API_NAME'),
+            'type' => $is_closure ? 'closure' : 'controller',
+            'remote_address' => Server::remoteAddress(),
+            'target_address' => Server::targetAddress(),
+            'user_agent' => Server::userAgent(),
+            'request_method' => Server::requestMethod(),
+            'request_uri' => Server::requestUri(),
+            'request_body' => json_encode($request->getParams()),
+            'endpoint' => $request->getAction()->getUri() ?? '',
+        ];
+        if (!$is_closure) {
+            $log_data['class'] = $request->getAction()->getClass();
+            $log_data['method'] = $request->getAction()->getMethod();
+        }
+
+        $logger->write('request', $log_data);
     }
 }
