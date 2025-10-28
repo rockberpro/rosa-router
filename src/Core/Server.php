@@ -5,6 +5,7 @@ namespace Rockberpro\RestRouter\Core;
 use Rockberpro\RestRouter\Core\ServerInterface;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Logs\RequestLogger;
+use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Rockberpro\RestRouter\Core\Route;
 
@@ -23,8 +24,6 @@ final class Server implements ServerInterface
     private ?HttpRequest $httpRequest = null;
 
     private array $routes = [];
-
-    private static Server $instance;
 
     public function __construct() {}
 
@@ -144,11 +143,12 @@ final class Server implements ServerInterface
      */
     public static function getInstance(): Server
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-            self::$instance->httpRequest = HttpRequest::createFromGlobals();
+        if (!Container::getInstance()->has(Server::class)) {
+            $instance = new self();
+            $instance->httpRequest = HttpRequest::createFromGlobals();
+            Container::getInstance()->set(Server::class, $instance);
         }
 
-        return self::$instance;
+        return Container::getInstance()->get(Server::class);
     }
 }
