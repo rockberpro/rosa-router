@@ -2,6 +2,8 @@
 
 use Rockberpro\RestRouter\Bootstrap;
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Utils\DotEnv;
@@ -13,8 +15,8 @@ $server = new Server();
 if ($server->isApiEndpoint()) {
     DotEnv::load(".env");
 
-    (new Bootstrap())
-        ->setRequestLogger(new RequestLogger("logs/api_access.log"))
-        ->setExceptionLogger(new ExceptionLogger("logs/api_error.log"))
-        ->execute();
+    InfoLogHandler::register("logs/info.log");
+    ErrorLogHandler::register("logs/error.log");
+
+    (new Bootstrap())->execute();
 }
