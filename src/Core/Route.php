@@ -295,10 +295,10 @@ class Route implements RouteInterface
     private function build(): void
     {
         $route = [
-          'method'     => self::$instance->method,
-          'prefix'     => self::$instance->prefix,
-          'route'      => self::$instance->route,
-          'target'     => self::$instance->target,
+          'method' => self::$instance->method,
+          'prefix' => self::$instance->prefix,
+          'route'  => self::$instance->route,
+          'target' => self::$instance->target,
         ];
 
         // get values with inheritance
