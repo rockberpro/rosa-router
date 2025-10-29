@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Helpers;
 
-use Rockberpro\RestRouter\Helpers\RouteHelperInterface;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 

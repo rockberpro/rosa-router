@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\RouteInterface;
 use Closure;
 use Exception;
 

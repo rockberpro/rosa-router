@@ -2,12 +2,10 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\ServerInterface;
 use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
-use Rockberpro\RestRouter\Core\Route;
 
 /**
  * @author Samuel Oberger Rockenbach

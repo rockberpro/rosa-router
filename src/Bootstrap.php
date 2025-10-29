@@ -5,8 +5,6 @@ namespace Rockberpro\RestRouter;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\RequestLogger;
-use Rockberpro\RestRouter\Logs\ExceptionLogger;
 use Rockberpro\RestRouter\Service\Container;
 use React\Http\Message\ServerRequest;
 use Rockberpro\RestRouter\Utils\DotEnv;

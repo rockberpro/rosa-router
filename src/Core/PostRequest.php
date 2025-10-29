@@ -2,9 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\RequestData;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 

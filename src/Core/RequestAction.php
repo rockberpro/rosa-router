@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\RequestActionInterface;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 
