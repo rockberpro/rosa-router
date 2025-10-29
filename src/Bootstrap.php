@@ -29,7 +29,7 @@ class Bootstrap
         return $this->handleStateful($this->request);
     }
 
-    public function handleStateless()
+    public function handleStateless(): \Rockberpro\RestRouter\Core\Response
     {
         try {
             $response = (new Request())
@@ -60,7 +60,7 @@ class Bootstrap
         ], 500);
     }
 
-    public function handleStateful(ServerRequest $request)
+    public function handleStateful(ServerRequest $request): \React\Http\Message\Response
     {
         try {
             $response = (new Request())
