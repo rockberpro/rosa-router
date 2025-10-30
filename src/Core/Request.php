@@ -66,7 +66,7 @@ class Request implements RequestInterface
         // call the controller
         $response = (new $class)->$method($request);
         if (!($response instanceof Response)) {
-            throw new RuntimeException('The controller method must return an instance of Response');
+            throw new ResponseException('The controller method must return an instance of Response');
         }
         return $response;
     }
@@ -292,3 +292,5 @@ class Request implements RequestInterface
         $logger->write('request', $log_data);
     }
 }
+
+final class RequestException extends \RuntimeException {}

@@ -81,12 +81,12 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
             // check if it's a parameter (e.g., {id})
             $route_matches = [];
-            if (preg_match('/^{(\w+)}$/', $route_part, $route_matches)) {
-                $attribute = $route_matches[1];
+            if ($this->checkIfPathParam($route_part, $route_matches)) {
+                $route_arg = $this->pathArg($route_matches);
                 if (!isset($uri_part) || !RouteHelper::isAlphaNumeric($uri_part)) {
-                    throw new Exception("Invalid or missing value for route parameter: {$attribute}");
+                    throw new RequestException("Invalid or missing value for route parameter: {$route_arg}");
                 }
-                $request->setPathParam($attribute, $uri_part);
+                $request->setPathParam($route_arg, $uri_part);
             }
             else {
                 // static segment must match exactly
@@ -315,5 +315,26 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $routes = $all_routes[$method];
 
         return $routes;
+    }
+
+    /**
+     * @param string $route_part
+     * @param array $route_matches
+     * @return false|int
+     */
+    public function checkIfPathParam(string $route_part, array &$route_matches)
+    {
+        return preg_match('/^{(\w+)}$/', $route_part, $route_matches);
+    }
+
+    /**
+     * @param array $route_matches
+     * @return string
+     */
+    public function pathArg(array $route_matches): string
+    {
+        $part = array_slice($route_matches, 1, 1);
+        $route_arg = reset($part);
+        return $route_arg;
     }
 }

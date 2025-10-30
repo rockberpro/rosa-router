@@ -68,7 +68,7 @@ class Response implements ResponseInterface
      * @param int $status
      * @exit
      */
-    public static function json($data, $status): never
+    public static function json($data, $status)
     {
         http_response_code($status);
         header('Content-Type: application/json; charset=utf-8');
@@ -77,3 +77,5 @@ class Response implements ResponseInterface
         );
     }
 }
+
+final class ResponseException extends \RuntimeException {}
