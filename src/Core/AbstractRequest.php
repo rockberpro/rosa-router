@@ -82,11 +82,11 @@ abstract class AbstractRequest implements AbstractRequestInterface
             // check if it's a parameter (e.g., {id})
             $route_matches = [];
             if ($this->checkIfPathParam($route_part, $route_matches)) {
-                $route_arg = $this->pathArg($route_matches);
+                $path_arg = $this->pathArg($route_matches);
                 if (!isset($uri_part) || !RouteHelper::isAlphaNumeric($uri_part)) {
-                    throw new RequestException("Invalid or missing value for route parameter: {$route_arg}");
+                    throw new RequestException("Invalid or missing value for route parameter: {$path_arg}");
                 }
-                $request->setPathParam($route_arg, $uri_part);
+                $request->setPathParam($path_arg, $uri_part);
             }
             else {
                 // static segment must match exactly
