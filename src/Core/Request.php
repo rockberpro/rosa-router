@@ -6,7 +6,6 @@ use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
 /**
  * @author Samuel Oberger Rockenbach
