@@ -24,7 +24,7 @@ class ErrorLogHandler
                 $instance->logger->pushHandler(new StreamHandler($file_path, Logger::ERROR));
             }
             if (DotEnv::get('API_LOGS_DB')) {
-                $instance->pushHandler(new PDOLogHandler(
+                $instance->logger->pushHandler(new PDOLogHandler(
                     (new PDOConnection())->getPDO(),
                     'logs',
                     Logger::ERROR,
