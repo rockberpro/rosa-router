@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter\Controllers;
 
-use Rockberpro\RestRouter\Controllers\ControllerInterface;
 use Rockberpro\RestRouter\Core\Response;
 
 class Controller implements ControllerInterface

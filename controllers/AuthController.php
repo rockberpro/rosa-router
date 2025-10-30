@@ -8,7 +8,6 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\Response;
 use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Controllers\Controller;
 use Rockberpro\RestRouter\Database\PDOConnection;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;

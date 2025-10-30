@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\RequestActionInterface;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 
@@ -11,15 +9,15 @@ use Rockberpro\RestRouter\Core\RequestActionInterface;
  */
 class RequestAction implements RequestActionInterface
 {
-    private ?string $middleware = '';
+    private ?string $middleware;
     private string $method;
     private $closure;
     private array $route;
     private string $class;
     private string $uri;
 
-    public function getMiddleware(): string {
-        return $this->middleware;
+    public function getMiddleware(): ?string {
+        return $this->middleware ?? null;
     }
     public function setMiddleware($middleware): void {
         $this->middleware = $middleware;
@@ -43,6 +41,10 @@ class RequestAction implements RequestActionInterface
         return $this->route;
     }
     public function setRoute($route): void {
+        $middleware = $route['middleware'] ?? null;
+        if ($middleware) {
+            $this->setMiddleware($middleware);
+        }
         $this->route = $route;
     }
 

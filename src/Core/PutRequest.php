@@ -2,9 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\RequestData;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 
@@ -16,12 +13,11 @@ class PutRequest extends AbstractRequest
      * Build the request for Put method
      * 
      * @method buildRequest
-     * @param array $routes
-     * @param RequestData $requestData
+     * @param RequestData $data
      * @return Request
      */
-    public function buildRequest($routes, RequestData $requestData): Request
+    public function buildRequest(RequestData $data): Request
     {
-        return parent::buildBodyRequest($routes, $requestData);
+        return parent::buildRequest($data);
     }
 }

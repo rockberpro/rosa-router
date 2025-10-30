@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\RouteInterface;
 use Closure;
 use Exception;
 
@@ -294,16 +293,11 @@ class Route implements RouteInterface
      */
     private function build(): void
     {
-        global $routes;
-        if (!isset($routes) || !is_array($routes)) {
-            $routes = [];
-        }
-
         $route = [
-          'method'     => self::$instance->method,
-          'prefix'     => self::$instance->prefix,
-          'route'      => self::$instance->route,
-          'target'     => self::$instance->target,
+          'method' => self::$instance->method,
+          'prefix' => self::$instance->prefix,
+          'route'  => self::$instance->route,
+          'target' => self::$instance->target,
         ];
 
         // get values with inheritance
@@ -317,7 +311,7 @@ class Route implements RouteInterface
             $route['middleware'] = $middleware;
         }
 
-        $routes[self::$instance->method][] = $route;
+        $this->createRoute($route);
     }
 
     /**
@@ -358,6 +352,17 @@ class Route implements RouteInterface
     }
 
     /**
+     * @param array $route
+     * @return void
+     */
+    private function createRoute(array $route): void
+    {
+        $routes = Server::getInstance()->getRoutes();
+        $routes[self::$instance->method][] = $route;
+        Server::getInstance()->setRoutes($routes);
+    }
+
+    /**
      * Get all routes
      * 
      * @method getRoutes
@@ -365,7 +370,6 @@ class Route implements RouteInterface
      */
     public static function getRoutes(): array
     {
-        global $routes;
-        return $routes ?? [];
+        return Server::getInstance()->getRoutes();
     }
 }

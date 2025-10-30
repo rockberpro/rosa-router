@@ -2,10 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\RequestAction;
-use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\RequestData;
-
 /**
  * @author Samuel Oberger Rockenbach
  * 
@@ -13,9 +9,8 @@ use Rockberpro\RestRouter\Core\RequestData;
  */
 interface AbstractRequestInterface
 {
-    public function buildUriRequest($routes, RequestData $requestData): Request;
-    public function buildBodyRequest($routes, RequestData $requestData): Request;
-    public function handle($routes, $method, $uri): RequestAction;
-    public function map($routes, $method, $uri): array;
-    public function match($mapped_routes, $uri): array;
+    public function buildRequest(RequestData $data): Request;
+    public function handle($routes, $uri): RequestAction;
+    public function map($routes, $uri): array;
+    public function match($routes, $mapped_routes, $uri): array;
 }

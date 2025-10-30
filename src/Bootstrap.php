@@ -3,23 +3,16 @@
 namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\RequestData;
 use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Logs\RequestLogger;
-use Rockberpro\RestRouter\Logs\ExceptionLogger;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Utils\UrlParser;
+use Rockberpro\RestRouter\Logs\ErrorLogHandler;
+use Rockberpro\RestRouter\Service\Container;
 use React\Http\Message\ServerRequest;
-use React\Http\Message\Response as ReactResponse;
-use Rockberpro\RestRouter\Core\Response as RouterResponse;
-use stdClass;
+use Rockberpro\RestRouter\Utils\DotEnv;
 use Throwable;
 
 class Bootstrap
 {
     private ?ServerRequest $request;
-    private ?ExceptionLogger $exceptionLogger = null;
-    private ?RequestLogger $requestLogger = null;
 
     public function __construct(?ServerRequest $request = null)
     {
@@ -34,163 +27,94 @@ class Bootstrap
         return $this->handleStateful($this->request);
     }
 
-    public function handleStateless()
+    public function handleStateless(): \Rockberpro\RestRouter\Core\Response
     {
-        $uri = Server::uri();
-        $body = Request::body();
-        $method = Server::method();
-        $pathQuery = UrlParser::pathQuery(Server::query());
-
         try {
             $response = (new Request())
-                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
-                    new RequestData(
-                        $method, 
-                        $uri, 
-                        $pathQuery, 
-                        (array) $body,
-                        (array) $this->queryParams()
-                    )
+                    Server::getInstance()->getRequestData()
                 );
 
             if ($response) {
                 $response->response();
             }
 
-            RouterResponse::json([
+            \Rockberpro\RestRouter\Core\Response::json([
                 'message' => 'Not implemented'
-            ], RouterResponse::NOT_IMPLEMENTED);
+            ], 501);
         }
         catch (Throwable $t) {
-            if ($this->getExceptionLogger()) {
-                $this->getExceptionLogger()->writeLog($t);
-            }
-
-            if (DotEnv::get('API_DEBUG')) {
-                RouterResponse::json([
-                    'message' => $t->getMessage(),
-                    'file' => $t->getFile(),
-                    'line' => $t->getLine(),
-                    'trace' => $t->getTraceAsString(),
-                ], RouterResponse::INTERNAL_SERVER_ERROR);
-            }
-
-            RouterResponse::json([
-                'message' => 'Internal server error'
-            ], RouterResponse::INTERNAL_SERVER_ERROR);
+            $this->writeLog($t);
         }
+
+        if (DotEnv::get('API_DEBUG')) {
+            \Rockberpro\RestRouter\Core\Response::json([
+                'message' => $t->getMessage()
+            ], 500);
+        }
+
+        \Rockberpro\RestRouter\Core\Response::json([
+            'message' => 'Internal server error'
+        ], 500);
     }
 
-    public function handleStateful(ServerRequest $request)
+    public function handleStateful(ServerRequest $request): \React\Http\Message\Response
     {
         try {
             $response = (new Request())
-                ->setRequestLogger($this->getRequestLogger())
                 ->handle(
-                    new RequestData(
-                        $request->getMethod(),
-                        $request->getUri()->getPath(),
-                        null, 
-                        (array) $request->getParsedBody(),
-                        (array) $request->getQueryParams()
-                    )
+                    Server::getInstance()->getRequestData()
                 );
 
             if ($response) {
-                return new ReactResponse(
+                return new \React\Http\Message\Response(
                     $response->status,
                     ['Content-Type' => 'application/json'],
                     json_encode($response->data)
                 );
             }
 
-            return new ReactResponse(
+            return new \React\Http\Message\Response(
                 501,
                 ['Content-Type' => 'application/json'],
                 json_encode(['message' => 'Not implemented'])
             );
         }
         catch (Throwable $t) {
-            if ($this->getExceptionLogger()) {
-                $this->getExceptionLogger()->writeLog($t);
-            }
-
-            if (DotEnv::get('API_DEBUG')) {
-                return new ReactResponse(
-                    500,
-                    ['Content-Type' => 'application/json'],
-                    json_encode([
-                        'message' => $t->getMessage(),
-                        'file' => $t->getFile(),
-                        'line' => $t->getLine(),
-                        'trace' => $t->getTraceAsString(),
-                    ])
-                );
-            }
+            $this->writeLog($t);
         }
 
-        return new ReactResponse(
+        if (DotEnv::get('API_DEBUG')) {
+            return new \React\Http\Message\Response(
+                500,
+                ['Content-Type' => 'application/json'],
+                json_encode(['message' => $t->getMessage()])
+            );
+        }
+
+        return new \React\Http\Message\Response(
             500,
             ['Content-Type' => 'application/json'],
             json_encode(['message' => 'Internal server error'])
         );
     }
 
-    public function queryParams()
-    {
-        $queryParams = new stdClass();
-        if (empty(Server::query())) {
-            return $queryParams;
-        }
-    
-        if (stripos(Server::query(), 'path=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($parts)) {
-                foreach($parts as $key => $value) {
-                    if ($key !== 'path') {
-                        $queryParams->$key = $value;
-                    }
-                }
-            }
-        }
-        else if (stripos(Server::query(), '=') !== false) {
-            $parts = [];
-            $query = Server::query();
-            parse_str($query, $parts);
-            if (!empty($query)) {
-                foreach($parts as $key => $value) {
-                    $queryParams->$key = $value;
-                }
-            }
-        }
-    
-        return $queryParams;
-    }
-
-    public function setExceptionLogger(?ExceptionLogger $logger)
-    {
-        $this->exceptionLogger = $logger;
-        return $this;
-    }
-    public function getExceptionLogger(): ?ExceptionLogger
-    {
-        return $this->exceptionLogger;
-    }
-
-    public function setRequestLogger(?RequestLogger $logger)
-    {
-        $this->requestLogger = $logger;
-        return $this;
-    }
-    public function getRequestLogger(): ?RequestLogger
-    {
-        return $this->requestLogger;
-    }
-
     public function isRunningCli(): bool {
         return (php_sapi_name() === 'cli');
+    }
+
+    /**
+     * @param Throwable $t
+     * @return void
+     */
+    public function writeLog(Throwable $t): void
+    {
+        $logger = Container::getInstance()->get(ErrorLogHandler::class);
+        $logger->write('error', [
+            'message' => $t->getMessage(),
+            'file' => $t->getFile(),
+            'line' => $t->getLine(),
+            'trace' => $t->getTraceAsString(),
+        ]);
     }
 }
