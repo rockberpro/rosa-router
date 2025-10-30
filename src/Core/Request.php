@@ -5,7 +5,6 @@ namespace Rockberpro\RestRouter\Core;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use RuntimeException;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -48,8 +47,8 @@ class Request implements RequestInterface
             default: break;
         }
 
-        if ($request === null) {
-            throw new RuntimeException('It was not possible to match your request');
+        if (!$request) {
+            throw new RequestException('It was not possible to match your request');
         }
 
         $this->writeLog($request);
