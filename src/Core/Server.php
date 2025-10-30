@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Logs\ExceptionLogger;
-use Rockberpro\RestRouter\Logs\RequestLogger;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
@@ -117,9 +115,63 @@ final class Server implements ServerInterface
             $httpRequest->getMethod(),
             $httpRequest->getPathInfo(),
             $httpRequest->getQueryString(),
-            !empty($httpRequest->getContent()) ? $httpRequest->toArray() : [],
+            $this->getRequestBody(),
             $httpRequest->query->all()
         );
+    }
+
+    public function getRequestBody(): array
+    {
+        $httpRequest = self::getHttpRequest();
+        return $this->extractRequestBody($httpRequest);
+    }
+
+    /**
+     * Extract request body as array supporting JSON and form-encoded bodies.
+     *
+     * @param HttpRequest $httpRequest
+     * @return array
+     */
+    private function extractRequestBody(HttpRequest $httpRequest): array
+    {
+        $raw = $httpRequest->getContent();
+
+        // If no raw content, prefer parsed parameters (e.g. $_POST)
+        if ($raw === null || $raw === '') {
+            return $httpRequest->request->all() ?: [];
+        }
+
+        $contentType = strtolower((string) $httpRequest->headers->get('content-type', ''));
+
+        // JSON preferred parsing
+        if (strpos($contentType, 'application/json') !== false) {
+            try {
+                return $httpRequest->toArray();
+            } catch (\Throwable $e) {
+                // fallthrough to other parsers
+            }
+        }
+
+        // form data (application/x-www-form-urlencoded or multipart/form-data)
+        if (strpos($contentType, 'application/x-www-form-urlencoded') !== false
+            || strpos($contentType, 'multipart/form-data') !== false) {
+            return $httpRequest->request->all() ?: [];
+        }
+
+        // fallback: try parse_str (handles "nomeCompleto=Samuel")
+        $parsed = [];
+        parse_str($raw, $parsed);
+        if (!empty($parsed)) {
+            return $parsed;
+        }
+
+        // last resort: try JSON decode
+        $decoded = json_decode($raw, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        return [];
     }
 
     /**

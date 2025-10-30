@@ -6,6 +6,7 @@ use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -65,6 +66,9 @@ class Request implements RequestInterface
 
         // call the controller
         $response = (new $class)->$method($request);
+        if (!($response instanceof Response)) {
+            throw new RuntimeException('The controller method must return an instance of Response');
+        }
         return $response;
     }
 
@@ -246,14 +250,11 @@ class Request implements RequestInterface
      */
     public function getBodyParam(string $key): ?string
     {
-        $content = [];
-        $raw = Server::getInstance()->getHttpRequest()->getContent();
-        if ($raw !== '' && $raw !== null) {
-            $content = Server::getInstance()->getHttpRequest()->toArray();
-        }
-        if (!array_key_exists($key, $content ?? [])) {
+        $content = $this->getAllBodyParams();
+        if (!array_key_exists($key, $content)) {
             return null;
         }
+
         return $content[$key] ?: null;
     }
 
@@ -262,11 +263,7 @@ class Request implements RequestInterface
      */
     public function getAllBodyParams(): array
     {
-        $raw = Server::getInstance()->getHttpRequest()->getContent();
-        if ($raw !== '' && $raw !== null) {
-            return Server::getInstance()->getHttpRequest()->toArray();
-        }
-        return [];
+        return Server::getInstance()->getRequestBody();
     }
 
     /**
