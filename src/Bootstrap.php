@@ -68,27 +68,6 @@ class Bootstrap
     }
 
     /**
-     * Backwards-compatible convenience wrapper for stateless mode.
-     */
-    public static function stateless()
-    {
-        return self::execute(self::MODE_STATELESS);
-    }
-
-    /**
-     * Backwards-compatible convenience wrapper for stateful mode.
-     */
-    public static function stateful(): callable
-    {
-        $callable = self::execute(self::MODE_STATEFUL);
-        if (!is_callable($callable)) {
-            throw new \RuntimeException('Stateful mode did not return a callable as expected.');
-        }
-
-        return $callable;
-    }
-
-    /**
      * Internal implementation for stateless handling (preserves previous behavior).
      */
     protected static function doStateless()
