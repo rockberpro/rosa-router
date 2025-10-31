@@ -12,7 +12,7 @@ Bootstrap::setup();
 $port = DotEnv::get('API_SERVER_PORT');
 $address = DotEnv::get('API_SERVER_ADDRESS');
 
-$server = new HttpServer(Bootstrap::stateful());
+$server = new HttpServer(Bootstrap::execute(Bootstrap::MODE_STATEFUL));
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
 });
