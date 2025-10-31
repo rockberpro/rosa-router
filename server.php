@@ -1,29 +1,17 @@
 <?php
 
-use Rockberpro\RestRouter\RequestHandler;
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Logs\ExceptionLogger;
-use Rockberpro\RestRouter\Logs\RequestLogger;
-use React\Http\Message\ServerRequest;
+use Rockberpro\RestRouter\Bootstrap;
 use React\Socket\SocketServer;
 use React\Http\HttpServer;
 
 require_once "vendor/autoload.php";
 require_once "routes/api.php";
 
-DotEnv::load(".env");
-InfoLogHandler::register("logs/info.log");
-ErrorLogHandler::register("logs/error.log");
-
+Bootstrap::setup();
 $port = DotEnv::get('API_SERVER_PORT');
-$server = new HttpServer(function(ServerRequest $request) {
-    return Server::getInstance()
-        ->stateful($request)
-        ->dispatch();
-});
+
+$server = new HttpServer(Bootstrap::stateful());
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
 });
