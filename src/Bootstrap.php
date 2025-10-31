@@ -37,7 +37,7 @@ class Bootstrap
      * Stateless entrypoint: boot and dispatch if the current request is an API endpoint.
      * Returns whatever Server::dispatch() returns or null when not an API endpoint.
      */
-    public static function stateless(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log")
+    public static function stateless()
     {
         if (!self::$booted) {
             throw new \RuntimeException('Bootstrap not booted. Call Bootstrap::setup() before using stateless entrypoint.');
@@ -55,7 +55,7 @@ class Bootstrap
      * React\Http\HttpServer which will ensure the Server instance handles the
      * incoming ServerRequest.
      */
-    public static function stateful(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log"): callable
+    public static function stateful(): callable
     {
         if (!self::$booted) {
             throw new \RuntimeException('Bootstrap not booted. Call Bootstrap::setup() before using stateless entrypoint.');
