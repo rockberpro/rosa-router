@@ -39,9 +39,8 @@ class Bootstrap
      */
     public static function stateless(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log")
     {
-        self::setup($envPath, $infoLog, $errorLog);
-
         if (Server::getInstance()->isApiEndpoint()) {
+            self::setup($envPath, $infoLog, $errorLog);
             return Server::getInstance()->dispatch();
         }
 
