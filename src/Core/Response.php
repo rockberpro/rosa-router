@@ -66,6 +66,7 @@ class Response implements ResponseInterface
     public function head(): void
     {
         http_response_code($this->status);
+        exit();
     }
 
     /**
