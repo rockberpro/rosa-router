@@ -1,9 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Core;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;

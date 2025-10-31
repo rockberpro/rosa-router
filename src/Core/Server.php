@@ -3,7 +3,6 @@
 namespace Rockberpro\RestRouter\Core;
 
 use React\Http\Message\ServerRequest;
-use Rockberpro\RestRouter\RequestHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 

@@ -10,12 +10,13 @@ require_once "routes/api.php";
 
 Bootstrap::setup();
 $port = DotEnv::get('API_SERVER_PORT');
+$address = DotEnv::get('API_SERVER_ADDRESS');
 
 $server = new HttpServer(Bootstrap::stateful());
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
 });
-$socket = new SocketServer("0.0.0.0:{$port}");
+$socket = new SocketServer("{$address}:{$port}");
 $server->listen($socket);
 
-print("Server running at http://0.0.0.0:{$port}".PHP_EOL);
+print("Server running at http://{$address}:{$port}".PHP_EOL);

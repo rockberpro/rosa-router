@@ -20,17 +20,17 @@ class Bootstrap
     /**
      * Initialize environment and register log handlers. Idempotent.
      */
-    public static function setup(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log"): void
+    public static function setup(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log"): bool
     {
         if (self::$booted) {
-            return;
+            return true;
         }
 
         DotEnv::load($envPath);
         InfoLogHandler::register($infoLog);
         ErrorLogHandler::register($errorLog);
 
-        self::$booted = true;
+        return self::$booted = true;
     }
 
     /**
@@ -39,8 +39,11 @@ class Bootstrap
      */
     public static function stateless(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log")
     {
+        if (!self::$booted) {
+            throw new \RuntimeException('Bootstrap not booted. Call Bootstrap::setup() before using stateless entrypoint.');
+        }
+
         if (Server::getInstance()->isApiEndpoint()) {
-            self::setup($envPath, $infoLog, $errorLog);
             return Server::getInstance()->dispatch();
         }
 
@@ -54,7 +57,9 @@ class Bootstrap
      */
     public static function stateful(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log"): callable
     {
-        self::setup($envPath, $infoLog, $errorLog);
+        if (!self::$booted) {
+            throw new \RuntimeException('Bootstrap not booted. Call Bootstrap::setup() before using stateless entrypoint.');
+        }
 
         return function (ServerRequest $request) {
             return Server::getInstance()
