@@ -175,7 +175,6 @@ final class Server implements ServerInterface
              // if the incoming HTTP method is HEAD, send only headers/status without a body
              if (Server::requestMethod() === 'HEAD') {
                  $response->head();
-                 return null;
              }
             $response->response();
          }
