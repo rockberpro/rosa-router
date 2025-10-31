@@ -40,6 +40,16 @@ class Route implements RouteInterface
     }
 
     /**
+     * @method head
+     * @param string $route
+     * @param string|array|Closure $target
+     */
+    public static function head($route, $target): void
+    {
+        self::buildRoute('HEAD', $route, $target);
+    }
+
+    /**
      * @method post
      * @param string $route
      * @param string|array|Closure $target
