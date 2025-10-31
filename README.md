@@ -45,8 +45,8 @@ if (Server::getInstance()->isApiEndpoint()) {
 }
 ```
 - server.php
-- Run: php server.php
 ```php
+// To run the server: php server.php
 <?php
 
 use Rockberpro\RestRouter\Utils\DotEnv;
