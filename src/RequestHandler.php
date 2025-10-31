@@ -6,59 +6,42 @@ use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Service\Container;
-use React\Http\Message\ServerRequest;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Throwable;
 
-class Bootstrap
+class RequestHandler
 {
-    private ?ServerRequest $request;
-
-    public function __construct(?ServerRequest $request = null)
+    public function dispatch()
     {
-        $this->request = $request;
-    }
-
-    public function execute()
-    {
-        if (!$this->isRunningCli()) {
-            return $this->handleStateless();
+        if ($this->isStateful()) {
+            return $this->handleStateful();
         }
-        return $this->handleStateful($this->request);
+        return $this->handleStateless();
     }
 
     public function handleStateless(): \Rockberpro\RestRouter\Core\Response
     {
         try {
-            $response = (new Request())
-                ->handle(
-                    Server::getInstance()->getRequestData()
-                );
-
-            if ($response) {
-                $response->response();
-            }
-
-            \Rockberpro\RestRouter\Core\Response::json([
-                'message' => 'Not implemented'
-            ], 501);
+            return (new Request())->handle(
+                Server::getInstance()->getRequestData()
+            );
         }
         catch (Throwable $t) {
             $this->writeLog($t);
         }
 
         if (DotEnv::get('API_DEBUG')) {
-            \Rockberpro\RestRouter\Core\Response::json([
+            return new \Rockberpro\RestRouter\Core\Response([
                 'message' => $t->getMessage()
             ], 500);
         }
 
-        \Rockberpro\RestRouter\Core\Response::json([
+        return new \Rockberpro\RestRouter\Core\Response([
             'message' => 'Internal server error'
         ], 500);
     }
 
-    public function handleStateful(ServerRequest $request): \React\Http\Message\Response
+    public function handleStateful(): \React\Http\Message\Response
     {
         try {
             $response = (new Request())
@@ -99,8 +82,8 @@ class Bootstrap
         );
     }
 
-    public function isRunningCli(): bool {
-        return (php_sapi_name() === 'cli');
+    public function isStateful(): bool {
+        return Server::getInstance()->isStateful();
     }
 
     /**

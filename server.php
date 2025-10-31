@@ -1,6 +1,6 @@
 <?php
 
-use Rockberpro\RestRouter\Bootstrap;
+use Rockberpro\RestRouter\RequestHandler;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
@@ -15,15 +15,13 @@ require_once "vendor/autoload.php";
 require_once "routes/api.php";
 
 DotEnv::load(".env");
-
 InfoLogHandler::register("logs/info.log");
 ErrorLogHandler::register("logs/error.log");
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
-    if (Server::getInstance()->isApiEndpoint()) {
-        return (new Bootstrap($request))->execute();
-    }
+    Server::getInstance()->stateful($request);
+    return Server::getInstance()->dispatch();
 });
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);

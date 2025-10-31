@@ -2,6 +2,8 @@
 
 namespace Rockberpro\RestRouter\Core;
 
+use React\Http\Message\ServerRequest;
+use Rockberpro\RestRouter\RequestHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
@@ -18,6 +20,8 @@ final class Server implements ServerInterface
      * @var HttpRequest|null
      */
     private ?HttpRequest $httpRequest = null;
+
+    private ?ServerRequest $serverRequest;
 
     private array $routes = [];
 
@@ -110,6 +114,17 @@ final class Server implements ServerInterface
      */
     public function getRequestData(): RequestData
     {
+        if ($this->isStateful()) {
+            $serverRequest = $this->serverRequest;
+            return new RequestData(
+                $serverRequest->getMethod(),
+                $serverRequest->getUri()->getPath(),
+                $serverRequest->getUri()->getQuery(),
+                $serverRequest->getParsedBody() ?? [],
+                $serverRequest->getQueryParams()
+            );
+        }
+
         $httpRequest = self::getHttpRequest();
         return new RequestData(
             $httpRequest->getMethod(),
@@ -184,6 +199,30 @@ final class Server implements ServerInterface
     public function getHttpRequest(): HttpRequest
     {
         return $this->httpRequest;
+    }
+
+    public function stateful(?ServerRequest $serverRequest)
+    {
+        $this->serverRequest = $serverRequest;
+    }
+
+    public function isStateful(): bool
+    {
+        return isset($this->serverRequest);
+    }
+
+    /**
+     * Execute the server request handling.
+     */
+    public function dispatch()
+    {
+        $response = (new RequestHandler())->dispatch();
+        if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
+            $response->response();
+        }
+        if ($response instanceof \React\Http\Message\Response) {
+            return $response;
+        }
     }
 
     /**
