@@ -18,7 +18,55 @@
 
 ROSA-Router listens for HTTP requests and maps them to the correct route handler based on the request's method and URI. It supports both static and dynamic routes and is fully customizable to fit different project needs.
 
-### Simple Routes
+## Setup example
+- index.php (stateless)
+```php
+use Rockberpro\RestRouter\Bootstrap;
+
+require_once "vendor/autoload.php";
+require_once "routes/api.php";
+
+Bootstrap::setup();
+Bootstrap::stateless();
+```
+- In case your index.php entrypoint is already in use, tweak it as shown below:
+```php
+use Rockberpro\RestRouter\Bootstrap;
+use Rockberpro\RestRouter\Core\Server;
+
+require_once "vendor/autoload.php";
+
+if (Server::getInstance()->isApiEndpoint()) {
+    require_once "routes/api.php";
+    Bootstrap::setup();
+    Bootstrap::stateless();
+}
+```
+- server.php (stateful)
+```php
+use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Bootstrap;
+use React\Socket\SocketServer;
+use React\Http\HttpServer;
+
+require_once "vendor/autoload.php";
+require_once "routes/api.php";
+
+Bootstrap::setup();
+$port = DotEnv::get('API_SERVER_PORT');
+$address = DotEnv::get('API_SERVER_ADDRESS');
+
+$server = new HttpServer(Bootstrap::stateful());
+$server->on('error', function (Throwable $e) {
+    print("Request error: " . $e->getMessage().PHP_EOL);
+});
+$socket = new SocketServer("{$address}:{$port}");
+$server->listen($socket);
+
+print("Server running at http://{$address}:{$port}".PHP_EOL);
+```
+
+## Usage examples
 
 ```php
 / ** GET route * /
