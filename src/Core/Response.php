@@ -37,6 +37,7 @@ class Response implements ResponseInterface
     const BAD_GATEWAY = 502;
     const SERVICE_UNAVAILABLE = 503;
 
+    private string $method;
     public array $data;
     public int $status;
 
@@ -47,7 +48,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Summary of response
+     * Payload response
      * 
      * @param array $data
      * @param int $status
@@ -56,6 +57,15 @@ class Response implements ResponseInterface
     public function response(): void
     {
         self::json($this->data, $this->status);
+    }
+
+    /**
+     * Head response
+     * @return void
+     */
+    public function head(): void
+    {
+        http_response_code($this->status);
     }
 
     /**

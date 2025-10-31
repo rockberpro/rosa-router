@@ -172,7 +172,12 @@ final class Server implements ServerInterface
         // explicit stateful flag so RequestHandler doesn't need to detect it
         $response = (new RequestHandler())->dispatch($this->isStateful());
          if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
-             $response->response();
+             // if the incoming HTTP method is HEAD, send only headers/status without a body
+             if (Server::requestMethod() === 'HEAD') {
+                 $response->head();
+                 return null;
+             }
+            $response->response();
          }
          if ($response instanceof \React\Http\Message\Response) {
              return $response;

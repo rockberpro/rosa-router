@@ -53,6 +53,15 @@ class RequestHandler
                 );
 
             if ($response) {
+                // For HEAD requests, return only headers (no body)
+                if (Server::requestMethod() === 'HEAD') {
+                    return new \React\Http\Message\Response(
+                        $response->status,
+                        ['Content-Type' => 'application/json'],
+                        ''
+                    );
+                }
+
                 return new \React\Http\Message\Response(
                     $response->status,
                     ['Content-Type' => 'application/json'],

@@ -32,6 +32,9 @@ class Request implements RequestInterface
             case 'GET':
                 $request = (new GetRequest())->buildRequest($data);
                 break;
+            case 'HEAD':
+                $request = (new HeadRequest())->buildRequest($data);
+                break;
             case 'POST':
                 $request = (new PostRequest())->buildRequest($data);
                 break;
