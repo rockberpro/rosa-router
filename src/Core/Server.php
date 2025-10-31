@@ -44,66 +44,6 @@ final class Server implements ServerInterface
         return self::getInstance()->routes;
     }
 
-    public static function query(): string
-    {
-        return $_SERVER['QUERY_STRING'] ?? '';
-    }
-
-    public static function method(): string
-    {
-        return $_SERVER['REQUEST_METHOD'] ?? '';
-    }
-
-    public static function key(): string
-    {
-        return $_SERVER['HTTP_X_API_KEY'] ?? '';
-    }
-
-    public static function authorization(): string
-    {
-        return $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    }
-
-    public static function userAgent(): string
-    {
-        return $_SERVER['HTTP_USER_AGENT'] ?? '';
-    }
-
-    public static function documentRoot(): string
-    {
-        return $_SERVER['DOCUMENT_ROOT'] ?? '';
-    }
-
-    public static function serverName(): string
-    {
-        return $_SERVER['SERVER_NAME'] ?? '';
-    }
-
-    public static function serverAddress(): string
-    {
-        return $_SERVER['SERVER_ADDR'] ?? '';
-    }
-
-    public static function remoteAddress(): string
-    {
-        return $_SERVER['REMOTE_ADDR'] ?? '';
-    }
-
-    public static function targetAddress(): string
-    {
-        return $_SERVER['HTTP_HOST'] ?? '';
-    }
-
-    public static function requestMethod(): string
-    {
-        return $_SERVER['REQUEST_METHOD'] ?? '';
-    }
-
-    public static function requestUri(): string
-    {
-        return $_SERVER['REQUEST_URI'] ?? '';
-    }
-
     public static function getRootDir()
     {
         return dirname(__DIR__, 1);
@@ -238,7 +178,9 @@ final class Server implements ServerInterface
          if ($response instanceof \React\Http\Message\Response) {
              return $response;
          }
-     }
+
+        return null;
+    }
 
     /**
      * Get the Server instance
@@ -254,5 +196,65 @@ final class Server implements ServerInterface
         }
 
         return Container::getInstance()->get(Server::class);
+    }
+
+    public static function query(): string
+    {
+        return ServerHelper::query();
+    }
+
+    public static function method(): string
+    {
+        return ServerHelper::method();
+    }
+
+    public static function key(): string
+    {
+        return ServerHelper::key();
+    }
+
+    public static function authorization(): string
+    {
+        return ServerHelper::authorization();
+    }
+
+    public static function userAgent(): string
+    {
+        return ServerHelper::userAgent();
+    }
+
+    public static function documentRoot(): string
+    {
+        return ServerHelper::documentRoot();
+    }
+
+    public static function serverName(): string
+    {
+        return ServerHelper::serverName();
+    }
+
+    public static function serverAddress(): string
+    {
+        return ServerHelper::serverAddress();
+    }
+
+    public static function remoteAddress(): string
+    {
+        return ServerHelper::remoteAddress();
+    }
+
+    public static function targetAddress(): string
+    {
+        return ServerHelper::targetAddress();
+    }
+
+    public static function requestMethod(): string
+    {
+        return ServerHelper::requestMethod();
+    }
+
+    public static function requestUri(): string
+    {
+        return ServerHelper::requestUri();
     }
 }
