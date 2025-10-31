@@ -137,6 +137,15 @@ final class Server implements ServerInterface
 
     public function getRequestBody(): array
     {
+        if ($this->isStateful()) {
+            $serverRequest = $this->serverRequest;
+            $parsedBody = $serverRequest->getParsedBody();
+            if (is_array($parsedBody)) {
+                return $parsedBody;
+            }
+            return [];
+        }
+
         $httpRequest = self::getHttpRequest();
         return $this->extractRequestBody($httpRequest);
     }
