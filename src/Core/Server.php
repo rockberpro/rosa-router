@@ -19,9 +19,9 @@ final class Server implements ServerInterface
      *
      * @var HttpRequest|null
      */
-    private ?HttpRequest $httpRequest = null;
+    private HttpRequest $httpRequest;
 
-    private ?ServerRequest $serverRequest;
+    private ServerRequest $serverRequest;
 
     private array $routes = [];
 
@@ -210,7 +210,7 @@ final class Server implements ServerInterface
         return $this->httpRequest;
     }
 
-    public function stateful(?ServerRequest $serverRequest)
+    public function stateful(ServerRequest $serverRequest)
     {
         $this->serverRequest = $serverRequest;
 
