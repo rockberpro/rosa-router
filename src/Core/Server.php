@@ -2,6 +2,7 @@
 
 namespace Rockberpro\RestRouter\Core;
 
+use React\Http\Message\ServerRequest;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
@@ -17,7 +18,11 @@ final class Server implements ServerInterface
      *
      * @var HttpRequest|null
      */
-    private ?HttpRequest $httpRequest = null;
+    private HttpRequest $httpRequest;
+
+    private ServerRequest $serverRequest;
+
+    private bool $isStateful = false;
 
     private array $routes = [];
 
@@ -38,66 +43,6 @@ final class Server implements ServerInterface
         return self::getInstance()->routes;
     }
 
-    public static function query(): string
-    {
-        return $_SERVER['QUERY_STRING'] ?? '';
-    }
-
-    public static function method(): string
-    {
-        return $_SERVER['REQUEST_METHOD'] ?? '';
-    }
-
-    public static function key(): string
-    {
-        return $_SERVER['HTTP_X_API_KEY'] ?? '';
-    }
-
-    public static function authorization(): string
-    {
-        return $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    }
-
-    public static function userAgent(): string
-    {
-        return $_SERVER['HTTP_USER_AGENT'] ?? '';
-    }
-
-    public static function documentRoot(): string
-    {
-        return $_SERVER['DOCUMENT_ROOT'] ?? '';
-    }
-
-    public static function serverName(): string
-    {
-        return $_SERVER['SERVER_NAME'] ?? '';
-    }
-
-    public static function serverAddress(): string
-    {
-        return $_SERVER['SERVER_ADDR'] ?? '';
-    }
-
-    public static function remoteAddress(): string
-    {
-        return $_SERVER['REMOTE_ADDR'] ?? '';
-    }
-
-    public static function targetAddress(): string
-    {
-        return $_SERVER['HTTP_HOST'] ?? '';
-    }
-
-    public static function requestMethod(): string
-    {
-        return $_SERVER['REQUEST_METHOD'] ?? '';
-    }
-
-    public static function requestUri(): string
-    {
-        return $_SERVER['REQUEST_URI'] ?? '';
-    }
-
     public static function getRootDir()
     {
         return dirname(__DIR__, 1);
@@ -110,6 +55,17 @@ final class Server implements ServerInterface
      */
     public function getRequestData(): RequestData
     {
+        if ($this->isStateful()) {
+            $serverRequest = $this->serverRequest;
+            return new RequestData(
+                $serverRequest->getMethod(),
+                $serverRequest->getUri()->getPath(),
+                $serverRequest->getUri()->getQuery(),
+                $serverRequest->getParsedBody() ?? [],
+                $serverRequest->getQueryParams()
+            );
+        }
+
         $httpRequest = self::getHttpRequest();
         return new RequestData(
             $httpRequest->getMethod(),
@@ -122,6 +78,15 @@ final class Server implements ServerInterface
 
     public function getRequestBody(): array
     {
+        if ($this->isStateful()) {
+            $serverRequest = $this->serverRequest;
+            $parsedBody = $serverRequest->getParsedBody();
+            if (is_array($parsedBody)) {
+                return $parsedBody;
+            }
+            return [];
+        }
+
         $httpRequest = self::getHttpRequest();
         return $this->extractRequestBody($httpRequest);
     }
@@ -186,6 +151,36 @@ final class Server implements ServerInterface
         return $this->httpRequest;
     }
 
+    public function stateful(ServerRequest $serverRequest)
+    {
+        $this->serverRequest = $serverRequest;
+        $this->isStateful = true;
+
+        return $this;
+    }
+
+    public function isStateful(): bool
+    {
+        return $this->isStateful;
+    }
+
+    /**
+     * Execute the server request handling.
+     */
+    public function dispatch()
+    {
+        // explicit stateful flag so RequestHandler doesn't need to detect it
+        $response = (new RequestHandler())->dispatch($this->isStateful());
+         if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
+             $response->response();
+         }
+         if ($response instanceof \React\Http\Message\Response) {
+             return $response;
+         }
+
+        return null;
+    }
+
     /**
      * Get the Server instance
      * 
@@ -200,5 +195,65 @@ final class Server implements ServerInterface
         }
 
         return Container::getInstance()->get(Server::class);
+    }
+
+    public static function query(): string
+    {
+        return ServerHelper::query();
+    }
+
+    public static function method(): string
+    {
+        return ServerHelper::method();
+    }
+
+    public static function key(): string
+    {
+        return ServerHelper::key();
+    }
+
+    public static function authorization(): string
+    {
+        return ServerHelper::authorization();
+    }
+
+    public static function userAgent(): string
+    {
+        return ServerHelper::userAgent();
+    }
+
+    public static function documentRoot(): string
+    {
+        return ServerHelper::documentRoot();
+    }
+
+    public static function serverName(): string
+    {
+        return ServerHelper::serverName();
+    }
+
+    public static function serverAddress(): string
+    {
+        return ServerHelper::serverAddress();
+    }
+
+    public static function remoteAddress(): string
+    {
+        return ServerHelper::remoteAddress();
+    }
+
+    public static function targetAddress(): string
+    {
+        return ServerHelper::targetAddress();
+    }
+
+    public static function requestMethod(): string
+    {
+        return ServerHelper::requestMethod();
+    }
+
+    public static function requestUri(): string
+    {
+        return ServerHelper::requestUri();
     }
 }

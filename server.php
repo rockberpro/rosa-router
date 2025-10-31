@@ -1,34 +1,22 @@
 <?php
 
-use Rockberpro\RestRouter\Bootstrap;
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Logs\ExceptionLogger;
-use Rockberpro\RestRouter\Logs\RequestLogger;
-use React\Http\Message\ServerRequest;
+use Rockberpro\RestRouter\Bootstrap;
 use React\Socket\SocketServer;
 use React\Http\HttpServer;
 
 require_once "vendor/autoload.php";
 require_once "routes/api.php";
 
-DotEnv::load(".env");
-
-InfoLogHandler::register("logs/info.log");
-ErrorLogHandler::register("logs/error.log");
-
+Bootstrap::setup();
 $port = DotEnv::get('API_SERVER_PORT');
-$server = new HttpServer(function(ServerRequest $request) {
-    if (Server::getInstance()->isApiEndpoint()) {
-        return (new Bootstrap($request))->execute();
-    }
-});
+$address = DotEnv::get('API_SERVER_ADDRESS');
+
+$server = new HttpServer(Bootstrap::execute(Bootstrap::MODE_STATEFUL));
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
 });
-$socket = new SocketServer("0.0.0.0:{$port}");
+$socket = new SocketServer("{$address}:{$port}");
 $server->listen($socket);
 
-print("Server running at http://0.0.0.0:{$port}".PHP_EOL);
+print("Server running at http://{$address}:{$port}".PHP_EOL);

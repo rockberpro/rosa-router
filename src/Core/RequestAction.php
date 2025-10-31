@@ -2,6 +2,8 @@
 
 namespace Rockberpro\RestRouter\Core;
 
+use Closure;
+
 /**
  * @author Samuel Oberger Rockenbach
  * 
@@ -11,7 +13,7 @@ class RequestAction implements RequestActionInterface
 {
     private ?string $middleware;
     private string $method;
-    private $closure;
+    private Closure $closure;
     private array $route;
     private string $class;
     private string $uri;
@@ -30,8 +32,11 @@ class RequestAction implements RequestActionInterface
         $this->method = $method;
     }
 
-    public function getClosure() {
-        return $this->closure;
+    public function getClosure(): ?Closure {
+        if (isset($this->closure)) {
+            return $this->closure;
+        }
+        return null;
     }
     public function setClosure($closure): void {
         $this->closure = $closure;
@@ -63,6 +68,9 @@ class RequestAction implements RequestActionInterface
     }
 
     public function isClosure(): bool {
-        return is_callable($this->closure);
+        if (isset($this->closure)) {
+            return is_callable($this->closure);
+        }
+        return false;
     }
 }
