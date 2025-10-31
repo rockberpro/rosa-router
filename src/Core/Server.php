@@ -213,6 +213,8 @@ final class Server implements ServerInterface
     public function stateful(?ServerRequest $serverRequest)
     {
         $this->serverRequest = $serverRequest;
+
+        return $this;
     }
 
     public function isStateful(): bool

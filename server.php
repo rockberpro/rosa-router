@@ -20,8 +20,9 @@ ErrorLogHandler::register("logs/error.log");
 
 $port = DotEnv::get('API_SERVER_PORT');
 $server = new HttpServer(function(ServerRequest $request) {
-    Server::getInstance()->stateful($request);
-    return Server::getInstance()->dispatch();
+    return Server::getInstance()
+        ->stateful($request)
+        ->dispatch();
 });
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
