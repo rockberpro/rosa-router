@@ -23,6 +23,8 @@ final class Server implements ServerInterface
 
     private ServerRequest $serverRequest;
 
+    private bool $isStateful = false;
+
     private array $routes = [];
 
     public function __construct() {}
@@ -213,13 +215,14 @@ final class Server implements ServerInterface
     public function stateful(ServerRequest $serverRequest)
     {
         $this->serverRequest = $serverRequest;
+        $this->isStateful = true;
 
         return $this;
     }
 
     public function isStateful(): bool
     {
-        return isset($this->serverRequest);
+        return $this->isStateful;
     }
 
     /**
@@ -227,14 +230,15 @@ final class Server implements ServerInterface
      */
     public function dispatch()
     {
-        $response = (new RequestHandler())->dispatch();
-        if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
-            $response->response();
-        }
-        if ($response instanceof \React\Http\Message\Response) {
-            return $response;
-        }
-    }
+        // explicit stateful flag so RequestHandler doesn't need to detect it
+        $response = (new RequestHandler())->dispatch($this->isStateful());
+         if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
+             $response->response();
+         }
+         if ($response instanceof \React\Http\Message\Response) {
+             return $response;
+         }
+     }
 
     /**
      * Get the Server instance

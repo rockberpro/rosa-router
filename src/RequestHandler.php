@@ -11,9 +11,13 @@ use Throwable;
 
 class RequestHandler
 {
-    public function dispatch()
+    /**
+     * @param bool $stateful
+     * @return \React\Http\Message\Response|Core\Response
+     */
+    public function dispatch(bool $stateful)
     {
-        if ($this->isStateful()) {
+        if ($stateful) {
             return $this->handleStateful();
         }
         return $this->handleStateless();
@@ -80,10 +84,6 @@ class RequestHandler
             ['Content-Type' => 'application/json'],
             json_encode(['message' => 'Internal server error'])
         );
-    }
-
-    public function isStateful(): bool {
-        return Server::getInstance()->isStateful();
     }
 
     /**
