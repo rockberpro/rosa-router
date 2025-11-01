@@ -5,6 +5,7 @@ namespace Rockberpro\RestRouter\Core;
 use React\Http\Message\ServerRequest;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
+use Rockberpro\RestRouter\Bootstrap;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -169,14 +170,14 @@ final class Server implements ServerInterface
      */
     public function dispatch()
     {
-        // explicit stateful flag so RequestHandler doesn't need to detect it
         $response = (new RequestHandler())->dispatch($this->isStateful());
          if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
-             // if the incoming HTTP method is HEAD, send only headers/status without a body
+             // if the incoming HTTP method is OPTIONS, send only headers/status without a body
              if (Server::requestMethod() === 'OPTIONS') {
                  $response->writeHeaders($response->getHeadersForOptions());
                  $response->exit();
              }
+             // if the incoming HTTP method is HEAD, send only headers/status without a body
              if (Server::requestMethod() === 'HEAD') {
                  $response->writeHeaders($response->getHeadersForHead());
                  $response->exit();
