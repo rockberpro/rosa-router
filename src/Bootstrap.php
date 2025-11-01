@@ -6,6 +6,7 @@ use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Utils\IniEnv;
 use React\Http\Message\ServerRequest;
 
 /**
@@ -29,7 +30,22 @@ class Bootstrap
             return true;
         }
 
-        DotEnv::load($envPath);
+        // detect by file extension: .ini -> IniEnv, .env -> DotEnv
+        $lower = strtolower(trim($envPath));
+        // Use substr_compare for PHP 7.4 compatibility
+        if (substr_compare($lower, '.ini', -4, 4) === 0) {
+            IniEnv::load($envPath);
+        } elseif (substr_compare($lower, '.env', -4, 4) === 0) {
+            DotEnv::load($envPath);
+        } else {
+            // fallback: try ini first, then dotenv
+            try {
+                IniEnv::load($envPath);
+            } catch (\Throwable $e) {
+                DotEnv::load($envPath);
+            }
+        }
+
         InfoLogHandler::register($infoLog);
         ErrorLogHandler::register($errorLog);
 
