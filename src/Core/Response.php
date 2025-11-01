@@ -2,6 +2,8 @@
 
 namespace Rockberpro\RestRouter\Core;
 
+use Rockberpro\RestRouter\Utils\DotEnv;
+
 /**
  * @author Samuel Oberger Rockenbach
  * 
@@ -41,7 +43,7 @@ class Response implements ResponseInterface
     public array $data;
     public int $status;
 
-    public function __construct($data, $status)
+    public function __construct($data = [], $status = 0)
     {
         $this->data = $data;
         $this->status = $status;
@@ -59,14 +61,61 @@ class Response implements ResponseInterface
         self::json($this->data, $this->status);
     }
 
+    public function exit(): void
+    {
+        exit;
+    }
+
     /**
-     * Head response
+     * Returns headers appropriate for a HEAD response as an associative array
+     * Keys are header names and values are header values.
+     * Adjust or extend these headers if you need different behavior (e.g. include Content-Length).
+     *
+     * @return array<string,string>
+     */
+    public function getHeadersForHead(): array
+    {
+        return [
+            'Content-Type' => 'application/json; charset=utf-8',
+            // indicate empty body (can be adjusted to actual length if known)
+            'Content-Length' => '0',
+        ];
+    }
+
+    /**
+     * Returns headers appropriate for an OPTIONS (preflight) response as an associative array.
+     * These include Allow and common CORS headers. You can compute Allow dynamically if needed.
+     *
+     * @return array<string,string>
+     */
+    public function getHeadersForOptions(): array
+    {
+        $origin = DotEnv::get('API_ALLOW_ORIGIN');
+        return [
+            'Content-Type' => 'application/json; charset=utf-8',
+            'Allow' => 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD',
+            'Access-Control-Allow-Origin' => $origin,
+            'Access-Control-Allow-Methods' => 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With',
+            'Access-Control-Max-Age' => '86400',
+            'Content-Length' => '0',
+        ];
+    }
+
+    /**
+     * Insert headers into the response using native PHP header() and then send status via head().
+     * This method does not return: it calls head() which exits.
+     *
+     * @param array<string,string> $headers
      * @return void
      */
-    public function head(): void
+    public function writeHeaders(array $headers): void
     {
         http_response_code($this->status);
-        exit();
+        foreach ($headers as $name => $value) {
+            // use header() to add the header; replace set to true to avoid duplicates by default
+            header(sprintf('%s: %s', $name, $value), true);
+        }
     }
 
     /**

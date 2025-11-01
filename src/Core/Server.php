@@ -173,8 +173,13 @@ final class Server implements ServerInterface
         $response = (new RequestHandler())->dispatch($this->isStateful());
          if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
              // if the incoming HTTP method is HEAD, send only headers/status without a body
+             if (Server::requestMethod() === 'OPTIONS') {
+                 $response->writeHeaders($response->getHeadersForOptions());
+                 $response->exit();
+             }
              if (Server::requestMethod() === 'HEAD') {
-                 $response->head();
+                 $response->writeHeaders($response->getHeadersForHead());
+                 $response->exit();
              }
             $response->response();
          }

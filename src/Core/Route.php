@@ -50,6 +50,16 @@ class Route implements RouteInterface
     }
 
     /**
+     * @method options
+     * @param string $route
+     * @param string|array|Closure $target
+     */
+    public static function options($route, $target): void
+    {
+        self::buildRoute('OPTIONS', $route, $target);
+    }
+
+    /**
      * @method post
      * @param string $route
      * @param string|array|Closure $target
@@ -111,14 +121,13 @@ class Route implements RouteInterface
 
         $full_route = self::route($route);
         $prefix = rtrim(explode('{', $full_route)[0], '/');
-        $route_path = rtrim($full_route, '/');
 
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
         $instance = self::$instance;
         $instance->prefix = $prefix;
-        $instance->route = $route_path;
+        $instance->route =  $full_route;
         $instance->method = strtoupper($method);
         $instance->target = $instance->buildTarget($target);
 

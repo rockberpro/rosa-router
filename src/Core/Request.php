@@ -28,12 +28,16 @@ class Request implements RequestInterface
             return new Response(['message' => 'Not found'], Response::NOT_FOUND);
         }
         $request = null;
-        switch ($data->getMethod()) {
+        $method = $data->getMethod();
+        switch ($method) {
             case 'GET':
                 $request = (new GetRequest())->buildRequest($data);
                 break;
             case 'HEAD':
                 $request = (new HeadRequest())->buildRequest($data);
+                break;
+            case 'OPTIONS':
+                $request = (new OptionsRequest())->buildRequest($data);
                 break;
             case 'POST':
                 $request = (new PostRequest())->buildRequest($data);
@@ -56,12 +60,56 @@ class Request implements RequestInterface
 
         $this->writeLog($request);
 
-        $closure = $request->getAction()->getClosure();
-        if ($closure) {
-            $response = $closure($request); // response
+        $response = $this->getClosureResponse($method, $request);
+        if ($response) {
             return $response;
         }
 
+        $response = $this->getControllerResponse($request);
+        if ($response) {
+            return $response;
+        }
+
+        throw new RequestException('It was not possible to match your request');
+    }
+
+    /**
+     * @param string $method
+     * @param Request $request
+     * @return Response
+     */
+    private function getClosureResponse(string $method, Request $request): Response
+    {
+        $closure = $request->getAction()->getClosure();
+        if ($closure instanceof \Closure) {
+            $response = $closure($request);
+            $response->status = $this->getStatusCodeForMethod($method, $response);
+            return $response;
+        }
+    }
+
+    /**
+     * @param string $method
+     * @param Response $response
+     * @return int
+     */
+    private function getStatusCodeForMethod(string $method, Response $response): int
+    {
+        if ($method === 'HEAD') {
+            return $response->status;
+        }
+        if ($method === 'OPTIONS') {
+            return Response::NO_CONTENT;
+        }
+        return $response->status;
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    private function getControllerResponse(Request $request): Response
+    {
         $class = $request->getAction()->getClass();
         $method = $request->getAction()->getMethod();
 
@@ -70,6 +118,7 @@ class Request implements RequestInterface
         if (!($response instanceof Response)) {
             throw new ResponseException('The controller method must return an instance of Response');
         }
+
         return $response;
     }
 
