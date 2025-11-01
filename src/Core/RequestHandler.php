@@ -53,11 +53,19 @@ class RequestHandler
                 );
 
             if ($response) {
-                // For HEAD requests, return only headers (no body)
+                // for HEAD requests, return only headers (no body)
                 if (Server::requestMethod() === 'HEAD') {
                     return new \React\Http\Message\Response(
                         $response->status,
-                        ['Content-Type' => 'application/json'],
+                        $response->getHeadersForHead(),
+                        ''
+                    );
+                }
+                // for OPTIONS requests, return only headers (no body)
+                if (Server::requestMethod() === 'OPTIONS') {
+                    return new \React\Http\Message\Response(
+                        Response::NO_CONTENT,
+                        $response->getHeadersForOptions(),
                         ''
                     );
                 }
