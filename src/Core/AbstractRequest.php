@@ -304,7 +304,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @return mixed
      * @throws Exception
      */
-    public function getRoutesForMethod(array $all_routes, string $method): mixed
+    public function getRoutesForMethod(array $all_routes, string $method): array
     {
         if (!$all_routes) {
             throw new Exception("No routes defined for the given method: {$method}");

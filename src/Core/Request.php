@@ -78,7 +78,7 @@ class Request implements RequestInterface
      * @param Request $request
      * @return Response
      */
-    private function getClosureResponse(string $method, Request $request): Response
+    private function getClosureResponse(string $method, Request $request): ?Response
     {
         $closure = $request->getAction()->getClosure();
         if ($closure instanceof \Closure) {
@@ -86,6 +86,7 @@ class Request implements RequestInterface
             $response->status = $this->getStatusCodeForMethod($method, $response);
             return $response;
         }
+        return null;
     }
 
     /**
