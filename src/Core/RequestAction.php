@@ -25,8 +25,8 @@ class RequestAction implements RequestActionInterface
         $this->middleware = $middleware;
     }
 
-    public function getMethod(): string {
-        return $this->method;
+    public function getMethod(): ?string {
+        return $this->method ?? null;
     }
     public function setMethod($method): void {
         $this->method = $method;

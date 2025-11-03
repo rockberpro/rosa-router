@@ -9,7 +9,7 @@ namespace Rockberpro\RestRouter\Core;
  */
 interface RequestActionInterface
 {
-    public function getMethod(): string;
+    public function getMethod(): ?string;
     public function setMethod($method): void;
     public function getClosure();
     public function setClosure($closure): void;
