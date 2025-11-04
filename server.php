@@ -7,13 +7,13 @@ use React\Http\HttpServer;
 use Rockberpro\RestRouter\Core\Server;
 
 require_once "vendor/autoload.php";
-require_once "routes/api.php";
 
 Bootstrap::setup();
 $port = DotEnv::get('API_SERVER_PORT');
 $address = DotEnv::get('API_SERVER_ADDRESS');
 
 $server = Server::init();
+$server->loadRoutes('./routes/api.php');
 $server = new HttpServer(
     $server->execute(Server::MODE_STATEFUL)
 );
