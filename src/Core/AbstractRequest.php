@@ -22,7 +22,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     public function buildRequest(RequestData $data): Request
     {
-        $routes = $this->getRoutesForMethod(Server::getInstance()->getRoutes(), $data->getMethod());
+        $routes = $this->getRoutesForMethod(RouteHandler::getInstance()->getRoutes(), $data->getMethod());
 
         $request = new Request();
         $action = $this->handle($routes, $data->getUri());

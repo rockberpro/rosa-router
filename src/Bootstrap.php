@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter;
 
 use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
@@ -88,8 +89,19 @@ class Bootstrap
      */
     protected static function doStateless()
     {
-        if (Server::getInstance()->isApiEndpoint()) {
-            return Server::getInstance()->dispatch();
+        try {
+            $server = Server::getInstance();
+        } catch (\RuntimeException $e) {
+            $server = Server::init();
+            try {
+                Container::getInstance()->set(Server::class, $server);
+            } catch (\Throwable $ignore) {
+                // noop
+            }
+        }
+
+        if ($server->isApiEndpoint()) {
+            return $server->dispatch();
         }
 
         return null;
