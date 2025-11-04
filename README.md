@@ -26,24 +26,17 @@ ROSA-Router listens for HTTP requests and maps them to the correct route handler
 use Rockberpro\RestRouter\Bootstrap;
 
 require_once "vendor/autoload.php";
-require_once "routes/api.php";
 
-Bootstrap::execute(Bootstrap::MODE_STATELESS);
-```
-- In case your index.php entrypoint is already in use, tweak it as shown below:
-```php
-<?php
-
-use Rockberpro\RestRouter\Bootstrap;
-use Rockberpro\RestRouter\Core\Server;
-
-require_once "vendor/autoload.php";
-
-if (Server::getInstance()->isApiEndpoint()) {
-    require_once "routes/api.php";
-    Bootstrap::execute(Bootstrap::MODE_STATELESS);
+// Bootstrap::setup('path/to/.env');
+// Bootstrap::setup('path/to/.ini');
+Bootstrap::setup();
+$server = Server::init();
+if ($server->isApiEndpoint()) {
+    $server->loadRoutes('./routes/api.php');
+    $server->execute(Server::MODE_STATELESS);
 }
 ```
+
 - server.php
 ```php
 // To run the server: php server.php
@@ -55,13 +48,18 @@ use React\Socket\SocketServer;
 use React\Http\HttpServer;
 
 require_once "vendor/autoload.php";
-require_once "routes/api.php";
 
+// Bootstrap::setup('path/to/.env');
+// Bootstrap::setup('path/to/.ini');
 Bootstrap::setup();
 $port = DotEnv::get('API_SERVER_PORT');
 $address = DotEnv::get('API_SERVER_ADDRESS');
 
-$server = new HttpServer(Bootstrap::execute(Bootstrap::MODE_STATEFUL));
+$server = Server::init();
+$server->loadRoutes('./routes/api.php');
+$server = new HttpServer(
+    $server->execute(Server::MODE_STATEFUL)
+);
 $server->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
 });
@@ -69,6 +67,7 @@ $socket = new SocketServer("{$address}:{$port}");
 $server->listen($socket);
 
 print("Server running at http://{$address}:{$port}".PHP_EOL);
+
 ```
 
 ## Usage examples
