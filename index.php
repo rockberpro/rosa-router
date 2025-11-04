@@ -6,8 +6,8 @@ use Rockberpro\RestRouter\Core\Server;
 require_once "vendor/autoload.php";
 require_once "routes/api.php";
 
-Bootstrap::setup(".ini");
+Bootstrap::setup();
 $server = Server::init();
 if ($server->isApiEndpoint()) {
-    Bootstrap::execute(Bootstrap::MODE_STATELESS);
+    $server->execute(Server::MODE_STATELESS);
 }

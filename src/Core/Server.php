@@ -3,6 +3,7 @@
 namespace Rockberpro\RestRouter\Core;
 
 use React\Http\Message\ServerRequest;
+use Rockberpro\RestRouter\Bootstrap;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
@@ -13,6 +14,9 @@ use Symfony\Component\HttpFoundation\Request as HttpRequest;
  */
 final class Server implements ServerInterface
 {
+    public const MODE_STATELESS = 'stateless';
+    public const MODE_STATEFUL = 'stateful';
+
     /**
      * Cached HttpFoundation Request instance (singleton)
      *
@@ -233,7 +237,88 @@ final class Server implements ServerInterface
         return $instance;
     }
 
-    public static function query(): string
+    /**
+     * @param string|null $mode one of Boostrap::MODE_STATELESS|Boostrap::MODE_STATEFUL or null to autodetect
+     * @return void
+     */
+    /**
+     * Centralized executor. Accepts an explicit mode or will detect one when null.
+     * - If mode is stateless: dispatch immediately and return the dispatch result (or null when not an API endpoint).
+     * - If mode is stateful: return a callable compatible with React\Http\HttpServer (same as previous stateful()).
+     * This preserves backward compatibility while providing a single authoritative entry point.
+     *
+     * @param string|null $mode one of self::MODE_STATELESS|self::MODE_STATEFUL or null to autodetect
+     * @return mixed|null|callable
+     */
+    public static function execute(?string $mode = null)
+    {
+        if (!Bootstrap::isBooted()) {
+            Bootstrap::setup();
+        }
+
+        if ($mode === null) {
+            $mode = self::detectMode();
+        }
+
+        switch ($mode) {
+            case self::MODE_STATELESS:
+                return self::doStateless();
+
+            case self::MODE_STATEFUL:
+                return self::doStateful();
+
+            default:
+                throw new \InvalidArgumentException("Unknown bootstrap mode: {$mode}");
+        }
+    }
+
+    /**
+     * Internal implementation for stateless handling (preserves previous behavior).
+     */
+    protected static function doStateless()
+    {
+        try {
+            $server = Server::getInstance();
+        } catch (\RuntimeException $e) {
+            $server = Server::init();
+            try {
+                Container::getInstance()->set(Server::class, $server);
+            } catch (\Throwable $ignore) {
+                // noop
+            }
+        }
+
+        return $server->dispatch();
+    }
+
+    /**
+     * Internal implementation for stateful handling (preserves previous behavior).
+     * Returns the callable expected by React\Http\HttpServer.
+     */
+    protected static function doStateful(): callable
+    {
+        return function (ServerRequest $request) {
+            return Server::getInstance()
+                ->stateful($request)
+                ->dispatch();
+        };
+    }
+
+    /**
+     * Simple detection heuristics for the API mode
+     */
+    protected static function detectMode(): string
+    {
+        // CLI should default to stateless (no HTTP sessions)
+        if (php_sapi_name() === 'cli' || PHP_SAPI === 'cli') {
+            return self::MODE_STATEFUL;
+        }
+
+        // default/fallback
+        return self::MODE_STATELESS;
+    }
+
+   public static function query(): string
     {
         return ServerHelper::query();
     }
