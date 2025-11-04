@@ -3,9 +3,9 @@
 namespace Rockberpro\RestRouter\Core;
 
 use React\Http\Message\ServerRequest;
+use Rockberpro\RestRouter\Bootstrap;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
-use Rockberpro\RestRouter\Bootstrap;
 
 /**
  * @author Samuel Oberger Rockenbach
@@ -14,6 +14,9 @@ use Rockberpro\RestRouter\Bootstrap;
  */
 final class Server implements ServerInterface
 {
+    public const MODE_STATELESS = 'stateless';
+    public const MODE_STATEFUL = 'stateful';
+
     /**
      * Cached HttpFoundation Request instance (singleton)
      *
@@ -25,23 +28,20 @@ final class Server implements ServerInterface
 
     private bool $isStateful = false;
 
-    private array $routes = [];
+    /**
+     * Prefer calling Server::setInstance() or Server::init()
+     * during bootstrap. This removes responsibility to register itself
+     * into the DI container from this class.
+     *
+     * @var self|null
+     */
+    private static ?self $instance = null;
 
     public function __construct() {}
 
     public function isApiEndpoint(): bool
     {
         return strpos(self::getInstance()->getHttpRequest()->getPathInfo(), '/api/') !== false;
-    }
-
-    public function setRoutes(array $routes): void
-    {
-        self::getInstance()->routes = $routes;
-    }
-
-    public function getRoutes(): array
-    {
-        return self::getInstance()->routes;
     }
 
     public static function getRootDir()
@@ -198,16 +198,127 @@ final class Server implements ServerInterface
      */
     public static function getInstance(): Server
     {
-        if (!Container::getInstance()->has(Server::class)) {
-            $instance = new self();
-            $instance->httpRequest = HttpRequest::createFromGlobals();
-            Container::getInstance()->set(Server::class, $instance);
+        // Return a previously set instance first
+        if (self::$instance !== null) {
+            return self::$instance;
+        }
+        // If the container already has an instance, use it but DO NOT create
+        // and register one here — keep responsibility in bootstrap code.
+        if (Container::getInstance()->has(Server::class)) {
+            $instance = Container::getInstance()->get(Server::class);
+            // Cache local reference for subsequent fast access
+            self::$instance = $instance;
+            return $instance;
         }
 
-        return Container::getInstance()->get(Server::class);
+        throw new \RuntimeException(
+            'Server instance is not initialized. Call Server::init() or Server::setInstance($server) during application bootstrap.'
+        );
     }
 
-    public static function query(): string
+    /**
+     * Explicitly set the Server instance (useful for tests/bootstrap).
+     */
+    public static function setInstance(Server $instance): void
+    {
+        self::$instance = $instance;
+    }
+
+    /**
+     * Convenience factory to create a Server based on globals and cache it.
+     * This does NOT register the instance into the DI container — do that
+     * in bootstrap if needed.
+     */
+    public static function init(): Server
+    {
+        $instance = new self();
+        $instance->httpRequest = HttpRequest::createFromGlobals();
+        self::setInstance($instance);
+        return $instance;
+    }
+
+    /**
+     * @param string|null $mode one of Boostrap::MODE_STATELESS|Boostrap::MODE_STATEFUL or null to autodetect
+     * @return void
+     */
+    /**
+     * Centralized executor. Accepts an explicit mode or will detect one when null.
+     * - If mode is stateless: dispatch immediately and return the dispatch result (or null when not an API endpoint).
+     * - If mode is stateful: return a callable compatible with React\Http\HttpServer (same as previous stateful()).
+     * This preserves backward compatibility while providing a single authoritative entry point.
+     *
+     * @param string|null $mode one of self::MODE_STATELESS|self::MODE_STATEFUL or null to autodetect
+     * @return mixed|null|callable
+     */
+    public static function execute(?string $mode = null)
+    {
+        if (!Bootstrap::isBooted()) {
+            Bootstrap::setup();
+        }
+
+        if ($mode === null) {
+            $mode = self::detectMode();
+        }
+
+        switch ($mode) {
+            case self::MODE_STATELESS:
+                return self::doStateless();
+
+            case self::MODE_STATEFUL:
+                return self::doStateful();
+
+            default:
+                throw new \InvalidArgumentException("Unknown bootstrap mode: {$mode}");
+        }
+    }
+
+    /**
+     * Internal implementation for stateless handling (preserves previous behavior).
+     */
+    protected static function doStateless()
+    {
+        try {
+            $server = Server::getInstance();
+        } catch (\RuntimeException $e) {
+            $server = Server::init();
+            try {
+                Container::getInstance()->set(Server::class, $server);
+            } catch (\Throwable $ignore) {
+                // noop
+            }
+        }
+
+        return $server->dispatch();
+    }
+
+    /**
+     * Internal implementation for stateful handling (preserves previous behavior).
+     * Returns the callable expected by React\Http\HttpServer.
+     */
+    protected static function doStateful(): callable
+    {
+        return function (ServerRequest $request) {
+            return Server::getInstance()
+                ->stateful($request)
+                ->dispatch();
+        };
+    }
+
+    /**
+     * Simple detection heuristics for the API mode
+     */
+    protected static function detectMode(): string
+    {
+        // CLI should default to stateless (no HTTP sessions)
+        if (php_sapi_name() === 'cli' || PHP_SAPI === 'cli') {
+            return self::MODE_STATEFUL;
+        }
+
+        // default/fallback
+        return self::MODE_STATELESS;
+    }
+
+   public static function query(): string
     {
         return ServerHelper::query();
     }
