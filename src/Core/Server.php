@@ -238,6 +238,39 @@ final class Server implements ServerInterface
     }
 
     /**
+     * Load route definitions from a PHP file.
+     *
+     * This helper includes the provided file in an
+     * isolated scope so route definitions don't leak variables.
+     *
+     * @param string $file Absolute or relative path to the routes file
+     * @return void
+     */
+    public function loadRoutes(string $file): void
+    {
+        // Include the routes file inside a closure to avoid leaking
+        // local variables into the global scope used by the routes file.
+        $loader = static function (string $path) {
+            if (!file_exists($path)) {
+                throw new \InvalidArgumentException("Routes file not found: {$path}");
+            }
+            include $path;
+        };
+
+        // Normalize relative paths: if the provided path doesn't exist,
+        // try resolving it relative to the project root (two levels up).
+        $path = $file;
+        if (!file_exists($path)) {
+            $alt = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . ltrim($file, '/\\');
+            if (file_exists($alt)) {
+                $path = $alt;
+            }
+        }
+
+        $loader($path);
+    }
+
+    /**
      * @param string|null $mode one of Boostrap::MODE_STATELESS|Boostrap::MODE_STATEFUL or null to autodetect
      * @return void
      */
