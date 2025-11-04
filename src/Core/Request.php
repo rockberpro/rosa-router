@@ -326,13 +326,7 @@ class Request implements RequestInterface
         $logger = Container::getInstance()->get(InfoLogHandler::class);
         $is_closure = $request->getAction()->isClosure();
         $log_data = [
-            'subject' => DotEnv::get('API_NAME'),
             'type' => $is_closure ? 'closure' : 'controller',
-            'remote_address' => Server::remoteAddress(),
-            'target_address' => Server::targetAddress(),
-            'user_agent' => Server::userAgent(),
-            'request_method' => Server::requestMethod(),
-            'request_uri' => Server::requestUri(),
             'request_data' => $request->getParams(),
             'endpoint' => $request->getAction()->getUri(),
         ];

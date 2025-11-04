@@ -2,6 +2,7 @@
 
 namespace Rockberpro\RestRouter\Logs;
 
+use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
 use Rockberpro\RestRouter\Database\PDOConnection;
 use Rockberpro\RestRouter\Service\Container;
@@ -37,6 +38,15 @@ class InfoLogHandler
 
     public function write($message, $data)
     {
+        $log_data = [
+            'subject' => DotEnv::get('API_NAME'),
+            'remote_address' => Server::remoteAddress(),
+            'target_address' => Server::targetAddress(),
+            'user_agent' => Server::userAgent(),
+            'request_method' => Server::requestMethod(),
+            'request_uri' => Server::requestUri(),
+        ];
+        $data = array_merge($data, $log_data);
         $this->logger->info($message, $data);
     }
 }

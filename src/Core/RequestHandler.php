@@ -24,8 +24,9 @@ class RequestHandler
 
     public function handleStateless(): \Rockberpro\RestRouter\Core\Response
     {
+        $request = new Request();
         try {
-            return (new Request())->handle(
+            return $request->handle(
                 Server::getInstance()->getRequestData()
             );
         }
@@ -46,11 +47,11 @@ class RequestHandler
 
     public function handleStateful(): \React\Http\Message\Response
     {
+        $request = new Request();
         try {
-            $response = (new Request())
-                ->handle(
-                    Server::getInstance()->getRequestData()
-                );
+            $response = $request->handle(
+                Server::getInstance()->getRequestData()
+            );
 
             if ($response) {
                 // for HEAD requests, return only headers (no body)
@@ -108,6 +109,7 @@ class RequestHandler
      */
     public function writeLog(Throwable $t): void
     {
+
         $logger = Container::getInstance()->get(ErrorLogHandler::class);
         $logger->write('error', [
             'message' => $t->getMessage(),
