@@ -6,10 +6,6 @@ use Rockberpro\RestRouter\Core\Server;
 
 /**
  * Cross-origin Resource Sharing
- * 
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Utils
  */
 class Cors
 {

@@ -6,11 +6,6 @@ use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Utils\DotEnv;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 class Request implements RequestInterface
 {
     private RequestAction $requestAction;

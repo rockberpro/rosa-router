@@ -5,11 +5,6 @@ namespace Rockberpro\RestRouter\Core;
 use Closure;
 use Exception;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 class Route implements RouteInterface
 {
     const PREFIX = '/api';

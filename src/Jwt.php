@@ -8,11 +8,6 @@ use DateTime;
 use Exception;
 use Throwable;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 class Jwt
 {
     /**

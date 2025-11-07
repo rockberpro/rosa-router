@@ -2,12 +2,7 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
-class PostRequest extends AbstractRequest 
+class PostRequest extends AbstractRequest
 {
     /**
      * Build the request for Post method

@@ -2,11 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 interface RouteInterface
 {
     public static function get($route, $method): void;
