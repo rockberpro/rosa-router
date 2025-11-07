@@ -1,15 +1,15 @@
 <?php
 
-namespace Rockberpro\RestRouter\Middleware;
+namespace Rockberpro\RosaRouter\Middleware;
 
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Core\Response;
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Utils\Cors;
-use Rockberpro\RestRouter\Utils\Sop;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Jwt;
-use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
+use Rockberpro\RosaRouter\Database\PDOConnection;
+use Rockberpro\RosaRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Server;
+use Rockberpro\RosaRouter\Utils\Cors;
+use Rockberpro\RosaRouter\Utils\Sop;
+use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Jwt;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiKeysHandler;
 
 class AuthMiddleware
 {

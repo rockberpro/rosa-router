@@ -1,7 +1,7 @@
 <?php
 
-use Rockberpro\RestRouter\Bootstrap;
-use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RosaRouter\Bootstrap;
+use Rockberpro\RosaRouter\Core\Server;
 
 require_once "vendor/autoload.php";
 

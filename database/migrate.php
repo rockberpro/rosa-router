@@ -1,7 +1,7 @@
 <?php
 
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Database\PDOConnection;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 
 require_once "../vendor/autoload.php";
 

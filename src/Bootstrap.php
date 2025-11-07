@@ -1,11 +1,11 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RosaRouter;
 
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Utils\IniEnv;
+use Rockberpro\RosaRouter\Logs\ErrorLogHandler;
+use Rockberpro\RosaRouter\Logs\InfoLogHandler;
+use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Utils\IniEnv;
 
 /**
  * Small bootstrap helper to initialize environment and logging

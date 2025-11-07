@@ -1,9 +1,9 @@
 <?php
 
-namespace Rockberpro\RestRouter\Utils;
+namespace Rockberpro\RosaRouter\Utils;
 
-use Rockberpro\RestRouter\Response;
-use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RosaRouter\Response;
+use Rockberpro\RosaRouter\Core\Server;
 
 /**
  * Same Origin Policy

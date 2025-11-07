@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter\Core;
+namespace Rockberpro\RosaRouter\Core;
 
-use Rockberpro\RestRouter\Helpers\RouteHelper;
+use Rockberpro\RosaRouter\Helpers\RouteHelper;
 use Closure;
 use Exception;
 

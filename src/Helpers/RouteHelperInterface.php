@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Helpers;
+namespace Rockberpro\RosaRouter\Helpers;
 
 interface RouteHelperInterface
 {

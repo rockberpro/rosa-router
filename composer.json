@@ -18,9 +18,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Rockberpro\\RestRouter\\": "src/",
-            "Rockberpro\\RestRouter\\Controllers\\": "controllers/",
-            "Rockberpro\\RestRouter\\Routes\\": "routes/"
+            "Rockberpro\\RosaRouter\\": "src/",
+            "Rockberpro\\RosaRouter\\Controllers\\": "controllers/",
+            "Rockberpro\\RosaRouter\\Routes\\": "routes/"
         }
     },
     "require-dev": {

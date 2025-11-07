@@ -1,12 +1,12 @@
 <?php
 
-namespace Rockberpro\RestRouter\Logs;
+namespace Rockberpro\RosaRouter\Logs;
 
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Service\Container;
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Core\Server;
+use Rockberpro\RosaRouter\Database\Handlers\PDOLogHandler;
+use Rockberpro\RosaRouter\Database\PDOConnection;
+use Rockberpro\RosaRouter\Service\Container;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 

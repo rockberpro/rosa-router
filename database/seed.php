@@ -1,10 +1,10 @@
 <?php
 
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
-use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Utils\Uuid;
+use Rockberpro\RosaRouter\Database\PDOConnection;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiKeysHandler;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiUsersHandler;
+use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Utils\Uuid;
 
 require_once "../vendor/autoload.php";
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Rockberpro\RestRouter\Core;
+namespace Rockberpro\RosaRouter\Core;
 
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Rockberpro\RestRouter\Service\Container;
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Logs\InfoLogHandler;
+use Rockberpro\RosaRouter\Service\Container;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 
 class Request implements RequestInterface
 {

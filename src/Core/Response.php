@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter\Core;
+namespace Rockberpro\RosaRouter\Core;
 
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 
 class Response implements ResponseInterface
 {

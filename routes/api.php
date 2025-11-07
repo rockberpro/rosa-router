@@ -1,8 +1,8 @@
 <?php
 
-use Rockberpro\RestRouter\Core\Response;
-use Rockberpro\RestRouter\Core\Route;
-use Rockberpro\RestRouter\Controllers\AuthController;
+use Rockberpro\RosaRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Route;
+use Rockberpro\RosaRouter\Controllers\AuthController;
 
 Route::get('/status', function() {
   return new Response([

@@ -1,7 +1,7 @@
 <?php
 
-use Rockberpro\RestRouter\Core\Response;
-use Rockberpro\RestRouter\Core\Route;
+use Rockberpro\RosaRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Route;
 
 Route::prefix('lvl1')->middleware(TestMiddleware::class)->group(function() {
 

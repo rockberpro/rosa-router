@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Core;
+namespace Rockberpro\RosaRouter\Core;
 
 class RequestData
 {

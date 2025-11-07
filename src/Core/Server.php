@@ -1,10 +1,10 @@
 <?php
 
-namespace Rockberpro\RestRouter\Core;
+namespace Rockberpro\RosaRouter\Core;
 
 use React\Http\Message\ServerRequest;
-use Rockberpro\RestRouter\Bootstrap;
-use Rockberpro\RestRouter\Service\Container;
+use Rockberpro\RosaRouter\Bootstrap;
+use Rockberpro\RosaRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
 final class Server implements ServerInterface
@@ -138,7 +138,7 @@ final class Server implements ServerInterface
     /**
      * Return a singleton Symfony HttpFoundation Request created from globals.
      *
-     * Usage: $req = \Rockberpro\RestRouter\Core\Server::getHttpRequest();
+     * Usage: $req = \Rockberpro\RosaRouter\Core\Server::getHttpRequest();
      *
      * @return HttpRequest
      */
@@ -166,7 +166,7 @@ final class Server implements ServerInterface
     public function dispatch()
     {
         $response = (new RequestHandler())->dispatch($this->isStateful());
-         if ($response instanceof \Rockberpro\RestRouter\Core\Response) {
+         if ($response instanceof \Rockberpro\RosaRouter\Core\Response) {
              // if the incoming HTTP method is OPTIONS, send only headers/status without a body
              if (Server::requestMethod() === 'OPTIONS') {
                  $response->writeHeaders($response->getHeadersForOptions());

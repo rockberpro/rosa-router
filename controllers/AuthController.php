@@ -1,16 +1,16 @@
 <?php
 
-namespace Rockberpro\RestRouter\Controllers;
+namespace Rockberpro\RosaRouter\Controllers;
 
-use Rockberpro\RestRouter\Jwt;
-use Rockberpro\RestRouter\JwtException;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Core\Request;
-use Rockberpro\RestRouter\Core\Response;
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
-use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
+use Rockberpro\RosaRouter\Jwt;
+use Rockberpro\RosaRouter\JwtException;
+use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Core\Request;
+use Rockberpro\RosaRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Server;
+use Rockberpro\RosaRouter\Database\PDOConnection;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiTokensHandler;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiUsersHandler;
 use Exception;
 
 class AuthController extends Controller

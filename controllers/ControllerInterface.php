@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Controllers;
+namespace Rockberpro\RosaRouter\Controllers;
 
 interface ControllerInterface
 {

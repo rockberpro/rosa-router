@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Rockberpro\RestRouter\Core\Route;
+use Rockberpro\RosaRouter\Core\Route;
 
 class NestedRoutesTest extends TestCase
 {

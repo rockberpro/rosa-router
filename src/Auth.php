@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RosaRouter;
 
-use Rockberpro\RestRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Response;
 
 class Auth
 {

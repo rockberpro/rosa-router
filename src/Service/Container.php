@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Service;
+namespace Rockberpro\RosaRouter\Service;
 
 class Container
 {

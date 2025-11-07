@@ -23,7 +23,7 @@ ROSA-Router listens for HTTP requests and maps them to the correct route handler
 ```php
 <?php
 
-use Rockberpro\RestRouter\Bootstrap;
+use Rockberpro\RosaRouter\Bootstrap;
 
 require_once "vendor/autoload.php";
 
@@ -42,8 +42,8 @@ if ($server->isApiEndpoint()) {
 // To run the server: php server.php
 <?php
 
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Bootstrap;
+use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Bootstrap;
 use React\Socket\SocketServer;
 use React\Http\HttpServer;
 

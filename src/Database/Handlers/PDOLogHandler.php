@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Database\Handlers;
+namespace Rockberpro\RosaRouter\Database\Handlers;
 
 use Monolog\Handler\AbstractProcessingHandler;
 use PDO;

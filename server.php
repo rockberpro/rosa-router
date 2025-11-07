@@ -1,10 +1,10 @@
 <?php
 
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Rockberpro\RestRouter\Bootstrap;
+use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Bootstrap;
 use React\Socket\SocketServer;
 use React\Http\HttpServer;
-use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RosaRouter\Core\Server;
 
 require_once "vendor/autoload.php";
 

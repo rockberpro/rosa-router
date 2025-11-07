@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter\Utils;
+namespace Rockberpro\RosaRouter\Utils;
 
-use Rockberpro\RestRouter\Core\Server;
+use Rockberpro\RosaRouter\Core\Server;
 
 /**
  * Cross-origin Resource Sharing

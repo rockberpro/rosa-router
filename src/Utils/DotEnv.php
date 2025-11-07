@@ -1,6 +1,6 @@
 <?php
 
-namespace Rockberpro\RestRouter\Utils;
+namespace Rockberpro\RosaRouter\Utils;
 
 use Throwable;
 

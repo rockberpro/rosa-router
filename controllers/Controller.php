@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter\Controllers;
+namespace Rockberpro\RosaRouter\Controllers;
 
-use Rockberpro\RestRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Response;
 
 class Controller implements ControllerInterface
 {

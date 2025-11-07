@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter;
+namespace Rockberpro\RosaRouter;
 
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 use DateInterval;
 use DateTime;
 use Exception;

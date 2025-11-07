@@ -1,8 +1,8 @@
 <?php
 
-namespace Rockberpro\RestRouter\Database;
+namespace Rockberpro\RosaRouter\Database;
 
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 
 use PDO;
 use PDOStatement;

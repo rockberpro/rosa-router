@@ -1,11 +1,11 @@
 <?php
 
-namespace Rockberpro\RestRouter\Core;
+namespace Rockberpro\RosaRouter\Core;
 
-use Rockberpro\RestRouter\Core;
-use Rockberpro\RestRouter\Logs\ErrorLogHandler;
-use Rockberpro\RestRouter\Service\Container;
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Core;
+use Rockberpro\RosaRouter\Logs\ErrorLogHandler;
+use Rockberpro\RosaRouter\Service\Container;
+use Rockberpro\RosaRouter\Utils\DotEnv;
 use Throwable;
 
 class RequestHandler
@@ -22,7 +22,7 @@ class RequestHandler
         return $this->handleStateless();
     }
 
-    public function handleStateless(): \Rockberpro\RestRouter\Core\Response
+    public function handleStateless(): \Rockberpro\RosaRouter\Core\Response
     {
         $request = new Request();
         try {
@@ -35,12 +35,12 @@ class RequestHandler
         }
 
         if (DotEnv::get('API_DEBUG')) {
-            return new \Rockberpro\RestRouter\Core\Response([
+            return new \Rockberpro\RosaRouter\Core\Response([
                 'message' => $t->getMessage()
             ], 500);
         }
 
-        return new \Rockberpro\RestRouter\Core\Response([
+        return new \Rockberpro\RosaRouter\Core\Response([
             'message' => 'Internal server error'
         ], 500);
     }
