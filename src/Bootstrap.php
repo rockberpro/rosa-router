@@ -2,13 +2,10 @@
 
 namespace Rockberpro\RestRouter;
 
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Logs\ErrorLogHandler;
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Utils\IniEnv;
-use React\Http\Message\ServerRequest;
 
 /**
  * Small bootstrap helper to initialize environment and logging
