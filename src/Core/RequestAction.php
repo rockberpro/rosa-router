@@ -4,11 +4,6 @@ namespace Rockberpro\RestRouter\Core;
 
 use Closure;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
 class RequestAction implements RequestActionInterface
 {
     private ?string $middleware;

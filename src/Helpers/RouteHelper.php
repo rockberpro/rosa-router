@@ -2,11 +2,6 @@
 
 namespace Rockberpro\RestRouter\Helpers;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Helpers
- */
 class RouteHelper implements RouteHelperInterface
 {
     /**

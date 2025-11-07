@@ -4,11 +4,6 @@ namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Utils\DotEnv;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 class Response implements ResponseInterface
 {
     const OK = 200;

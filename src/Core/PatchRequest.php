@@ -2,12 +2,7 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
-class PatchRequest extends AbstractRequest 
+class PatchRequest extends AbstractRequest
 {
     /**
      * Build the request for Patch method

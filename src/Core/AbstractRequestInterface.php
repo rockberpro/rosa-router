@@ -2,11 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
 interface AbstractRequestInterface
 {
     public function buildRequest(RequestData $data): Request;

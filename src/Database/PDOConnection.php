@@ -9,12 +9,6 @@ use PDOStatement;
 use RuntimeException;
 use Throwable;
 
-/**
- * PDO Database connector
- * 
- * @author Samuel Oberger Rockenbach <samuel.rockenbach@univates.br>
- * @since july-2022
- */
 class PDOConnection
 {
     private string $username;

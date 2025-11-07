@@ -2,12 +2,7 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
-class PutRequest extends AbstractRequest 
+class PutRequest extends AbstractRequest
 {
     /**
      * Build the request for Put method

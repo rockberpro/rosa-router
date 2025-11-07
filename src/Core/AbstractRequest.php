@@ -6,11 +6,6 @@ use Rockberpro\RestRouter\Helpers\RouteHelper;
 use Closure;
 use Exception;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
 abstract class AbstractRequest implements AbstractRequestInterface
 {
     /**
