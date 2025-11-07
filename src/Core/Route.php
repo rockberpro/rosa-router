@@ -116,7 +116,7 @@ class Route implements RouteInterface
             throw new Exception('Target route cannot be empty.');
         }
 
-        $full_route = self::route($route);
+        $full_route = rtrim(self::route($route), '/');
         $prefix = rtrim(explode('{', $full_route)[0], '/');
 
         if (!isset(self::$instance)) {
