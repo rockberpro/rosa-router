@@ -13,7 +13,8 @@
         "monolog/monolog": "^2.10",
         "symfony/http-foundation": "^5.4",
         "symfony/dotenv": "3.4",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {
