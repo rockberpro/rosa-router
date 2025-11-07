@@ -3,6 +3,7 @@
 namespace Rockberpro\RosaRouter\Database\Handlers;
 
 use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\LogRecord;
 use PDO;
 
 class PDOLogHandler extends AbstractProcessingHandler
@@ -17,7 +18,7 @@ class PDOLogHandler extends AbstractProcessingHandler
         $this->table = $table;
     }
 
-    protected function write(array $record): void
+    protected function write(LogRecord $record): void
     {
         $sql = "INSERT INTO {$this->table} (channel, level, message, context, created_at) VALUES (:channel, :level, :message, :context, :created_at)";
         $stmt = $this->pdo->prepare($sql);
