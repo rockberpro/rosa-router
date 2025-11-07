@@ -2,11 +2,6 @@
 
 namespace Rockberpro\RestRouter\Helpers;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Helpers
- */
 interface RouteHelperInterface
 {
     public static function routeArgs($route_match);

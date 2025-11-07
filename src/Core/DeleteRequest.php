@@ -2,12 +2,7 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Core
- */
-class DeleteRequest extends AbstractRequest 
+class DeleteRequest extends AbstractRequest
 {
     /**
      * Build the request for Delete method

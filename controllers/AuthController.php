@@ -13,11 +13,6 @@ use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
 use Exception;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 class AuthController extends Controller
 {
     /**

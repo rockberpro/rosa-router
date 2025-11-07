@@ -11,11 +11,6 @@ use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Jwt;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Middleware
- */
 class AuthMiddleware
 {
     /**

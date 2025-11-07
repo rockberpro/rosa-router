@@ -6,9 +6,6 @@ namespace Rockberpro\RestRouter\Utils;
  * Helper for generating UUIDs
  * 
  * @source https://www.uuidgenerator.net/dev-corner/php
- * 
- * @author Samuel Oberger Rockenbach
- * @since dec-2024
  */
 class Uuid
 {

@@ -2,11 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 interface RequestDataInterface
 {
     public function getMethod(): string;

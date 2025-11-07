@@ -7,11 +7,6 @@ use Rockberpro\RestRouter\Bootstrap;
 use Rockberpro\RestRouter\Service\Container;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter
- */
 final class Server implements ServerInterface
 {
     public const MODE_STATELESS = 'stateless';

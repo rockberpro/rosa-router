@@ -4,11 +4,6 @@ namespace Rockberpro\RestRouter\Utils;
 
 use Throwable;
 
-/**
- * @author Samuel Oberger Rockenbach
- * 
- * @package Rockberpro\RestRouter\Utils
- */
 class DotEnv
 {
     private static \Symfony\Component\Dotenv\Dotenv $dotEnv;
