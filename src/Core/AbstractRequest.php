@@ -45,6 +45,9 @@ abstract class AbstractRequest implements AbstractRequestInterface
      */
     public function handle($routes, $uri): RequestAction
     {
+        // normalize URI to treat trailing slash as optional ("/foo" and "/foo/" both match)
+        $uri = $this->normalizeUri($uri);
+
         $routes_map = $this->map($routes, $uri);
         $match = $this->match($routes, $routes_map, $uri);
         if (!$match) {
@@ -52,6 +55,23 @@ abstract class AbstractRequest implements AbstractRequestInterface
         }
 
         return $this->buildAction($uri, $match);
+    }
+
+    /**
+     * Normalize URI by removing a trailing slash except for the root '/'
+     *
+     * @param string $uri
+     * @return string
+     */
+    private function normalizeUri(string $uri): string
+    {
+        if ($uri === '/') {
+            return $uri;
+        }
+
+        $trimmed = rtrim($uri, '/');
+
+        return $trimmed === '' ? '/' : $trimmed;
     }
 
     /**
