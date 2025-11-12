@@ -19,8 +19,6 @@ class Route implements RouteInterface
 
     private static self $instance;
 
-    private static array $routes = [];
-
     private string $prefix;
     private string $route;
     private string $method;
