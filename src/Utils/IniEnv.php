@@ -28,9 +28,14 @@ class IniEnv
             throw new IniEnvException("Failed to parse INI file '{$path}'.");
         }
 
-        foreach($data as $key => $value)
-        {
-            self::put($key, $value);
+        foreach ($data as $section => $data) {
+            if (is_array($data)) {
+                foreach ($data as $key => $value) {
+                    self::put($key, $value);
+                }
+            } else {
+                self::put($section, $data);
+            }
         }
     }
 
