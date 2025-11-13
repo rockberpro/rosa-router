@@ -14,13 +14,13 @@ $address = DotEnv::get('API_SERVER_ADDRESS');
 
 $server = Server::init();
 $server->loadRoutes('./routes/api.php');
-$server = new HttpServer(
+$httpServer = new HttpServer(
     $server->execute(Server::MODE_STATEFUL)
 );
-$server->on('error', function (Throwable $e) {
+$httpServer->on('error', function (Throwable $e) {
     print("Request error: " . $e->getMessage().PHP_EOL);
 });
 $socket = new SocketServer("{$address}:{$port}");
-$server->listen($socket);
+$httpServer->listen($socket);
 
 print("Server running at http://{$address}:{$port}".PHP_EOL);
