@@ -38,9 +38,7 @@ class PDOConnection
     }
 
     /**
-     * Carregar configuracoes de arquivo INI
-     * 
-     * @since 1.0
+     * Load settings from .env file
      * 
      * @method loadConfigurations
      * @param string $databaseName
@@ -59,9 +57,7 @@ class PDOConnection
     }
 
     /**
-     * Configura o DSN da PDO
-     * 
-     * @since 1.0
+     * Setup PDO
      * 
      * @method configurePDO
      * @return void
@@ -87,22 +83,21 @@ class PDOConnection
     /**
      * Builds DNS URL for PDO
      * 
-     * @since 1.0
-     * 
      * @method getDsnUrl
      * @return string
      */
     private function getDsnUrl()
     {
-        return (
-            "{$this->getDriveType()}:host={$this->getHostName()};port={$this->getPort()};dbname={$this->getDbName()}"
-        );
+        $driver_type = $this->getDriveType();
+        $hostname = $this->getHostName();
+        $post = $this->getPort();
+        $dbname = $this->getDbName();
+
+        return sprintf('%s:host=%s;port=%s;dbname=%s', $driver_type, $hostname, $post, $dbname);
     }
 
     /**
      * Creates a standard SQL ANSI statement
-     * 
-     * @since 1.0
      * 
      * @method createStandardStatement
      * @param string $sqlQuery
@@ -116,8 +111,6 @@ class PDOConnection
 
     /**
      * Creates a prepared statement
-     * 
-     * @since 1.0
      * 
      * @method preparedStatement
      * @param string $sqlQuery
@@ -133,8 +126,6 @@ class PDOConnection
      * Adds parpameters to the statement
      * * $pdo->bindParameter(':id', $value, PDO::PARAM_INT);
      * * $pdo->bindParameter(':id', $value, PDO::PARAM_STR);
-     * 
-     * @since 1.0
      * 
      * @param string $column,
      * @param string $value
@@ -153,8 +144,6 @@ class PDOConnection
 
     /**
      * Finds a single object via PDO
-     * 
-     * @since 1.0
      * 
      * @method fetchOneByPreparedStatement
      * @return ?object
@@ -183,8 +172,6 @@ class PDOConnection
    /**
      * Finds multiple objects via PDO
      * 
-     * @since 1.0
-     * 
      * @method fetchAllByPreparedStatement
      * @return ?array[object]
      */
@@ -211,8 +198,6 @@ class PDOConnection
 
     /**
      * Builds a query
-     * 
-     * @since 1.0
      * 
      * @method getStatement
      * @param $paramValues
@@ -243,8 +228,6 @@ class PDOConnection
     /**
      * Executes statement
      *
-     * @since 1.0
-     * 
      * @method insert
      * @return boolean
      */
@@ -264,8 +247,6 @@ class PDOConnection
 
     /**
      * Counts the number of rows
-     * 
-     * @since 1.1
      * 
      * @method rowCount
      */
@@ -289,8 +270,6 @@ class PDOConnection
     /**
      * Starts a new transaction
      * 
-     * @since 1.1
-     * 
      * @method beginTransaction
      * @return void
      */
@@ -301,8 +280,6 @@ class PDOConnection
 
    /**
      * Commits current transaction
-     * 
-     * @since 1.1
      * 
      * @method commitTransaction
      * @return void
@@ -315,8 +292,6 @@ class PDOConnection
     /**
      * Rollbacks current transaction
      * 
-     * @since 1.1
-     * 
      * @method beginTransaction
      * @return void
      */
@@ -327,8 +302,6 @@ class PDOConnection
 
     /**
      * Closes the connection
-     * 
-     * @since 1.1
      * 
      * @method closeConnection
      * @return void

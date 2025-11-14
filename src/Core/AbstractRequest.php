@@ -4,7 +4,6 @@ namespace Rockberpro\RosaRouter\Core;
 
 use Rockberpro\RosaRouter\Helpers\RouteHelper;
 use Closure;
-use Exception;
 
 abstract class AbstractRequest implements AbstractRequestInterface
 {
@@ -51,7 +50,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $routes_map = $this->map($routes, $uri);
         $match = $this->match($routes, $routes_map, $uri);
         if (!$match) {
-            throw new Exception('No matching route');
+            throw new RequestException('No matching route');
         }
 
         return $this->buildAction($uri, $match);
@@ -87,7 +86,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         [$route_parts, $uri_parts] = [$parts['route_parts'], $parts['uri_parts']];
 
         if (sizeof($route_parts) !== sizeof($uri_parts)) {
-            throw new Exception('Route does not match: different number of segments');
+            throw new RequestException('Route does not match: different number of segments');
         }
 
         foreach ($route_parts as $key => $route_part) {
@@ -105,7 +104,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
             else {
                 // static segment must match exactly
                 if ($route_part !== $uri_part) {
-                    throw new Exception("Route segment mismatch: expected '{$route_part}', got '{$uri_part}'");
+                    throw new RequestException("Route segment mismatch: expected '{$route_part}', got '{$uri_part}'");
                 }
             }
         }
@@ -170,7 +169,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
 
         $target = $action->getRoute()['target'];
         if (!$target) {
-            throw new Exception('Target not defined for the route.');
+            throw new RequestException('Target not defined for the route.');
         }
         if ($target instanceof Closure) {
             $action->setClosure($target);
@@ -178,16 +177,16 @@ abstract class AbstractRequest implements AbstractRequestInterface
         elseif (is_array($target) && sizeof($target) === 2) {
             [$class, $method_name] = $target;
             if (!class_exists($class)) {
-                throw new Exception("Class not found: {$class}");
+                throw new RequestException("Class not found: {$class}");
             }
             if (!method_exists($class, $method_name)) {
-                throw new Exception("Method not found: {$method_name} in {$class}");
+                throw new RequestException("Method not found: {$method_name} in {$class}");
             }
             $action->setClass($class);
             $action->setMethod($method_name);
         }
         else {
-            throw new Exception('Invalid route target.');
+            throw new RequestException('Invalid route target.');
         }
 
         return $action;
@@ -204,10 +203,10 @@ abstract class AbstractRequest implements AbstractRequestInterface
     private function middleware($middleware, Request $request): void
     {
         if (!class_exists($middleware)) {
-            throw new Exception("Middleware not found: {$middleware}");
+            throw new RequestException("Middleware not found: {$middleware}");
         }
         if (!method_exists($middleware, 'handle')) {
-            throw new Exception("Method 'handle' nod implemented for middleware: {$middleware}");
+            throw new RequestException("Method 'handle' nod implemented for middleware: {$middleware}");
         }
         $middleware = new $middleware();
         $middleware->handle($request);
@@ -269,7 +268,7 @@ abstract class AbstractRequest implements AbstractRequestInterface
         });
         $macthing_route = array_shift($macthing_route);
         if (!$macthing_route) {
-            throw new Exception('No matching route found.');
+            throw new RequestException('No matching route found.');
         }
 
         return $macthing_route;
@@ -316,15 +315,15 @@ abstract class AbstractRequest implements AbstractRequestInterface
      * @param array $all_routes
      * @param string $method
      * @return mixed
-     * @throws Exception
+     * @throws RequestException
      */
     public function getRoutesForMethod(array $all_routes, string $method): array
     {
         if (!$all_routes) {
-            throw new Exception("No routes defined for the given method: {$method}");
+            throw new RequestException("No routes defined for the given method: {$method}");
         }
         if (!array_key_exists($method, $all_routes)) {
-            throw new Exception("No routes defined for the given method: {$method}");
+            throw new RequestException("No routes defined for the given method: {$method}");
         }
         $routes = $all_routes[$method];
 
