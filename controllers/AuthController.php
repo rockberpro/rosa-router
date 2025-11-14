@@ -11,7 +11,7 @@ use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Database\PDOConnection;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiTokensHandler;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiUsersHandler;
-use Exception;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -49,7 +49,7 @@ class AuthController extends Controller
         try {
             $apiTokens->addToken($refresh_token, $user->audience);
         }
-        catch (Exception $e) {
+        catch (Throwable $e) {
             return $this->response(['message' => $e->getMessage()], Response::INTERNAL_SERVER_ERROR);
         }
 

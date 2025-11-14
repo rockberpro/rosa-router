@@ -105,13 +105,13 @@ class Route implements RouteInterface
     private static function buildRoute($method, $route, $target): void
     {
         if (!is_string($method) || empty($method)) {
-            throw new Exception('HTTP invalid method.');
+            throw new RouteException('HTTP invalid method.');
         }
         if (!is_string($route) || empty($route)) {
-            throw new Exception('Route invalid.');
+            throw new RouteException('Route invalid.');
         }
         if (empty($target)) {
-            throw new Exception('Target route cannot be empty.');
+            throw new RouteException('Target route cannot be empty.');
         }
 
         $full_route = rtrim(self::route($route), '/');
@@ -258,7 +258,7 @@ class Route implements RouteInterface
         if (is_string($target) && strpos($target, '@') === false) {
             $controller = self::getContextValue('controller');
             if (!$controller) {
-                throw new Exception('Controller not defined for the route.');
+                throw new RouteException('Controller not defined for the route.');
             }
             return [$controller, $target];
         }
@@ -273,7 +273,7 @@ class Route implements RouteInterface
             return [$controller, $method];
         }
 
-        throw new Exception('Invalid or unsupported route target.');
+        throw new RouteException('Invalid or unsupported route target.');
     }
 
     /**

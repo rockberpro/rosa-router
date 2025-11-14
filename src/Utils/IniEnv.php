@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter\Utils;
 
-use Throwable;
+use IniEnvException;
 
 /**
  * Simple INI-based environment loader compatible with DotEnv::get usage.
@@ -68,6 +68,3 @@ class IniEnv
         putenv("{$key}={$val}");
     }
 }
-
-final class IniEnvException extends \RuntimeException {}
-

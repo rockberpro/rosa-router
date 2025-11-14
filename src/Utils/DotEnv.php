@@ -2,6 +2,7 @@
 
 namespace Rockberpro\RestRouter\Utils;
 
+use DotEnvException;
 use Throwable;
 
 class DotEnv
@@ -44,5 +45,3 @@ class DotEnv
         return self::$dotEnv;
     }
 }
-
-final class DotEnvException extends \RuntimeException {}
