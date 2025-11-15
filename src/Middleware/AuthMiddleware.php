@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter\Middleware;
 
-use Rockberpro\RestRouter\Database\PDOConnection;
 use Rockberpro\RestRouter\Core\Response;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\Cors;
@@ -32,7 +31,7 @@ class AuthMiddleware
         }
 
         if (DotEnv::get('API_AUTH_METHOD') === 'KEY') {
-            $apiKey = new PDOApiKeysHandler(new PDOConnection()->getPDO());
+            $apiKey = new PDOApiKeysHandler();
             if (!$apiKey->exists(Server::key())) {
                 Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
             }

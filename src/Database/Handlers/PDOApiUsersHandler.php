@@ -2,18 +2,19 @@
 
 namespace Rockberpro\RestRouter\Database\Handlers;
 
-use PDO;
+use Rockberpro\RestRouter\Database\PDOConnection;
 use Exception;
+use PDO;
 
 class PDOApiUsersHandler
 {
-    private PDO $pdo;
     private string $table;
+    private PDO $pdo;
 
-    public function __construct(PDO $pdo, string $table = 'users')
+    public function __construct()
     {
-        $this->pdo = $pdo;
-        $this->table = $table;
+        $this->table = 'users';
+        $this->pdo = (new PDOConnection())->getPDO();
     }
 
     /**

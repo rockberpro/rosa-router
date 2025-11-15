@@ -2,17 +2,18 @@
 
 namespace Rockberpro\RestRouter\Database\Handlers;
 
+use Rockberpro\RestRouter\Database\PDOConnection;
 use PDO;
 
 class PDOApiKeysHandler
 {
-    private PDO $pdo;
     private string $table;
+    private PDO $pdo;
 
-    public function __construct(PDO $pdo, string $table = 'api_keys')
+    public function __construct()
     {
-        $this->pdo = $pdo;
-        $this->table = $table;
+        $this->table = 'api_keys';
+        $this->pdo = (new PDOConnection())->getPDO();
     }
 
     /**
