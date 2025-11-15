@@ -2,15 +2,14 @@
 
 namespace Rockberpro\RosaRouter\Controllers;
 
-use Rockberpro\RosaRouter\Jwt;
-use Rockberpro\RosaRouter\JwtException;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiTokensHandler;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiUsersHandler;
 use Rockberpro\RosaRouter\Utils\DotEnv;
 use Rockberpro\RosaRouter\Core\Request;
 use Rockberpro\RosaRouter\Core\Response;
 use Rockberpro\RosaRouter\Core\Server;
-use Rockberpro\RosaRouter\Database\PDOConnection;
-use Rockberpro\RosaRouter\Database\Handlers\PDOApiTokensHandler;
-use Rockberpro\RosaRouter\Database\Handlers\PDOApiUsersHandler;
+use Rockberpro\RosaRouter\JwtException;
+use Rockberpro\RosaRouter\Jwt;
 use Throwable;
 
 class AuthController extends Controller
@@ -30,7 +29,7 @@ class AuthController extends Controller
         $username = $request->get('username');
         $password = $request->get('password');
 
-        $apiUsers = new PDOApiUsersHandler((new PDOConnection())->getPDO());
+        $apiUsers = new PDOApiUsersHandler();
         $user = $apiUsers->getUser($username);
         if (!$user) {
             return $this->response(['message' => 'User does not exist'], Response::UNAUTHORIZED);
@@ -39,22 +38,24 @@ class AuthController extends Controller
             return $this->response(['message' => 'Invalid credentials'], Response::UNAUTHORIZED);
         }
 
-        $apiTokens = new PDOApiTokensHandler((new PDOConnection())->getPDO());
-        $last_token = $apiTokens->getLastValidToken($user->audience);
-        if ($last_token) {
-            $apiTokens->revokeByHash($last_token);
+        $apiTokens = new PDOApiTokensHandler();
+        $hash = $apiTokens->getLastValidToken($user->id);
+        if ($hash) {
+            $apiTokens->revokeByHash($hash);
         }
 
         $refresh_token = Jwt::getRefreshToken($user->audience);
+        $access_token = Jwt::getAccessToken();
         try {
-            $apiTokens->addToken($refresh_token, $user->audience);
+            $apiTokens->addToken($refresh_token, $user->id, $user->audience, 'refresh');
         }
         catch (Throwable $e) {
             return $this->response(['message' => $e->getMessage()], Response::INTERNAL_SERVER_ERROR);
         }
 
         return $this->response([
-            'refresh-token' => "Bearer {$refresh_token}"
+            'access-token' => "Bearer {$access_token}",
+            'refresh-token' => "Bearer {$refresh_token}",
         ], Response::OK);
     }
 
@@ -76,7 +77,7 @@ class AuthController extends Controller
         }
 
         $token = explode(' ', Server::authorization())[1];
-        $apiTokens = new PDOApiTokensHandler((new PDOConnection())->getPDO());
+        $apiTokens = new PDOApiTokensHandler();
         if (!$apiTokens->exists($token)) {
             return $this->response(['message' => 'Token is invalid'], Response::UNAUTHORIZED);
         }
@@ -91,9 +92,25 @@ class AuthController extends Controller
             return new Response(['message' => $e->getMessage()], Response::UNAUTHORIZED);
         }
 
+        $userId = $apiTokens->getUserIdByToken($token);
+        if (!$userId) {
+            return $this->response(['message' => 'User not found for token'], Response::UNAUTHORIZED);
+        }
+        $audience = $apiTokens->getAudienceByToken($token);
+        if (!$audience) {
+            return $this->response(['message' => 'Audience not found for token'], Response::UNAUTHORIZED);
+        }
+
+        $apiTokens->revokeByToken($token);
+
         $access_token = Jwt::getAccessToken();
+        $refresh_token = Jwt::getRefreshToken($audience);
+
+        $apiTokens->addToken($refresh_token, $userId, $audience, 'refresh');
+
         return $this->response([
-            'access-token' => "Bearer {$access_token}"
+            'access-token' => "Bearer {$access_token}",
+            'refresh-token' => "Bearer {$refresh_token}",
         ], Response::OK);
     }
 }

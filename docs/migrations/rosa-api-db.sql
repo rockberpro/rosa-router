@@ -34,6 +34,7 @@ CREATE INDEX idx_api_keys_key ON api_keys(key);
 DROP TABLE IF EXISTS api_tokens;
 CREATE TABLE api_tokens(
     id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     audience TEXT NOT NULL,
     type TEXT NOT NULL,
     token TEXT NOT NULL,

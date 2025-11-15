@@ -2,43 +2,47 @@
 
 namespace Rockberpro\RosaRouter\Database\Handlers;
 
-use PDO;
+use Rockberpro\RosaRouter\Database\PDOConnection;
 use Exception;
+use PDO;
 
 class PDOApiTokensHandler
 {
-    private PDO $pdo;
     private string $table;
+    private PDO $pdo;
 
-    public function __construct(PDO $pdo, string $table = 'api_tokens')
+    public function __construct()
     {
-        $this->pdo = $pdo;
-        $this->table = $table;
+        $this->table = 'api_tokens';
+        $this->pdo = (new PDOConnection())->getPDO();
     }
 
     /**
      * Add a new token to the database.
      * 
      * @param string $token
+     * @param string $userId
      * @param string $audience
+     * @param string $type
      * @throws \Exception
      * @return void
      */
-    public function addToken(string $token, string $audience): void
+    public function addToken(string $token, string $userId, string $audience, string $type): void
     {
         if ($this->exists($token)) {
             throw new Exception('Token already in use');
         }
 
-        $sql = "INSERT INTO {$this->table} (token, hash_alg, audience, type, created_at) 
-                VALUES (:token, :hash_alg, :audience, :type, :created_at)";
+        $sql = "INSERT INTO {$this->table} (token, hash_alg, user_id, audience, type, created_at) 
+                VALUES (:token, :hash_alg, :user_id, :audience, :type, :created_at)";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
             ':token' => hash('sha256', $token),
+            ':user_id' => $userId,
             ':hash_alg' => 'sha256',
             ':audience' => $audience,
-            ':type' => 'Bearer',
+            ':type' => $type,
             ':created_at' => date('Y-m-d H:i:s'),
         ]);
     }
@@ -123,19 +127,39 @@ class PDOApiTokensHandler
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function getUserIdByToken(string $token): ?string
+    {
+        $sql = "SELECT user_id FROM {$this->table} WHERE token = :token";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':token' => hash('sha256', $token)]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['user_id'] ?? null;
+    }
+
+    public function getAudienceByToken(string $token): ?string
+    {
+        $sql = "SELECT audience FROM {$this->table} WHERE token = :token";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':token' => hash('sha256', $token)]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['audience'] ?? null;
+    }
+
     /**
      * Get the last valid token for a specific audience.
      * 
-     * @param string $audience
+     * @param string $userId
      * @throws \Exception
      * @return string|null
      */
-    public function getLastValidToken(string $audience): ?string
+    public function getLastValidToken(string $userId): ?string
     {
-        $sql = "SELECT token FROM {$this->table} WHERE audience = :audience AND revoked_at IS NULL 
+        $sql = "SELECT token FROM {$this->table} WHERE user_id = :user_id AND revoked_at IS NULL 
                 ORDER BY created_at DESC LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':audience' => $audience]);
+        $stmt->execute([':user_id' => $userId]);
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['token'] ?? null;
