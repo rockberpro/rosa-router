@@ -2,14 +2,13 @@
 
 namespace Rockberpro\RosaRouter\Middleware;
 
-use Rockberpro\RosaRouter\Database\PDOConnection;
+use Rockberpro\RosaRouter\Database\Handlers\PDOApiKeysHandler;
 use Rockberpro\RosaRouter\Core\Response;
 use Rockberpro\RosaRouter\Core\Server;
 use Rockberpro\RosaRouter\Utils\Cors;
 use Rockberpro\RosaRouter\Utils\Sop;
 use Rockberpro\RosaRouter\Utils\DotEnv;
 use Rockberpro\RosaRouter\Jwt;
-use Rockberpro\RosaRouter\Database\Handlers\PDOApiKeysHandler;
 
 class AuthMiddleware
 {
@@ -32,7 +31,7 @@ class AuthMiddleware
         }
 
         if (DotEnv::get('API_AUTH_METHOD') === 'KEY') {
-            $apiKey = new PDOApiKeysHandler(new PDOConnection()->getPDO());
+            $apiKey = new PDOApiKeysHandler();
             if (!$apiKey->exists(Server::key())) {
                 Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
             }
