@@ -10,11 +10,32 @@ class PDOApiTokensHandler
 {
     private string $table;
     private PDO $pdo;
+    private string $driverName;
 
     public function __construct()
     {
         $this->table = 'api_tokens';
         $this->pdo = (new PDOConnection())->getPDO();
+        $this->driverName = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '';
+    }
+
+    /**
+     * Quote an identifier (table or column) according to the current driver.
+     * Uses backticks for MySQL and double-quotes for PostgreSQL/others.
+     * Supports schema-qualified identifiers (schema.table).
+     */
+    private function quoteId(string $identifier): string
+    {
+        $parts = explode('.', $identifier);
+        $quoted = array_map(function ($part) {
+            if ($this->driverName === 'mysql') {
+                return '`' . str_replace('`', '``', $part) . '`';
+            }
+
+            return '"' . str_replace('"', '""', $part) . '"';
+        }, $parts);
+
+        return implode('.', $quoted);
     }
 
     /**
@@ -33,8 +54,16 @@ class PDOApiTokensHandler
             throw new Exception('Token already in use');
         }
 
-        $sql = "INSERT INTO {$this->table} (token, hash_alg, user_id, audience, type, created_at) 
-                VALUES (:token, :hash_alg, :user_id, :audience, :type, :created_at)";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_hash = $this->quoteId('hash_alg');
+        $c_user = $this->quoteId('user_id');
+        $c_audience = $this->quoteId('audience');
+        $c_type = $this->quoteId('type');
+        $c_created = $this->quoteId('created_at');
+
+        $sql = "INSERT INTO {$table} ({$c_token}, {$c_hash}, {$c_user}, {$c_audience}, {$c_type}, {$c_created}) 
+            VALUES (:token, :hash_alg, :user_id, :audience, :type, :created_at)";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
@@ -55,7 +84,10 @@ class PDOApiTokensHandler
      */
     public function exists(string $token): bool
     {
-        $sql = "SELECT 1 FROM {$this->table} WHERE token = :token";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+
+        $sql = "SELECT 1 FROM {$table} WHERE {$c_token} = :token";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':token' => hash('sha256', $token)]);
 
@@ -70,7 +102,11 @@ class PDOApiTokensHandler
      */
     public function isRevoked(string $token): bool
     {
-        $sql = "SELECT 1 FROM {$this->table} WHERE token = :token AND revoked_at IS NULL";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_revoked = $this->quoteId('revoked_at');
+
+        $sql = "SELECT 1 FROM {$table} WHERE {$c_token} = :token AND {$c_revoked} IS NULL";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':token' => hash('sha256', $token)]);
 
@@ -85,7 +121,11 @@ class PDOApiTokensHandler
      */
     public function revokeByToken(string $token): void
     {
-        $sql = "UPDATE {$this->table} SET revoked_at = :revoked_at WHERE token = :token";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_revoked = $this->quoteId('revoked_at');
+
+        $sql = "UPDATE {$table} SET {$c_revoked} = :revoked_at WHERE {$c_token} = :token";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
@@ -102,7 +142,11 @@ class PDOApiTokensHandler
      */
     public function revokeByHash(string $hash): void
     {
-        $sql = "UPDATE {$this->table} SET revoked_at = :revoked_at WHERE token = :token";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_revoked = $this->quoteId('revoked_at');
+
+        $sql = "UPDATE {$table} SET {$c_revoked} = :revoked_at WHERE {$c_token} = :token";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
@@ -120,7 +164,10 @@ class PDOApiTokensHandler
      */
     public function fetchToken(string $token): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE token = :token";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+
+        $sql = "SELECT * FROM {$table} WHERE {$c_token} = :token";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':token' => hash('sha256', $token)]);
 
@@ -129,7 +176,11 @@ class PDOApiTokensHandler
 
     public function getUserIdByToken(string $token): ?string
     {
-        $sql = "SELECT user_id FROM {$this->table} WHERE token = :token";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_user = $this->quoteId('user_id');
+
+        $sql = "SELECT {$c_user} FROM {$table} WHERE {$c_token} = :token";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':token' => hash('sha256', $token)]);
 
@@ -139,7 +190,11 @@ class PDOApiTokensHandler
 
     public function getAudienceByToken(string $token): ?string
     {
-        $sql = "SELECT audience FROM {$this->table} WHERE token = :token";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_audience = $this->quoteId('audience');
+
+        $sql = "SELECT {$c_audience} FROM {$table} WHERE {$c_token} = :token";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':token' => hash('sha256', $token)]);
 
@@ -156,8 +211,14 @@ class PDOApiTokensHandler
      */
     public function getLastValidToken(string $userId): ?string
     {
-        $sql = "SELECT token FROM {$this->table} WHERE user_id = :user_id AND revoked_at IS NULL 
-                ORDER BY created_at DESC LIMIT 1";
+        $table = $this->quoteId($this->table);
+        $c_token = $this->quoteId('token');
+        $c_user = $this->quoteId('user_id');
+        $c_revoked = $this->quoteId('revoked_at');
+        $c_created = $this->quoteId('created_at');
+
+        $sql = "SELECT {$c_token} FROM {$table} WHERE {$c_user} = :user_id AND {$c_revoked} IS NULL 
+            ORDER BY {$c_created} DESC LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':user_id' => $userId]);
 
