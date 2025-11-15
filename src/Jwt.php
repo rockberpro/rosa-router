@@ -5,8 +5,6 @@ namespace Rockberpro\RosaRouter;
 use Rockberpro\RosaRouter\Utils\DotEnv;
 use DateInterval;
 use DateTime;
-use Exception;
-use Throwable;
 
 class Jwt
 {
@@ -181,13 +179,5 @@ class Jwt
         $replaced = str_replace(['-', '_'], ['+', '/'], $input);
         $padded = str_pad($replaced, strlen($replaced) % 4, '=', STR_PAD_RIGHT);
         return base64_decode($padded);
-    }
-}
-
-class JwtException extends Exception
-{
-    public function __construct(string $message, int $code = 0, ?Throwable $previous = null) // Adicionado ?Throwable
-    {
-        parent::__construct($message, $code, $previous);
     }
 }
