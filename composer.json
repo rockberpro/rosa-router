@@ -12,7 +12,7 @@
         "react/http": "^1.11",
         "monolog/monolog": "3.9",
         "symfony/http-foundation": "8.0",
-        "symfony/dotenv": "7.3",
+        "symfony/dotenv": "8.0",
         "ext-json": "*",
         "ext-pdo": "*"
     },
