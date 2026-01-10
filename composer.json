@@ -11,7 +11,7 @@
         "php": ">=8.0",
         "react/http": "^1.11",
         "monolog/monolog": "3.9",
-        "symfony/http-foundation": "7.3",
+        "symfony/http-foundation": "8.0",
         "symfony/dotenv": "7.3",
         "ext-json": "*",
         "ext-pdo": "*"
