@@ -11,6 +11,8 @@ use Throwable;
 
 class PDOConnection
 {
+    private static ?PDO $sharedPdo = null;
+
     private string $username;
     private string $password;
     private string $dbname;
@@ -29,8 +31,14 @@ class PDOConnection
      */
     public function __construct()
     {
+        if (self::$sharedPdo !== null) {
+            $this->pdo = self::$sharedPdo;
+            return;
+        }
+
         if ($this->loadConfigurations()) {
             $this->configurePDO();
+            self::$sharedPdo = $this->pdo;
         }
         else {
             throw new RuntimeException("Error configuring PDO");
@@ -302,13 +310,14 @@ class PDOConnection
 
     /**
      * Closes the connection
-     * 
+     *
      * @method closeConnection
      * @return void
      */
-    public function closeConnection() 
+    public function closeConnection()
     {
         $this->pdo = null;
+        self::$sharedPdo = null;
     }
 
     /**
@@ -353,7 +362,6 @@ class PDOConnection
     {
         return $this->preparedStatement;
     }
-
     /**
      * Getters & Setters
      */
