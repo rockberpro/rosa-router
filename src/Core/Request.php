@@ -2,10 +2,7 @@
 
 namespace Rockberpro\RosaRouter\Core;
 
-use Rockberpro\RosaRouter\Logs\InfoLogHandler;
-use Rockberpro\RosaRouter\Middleware\Pipeline;
-use Rockberpro\RosaRouter\Service\Container;
-use Rockberpro\RosaRouter\Utils\DotEnv;
+use Rockberpro\RosaRouter\Service\Pipeline;
 
 class Request implements RequestInterface
 {
