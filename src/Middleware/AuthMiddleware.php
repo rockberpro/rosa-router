@@ -2,6 +2,7 @@
 
 namespace Rockberpro\RestRouter\Middleware;
 
+use Rockberpro\RestRouter\Core\Request;
 use Rockberpro\RestRouter\Core\Response;
 use Rockberpro\RestRouter\Core\Server;
 use Rockberpro\RestRouter\Utils\Cors;
@@ -9,8 +10,9 @@ use Rockberpro\RestRouter\Utils\Sop;
 use Rockberpro\RestRouter\Utils\DotEnv;
 use Rockberpro\RestRouter\Jwt;
 use Rockberpro\RestRouter\Database\Handlers\PDOApiKeysHandler;
+use Closure;
 
-class AuthMiddleware
+class AuthMiddleware implements MiddlewareInterface
 {
     /**
      * Secure the request
@@ -18,7 +20,7 @@ class AuthMiddleware
      * @method handle
      * @return void
      */
-    public function handle(): void
+    public function handle(Request $request, Closure $next): Response
     {
         Sop::check();
 
@@ -41,5 +43,7 @@ class AuthMiddleware
         }
 
         Cors::allowOrigin();
+
+        return $next($request);
     }
 }

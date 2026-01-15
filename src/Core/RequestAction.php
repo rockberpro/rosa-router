@@ -6,14 +6,14 @@ use Closure;
 
 class RequestAction implements RequestActionInterface
 {
-    private ?string $middleware;
+    private mixed $middleware;
     private string $method;
     private Closure $closure;
     private array $route;
     private string $class;
     private string $uri;
 
-    public function getMiddleware(): ?string {
+    public function getMiddleware(): mixed {
         return $this->middleware ?? null;
     }
     public function setMiddleware($middleware): void {

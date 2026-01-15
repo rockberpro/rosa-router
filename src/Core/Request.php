@@ -53,8 +53,6 @@ class Request implements RequestInterface
             throw new RequestException('It was not possible to match your request');
         }
 
-        $this->writeLog($request);
-
         $middleware = $request->getAction()->getMiddleware();
         if ($middleware) {
             $middlewares = is_array($middleware) ? $middleware : [$middleware];
@@ -331,27 +329,6 @@ class Request implements RequestInterface
     public function getAllBodyParams(): array
     {
         return Server::getInstance()->getRequestBody();
-    }
-
-    /**
-     * @param Request $request
-     * @return void
-     */
-    public function writeLog(Request $request): void
-    {
-        $logger = Container::getInstance()->get(InfoLogHandler::class);
-        $is_closure = $request->getAction()->isClosure();
-        $log_data = [
-            'type' => $is_closure ? 'closure' : 'controller',
-            'request_data' => $request->getParams(),
-            'endpoint' => $request->getAction()->getUri(),
-        ];
-        if (!$is_closure) {
-            $log_data['class'] = $request->getAction()->getClass();
-            $log_data['method'] = $request->getAction()->getMethod();
-        }
-
-        $logger->write('request', $log_data);
     }
 }
 
