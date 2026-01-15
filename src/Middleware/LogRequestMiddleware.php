@@ -1,11 +1,11 @@
 <?php
 
-namespace Rockberpro\RosaRouter\Middleware;
+namespace Rockberpro\RestRouter\Middleware;
 
-use Rockberpro\RosaRouter\Core\Request;
-use Rockberpro\RosaRouter\Core\Response;
-use Rockberpro\RosaRouter\Logs\InfoLogHandler;
-use Rockberpro\RosaRouter\Service\Container;
+use Rockberpro\RestRouter\Core\Request;
+use Rockberpro\RestRouter\Core\Response;
+use Rockberpro\RestRouter\Logs\InfoLogHandler;
+use Rockberpro\RestRouter\Service\Container;
 use Closure;
 
 class LogRequestMiddleware implements MiddlewareInterface

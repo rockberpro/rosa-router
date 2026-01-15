@@ -1,11 +1,11 @@
 <?php
 
-namespace Rockberpro\RosaRouter\Service;
+namespace Rockberpro\RestRouter\Service;
 
 use Closure;
-use Rockberpro\RosaRouter\Core\Request;
-use Rockberpro\RosaRouter\Core\RequestException;
-use Rockberpro\RosaRouter\Core\Response;
+use Rockberpro\RestRouter\Core\Request;
+use Rockberpro\RestRouter\Core\RequestException;
+use Rockberpro\RestRouter\Core\Response;
 
 class Pipeline
 {
