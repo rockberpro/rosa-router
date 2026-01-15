@@ -4,7 +4,7 @@ namespace Rockberpro\RestRouter\Core;
 
 use Rockberpro\RestRouter\Logs\InfoLogHandler;
 use Rockberpro\RestRouter\Service\Container;
-use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Middleware\Pipeline;
 
 class Request implements RequestInterface
 {
@@ -55,6 +55,27 @@ class Request implements RequestInterface
 
         $this->writeLog($request);
 
+        $middleware = $request->getAction()->getMiddleware();
+        if ($middleware) {
+            $middlewares = is_array($middleware) ? $middleware : [$middleware];
+
+            $pipeline = new Pipeline();
+            $response = $pipeline
+                ->through($middlewares)
+                ->then(function(Request $req) use ($method) {
+                    return $this->executeController($method, $req);
+                })
+                ->handle($request);
+
+            return $response;
+        }
+
+        // no binded middleware
+        return $this->executeController($method, $request);
+    }
+
+    private function executeController(string $method, Request $request): Response
+    {
         $response = $this->getClosureResponse($method, $request);
         if ($response) {
             return $response;
