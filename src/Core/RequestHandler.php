@@ -11,12 +11,11 @@ use Throwable;
 class RequestHandler
 {
     /**
-     * @param bool $stateful
      * @return \React\Http\Message\Response|Core\Response
      */
-    public function dispatch(bool $stateful)
+    public function dispatch()
     {
-        if ($stateful) {
+        if (Server::getInstance()->isStateful()) {
             return $this->handleStateful();
         }
         return $this->handleStateless();
