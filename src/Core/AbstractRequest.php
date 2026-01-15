@@ -26,11 +26,6 @@ abstract class AbstractRequest implements AbstractRequestInterface
         $request = $this->pathParams($request);
         $request = $this->queryParams($request, $data->getQueryParams());
 
-        // execute the middleware
-        if ($middleware = $request->getAction()->getMiddleware()) {
-            $this->middleware($middleware, $request);
-        }
-
         return $request;
     }
 
@@ -190,26 +185,6 @@ abstract class AbstractRequest implements AbstractRequestInterface
         }
 
         return $action;
-    }
-
-    /**
-     * Middleware
-     * 
-     * @method middleware
-     * @param string $middleware
-     * @param Request $request
-     * @return void
-     */
-    private function middleware($middleware, Request $request): void
-    {
-        if (!class_exists($middleware)) {
-            throw new RequestException("Middleware not found: {$middleware}");
-        }
-        if (!method_exists($middleware, 'handle')) {
-            throw new RequestException("Method 'handle' nod implemented for middleware: {$middleware}");
-        }
-        $middleware = new $middleware();
-        $middleware->handle($request);
     }
 
     /**

@@ -189,10 +189,10 @@ class Route implements RouteInterface
      * Adds middleware to the route
      * 
      * @method middleware
-     * @param string $middleware classname
+     * @param string|array $middleware classname
      * @return self
      */
-    public static function middleware($middleware): Route
+    public static function middleware(string|array $middleware): Route
     {
         self::$currentContext['middleware'] = $middleware;
 
@@ -207,7 +207,7 @@ class Route implements RouteInterface
      * Group routes under the same context
      * 
      * @method group
-     * @param closure $closure()
+     * @param Closure $closure()
      */
     public function group($closure): void
     {
