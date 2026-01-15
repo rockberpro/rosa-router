@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Logs\InfoLogHandler;
-use Rockberpro\RestRouter\Service\Container;
 use Rockberpro\RestRouter\Middleware\Pipeline;
 
 class Request implements RequestInterface
