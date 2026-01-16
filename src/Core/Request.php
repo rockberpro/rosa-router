@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RestRouter\Core;
 
-use Rockberpro\RestRouter\Middleware\Pipeline;
+use Rockberpro\RestRouter\Service\Pipeline;
 
 class Request implements RequestInterface
 {
