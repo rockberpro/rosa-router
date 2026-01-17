@@ -5,6 +5,7 @@ namespace Rockberpro\RosaRouter\Core;
 use React\Http\Message\ServerRequest;
 use Rockberpro\RosaRouter\Bootstrap;
 use Rockberpro\RosaRouter\Service\Container;
+use Rockberpro\RosaRouter\Service\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 
 final class Server implements ServerInterface
@@ -220,6 +221,15 @@ final class Server implements ServerInterface
     }
 
     /**
+     * Set a custom container implementation.
+     */
+    public function setContainer(ContainerInterface $container): self
+    {
+        Container::setInstance($container);
+        return $this;
+    }
+
+    /**
      * Convenience factory to create a Server based on globals and cache it.
      * This does NOT register the instance into the DI container — do that
      * in bootstrap if needed.
@@ -305,18 +315,12 @@ final class Server implements ServerInterface
      */
     protected static function doStateless()
     {
-        try {
-            $server = Server::getInstance();
-        } catch (\RuntimeException $e) {
+        if (self::$instance === null && !Container::getInstance()->has(Server::class)) {
             $server = Server::init();
-            try {
-                Container::getInstance()->set(Server::class, $server);
-            } catch (\Throwable $ignore) {
-                // noop
-            }
+            Container::getInstance()->set(Server::class, $server);
         }
 
-        return $server->dispatch();
+        return Server::getInstance()->dispatch();
     }
 
     /**
