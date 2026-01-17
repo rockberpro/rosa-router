@@ -2,14 +2,14 @@
 
 namespace Rockberpro\RestRouter\Service;
 
-class Container
+class Container implements ContainerInterface
 {
-    private static ?self $instance = null;
+    private static ?ContainerInterface $instance = null;
     private array $services = [];
 
     private function __construct() {}
 
-    public static function getInstance(): self
+    public static function getInstance(): ContainerInterface
     {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -18,7 +18,12 @@ class Container
         return self::$instance;
     }
 
-    public function set(string $id, $service): void
+    public static function setInstance(ContainerInterface $container): void
+    {
+        self::$instance = $container;
+    }
+
+    public function set(string $id, object $service): void
     {
         $this->services[$id] = $service;
     }
