@@ -300,6 +300,51 @@ class Route implements RouteInterface
     }
 
     /**
+     * Collect middleware across the whole context stack.
+     *
+     * Unlike getContextValue(), middleware accumulates instead of overriding:
+     * an inner group declaring its own middleware does not discard the
+     * middleware inherited from outer groups. Order is outer -> inner so the
+     * outermost middleware wraps the request first, and duplicates declared at
+     * multiple levels are kept only once.
+     *
+     * @return array list of middleware class names, outer-most first
+     */
+    private static function getMiddlewareStack(): array
+    {
+        $middlewares = [];
+
+        // parent contexts, outer -> inner
+        foreach (self::$contextStack as $context) {
+            self::collectMiddleware($context['middleware'], $middlewares);
+        }
+
+        // current (inner-most) context runs closest to the controller
+        self::collectMiddleware(self::$currentContext['middleware'], $middlewares);
+
+        return array_keys($middlewares);
+    }
+
+    /**
+     * Push one context level's middleware into the accumulator, de-duplicated
+     * and order-preserving. Accepts a single class name or an array of them.
+     *
+     * @param string|array|null $middleware
+     * @param array $middlewares accumulator keyed by class name (by reference)
+     * @return void
+     */
+    private static function collectMiddleware($middleware, array &$middlewares): void
+    {
+        if ($middleware === null) {
+            return;
+        }
+
+        foreach ((array) $middleware as $name) {
+            $middlewares[$name] = true; // keyed -> dedupes, preserves first-seen order
+        }
+    }
+
+    /**
      * Building the route
      * 
      * @method private
@@ -316,12 +361,12 @@ class Route implements RouteInterface
 
         // get values with inheritance
         $namespace = self::getContextValue('namespace');
-        $middleware = self::getContextValue('middleware');
+        $middleware = self::getMiddlewareStack();
 
         if ($namespace) {
             $route['namespace'] = $namespace;
         }
-        if ($middleware) {
+        if (!empty($middleware)) {
             $route['middleware'] = $middleware;
         }
 

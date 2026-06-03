@@ -32,6 +32,13 @@ class InfoLogHandler
                 ));
             }
 
+            if (count($instance->logger->getHandlers()) === 0) {
+                throw new LogHandlerException(
+                    'LogRequestMiddleware is active but no log destination is enabled. '
+                    . 'Set API_LOGS=true and/or API_LOGS_DB=true, or remove the middleware from the route.'
+                );
+            }
+
             return $instance;
         });
     }
