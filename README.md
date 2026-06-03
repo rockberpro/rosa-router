@@ -330,6 +330,28 @@ Route::prefix('v1')
     });
 ```
 
+**Middleware accumulates through nesting.** When groups are nested, a route
+runs *every* middleware declared along its chain — an inner group does not
+discard the middleware inherited from an outer one. They execute **outer-most
+first**, and the same middleware declared at multiple levels runs only once:
+
+```php
+Route::middleware(LogRequestMiddleware::class)   // applies to everything below
+    ->group(function() {
+
+        Route::get('/health', 'HealthController@check');   // [Log]
+
+        Route::middleware(AuthMiddleware::class)
+            ->group(function() {
+                // runs [Log, Auth] — logging is NOT lost by the inner group
+                Route::get('/user/{id}', 'UserController@get');
+            });
+    });
+```
+
+This makes a single outer group a practical way to apply a cross-cutting
+middleware (like request logging) to every route it wraps.
+
 ### Logging
 
 ROSA Router ships with a `LogRequestMiddleware` that records each incoming
@@ -337,7 +359,7 @@ request (endpoint, method, params, remote address, user agent). Logging works in
 two independent layers:
 
 1. **Trigger — bind the middleware.** Like any middleware, it only runs on routes
-   you attach it to. Logging is **opt-in per route**, never automatic:
+   you attach it to. Logging is **opt-in**, never automatic:
 
    ```php
    use Rockberpro\RosaRouter\Middleware\LogRequestMiddleware;
@@ -347,6 +369,17 @@ two independent layers:
        ->group(function() {
            Route::get('/hello', 'HelloWorldController@hello');
        });
+   ```
+
+   Because [middleware accumulates through nesting](#middleware), wrapping all
+   your routes in one outer group is the simplest way to log everything —
+   inner groups can still add their own middleware (e.g. auth) without losing
+   the logging:
+
+   ```php
+   Route::middleware(LogRequestMiddleware::class)->group(function() {
+       require 'routes/api.php'; // every route inside is logged
+   });
    ```
 
 2. **Destination — pick where logs go** via env (see [Configuration](#configuration)):
