@@ -3,6 +3,13 @@
 use PHPUnit\Framework\TestCase;
 use Rockberpro\RosaRouter\Core\Route;
 
+/**
+ * Route state is held in process-global statics; isolate so the shared
+ * registry starts empty and isn't polluted by other test classes.
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 class NestedRoutesTest extends TestCase
 {
     protected function setUp(): void
@@ -24,19 +31,19 @@ class NestedRoutesTest extends TestCase
                 'method' => 'GET',
                 'prefix' => '/api/lvl1/hello',
                 'route'  => '/api/lvl1/hello',
-                'middleware' => TestMiddleware::class,
+                'middleware' => [TestMiddleware::class],
             ],
             [
                 'method' => 'GET',
                 'prefix' => '/api/lvl1/lvl2/status',
                 'route'  => '/api/lvl1/lvl2/status',
-                'middleware' => TestMiddleware::class,
+                'middleware' => [TestMiddleware::class],
             ],
             [
                 'method' => 'GET',
                 'prefix' => '/api/lvl1/test',
                 'route'  => '/api/lvl1/test',
-                'middleware' => TestMiddleware::class,
+                'middleware' => [TestMiddleware::class],
             ],
               [
                 'method' => 'GET',

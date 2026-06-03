@@ -1,9 +1,9 @@
 <?php
 
 $namespaceMap = [
-    "Rockberpro\\RestRouter\\" => "src/",
-    "Rockberpro\\RestRouter\\Controllers\\" => "controllers/",
-    "Rockberpro\\RestRouter\\Routes\\" => "routes/"
+    "Rockberpro\\RosaRouter\\" => "src/",
+    "Rockberpro\\RosaRouter\\Controllers\\" => "controllers/",
+    "Rockberpro\\RosaRouter\\Routes\\" => "routes/"
 ];
 
 spl_autoload_register(function(string $classname) use ($namespaceMap) {
