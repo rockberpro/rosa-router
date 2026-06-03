@@ -27,6 +27,7 @@
 - [Quick Start](#quick-start)
 - [Usage](#usage)
 - [Authentication](#authentication)
+- [Logging](#logging)
 - [Testing](#testing)
 - [License](#license)
 
@@ -53,6 +54,7 @@ pulling in a full framework.
 - 🧩 **Route groups & prefixes** — Organize routes with prefixes, nesting and namespaces.
 - 🛡️ **Middleware** — Attach middleware to single routes or whole groups.
 - 🔐 **Built-in authentication** — JWT and API key strategies out of the box.
+- 📝 **Request logging** — Opt-in per-route logging to file or database.
 - ⚡ **Stateless or stateful** — Run on a classic web server or as a long-running ReactPHP server.
 - 🪶 **Lightweight & fast** — Minimal overhead, optimized for performance.
 - 🧯 **Built-in error handling** — Gracefully manage exceptions and invalid requests.
@@ -91,7 +93,7 @@ Bootstrap::setup('config/.ini');  // INI format
 | ------------------------------------------- | -------------------------------------------------------- | ------------------ |
 | `API_NAME`                                  | Application name                                         | `rosa-api`         |
 | `API_DEBUG`                                 | Verbose error output                                     | `false`            |
-| `API_LOGS` / `API_LOGS_DB`                  | Enable file / database logging                           | `true` / `false`   |
+| `API_LOGS` / `API_LOGS_DB`                  | Request-log destination — file / database (see [Logging](#logging)) | `true` / `false`   |
 | `API_ALLOW_ORIGIN`                          | CORS allowed origin                                      | `*`                |
 | `API_SERVER_ADDRESS` / `API_SERVER_PORT`    | Address & port for stateful mode                         | `0.0.0.0` / `8081` |
 | `API_AUTH_METHOD`                           | Authentication strategy — `JWT` or `KEY`                 | `JWT`              |
@@ -327,6 +329,43 @@ Route::prefix('v1')
         Route::get('/hello', 'HelloWorldController@hello');
     });
 ```
+
+### Logging
+
+ROSA Router ships with a `LogRequestMiddleware` that records each incoming
+request (endpoint, method, params, remote address, user agent). Logging works in
+two independent layers:
+
+1. **Trigger — bind the middleware.** Like any middleware, it only runs on routes
+   you attach it to. Logging is **opt-in per route**, never automatic:
+
+   ```php
+   use Rockberpro\RosaRouter\Middleware\LogRequestMiddleware;
+
+   Route::prefix('v1')
+       ->middleware(LogRequestMiddleware::class)
+       ->group(function() {
+           Route::get('/hello', 'HelloWorldController@hello');
+       });
+   ```
+
+2. **Destination — pick where logs go** via env (see [Configuration](#configuration)):
+   - `API_LOGS=true` — write to the info log file (`logs/info.log`).
+   - `API_LOGS_DB=true` — write to the `logs` database table.
+
+   You can enable either, both, or combine the middleware with others:
+
+   ```php
+   Route::middleware([AuthMiddleware::class, LogRequestMiddleware::class])
+       ->get('/user/{id}', [UserController::class, 'get']);
+   ```
+
+**No silent failures.** If you bind `LogRequestMiddleware` to a route but leave
+**both** `API_LOGS` and `API_LOGS_DB` disabled, the request has nowhere to be
+logged — a contradiction — and the router throws a `LogHandlerException` instead
+of quietly dropping the log. Either enable a destination, or remove the
+middleware from that route. A missing/undefined env variable likewise throws,
+so misconfiguration always surfaces loudly.
 
 ### Controllers
 
