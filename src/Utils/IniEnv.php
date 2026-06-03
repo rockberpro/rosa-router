@@ -28,13 +28,13 @@ class IniEnv
             throw new IniEnvException("Failed to parse INI file '{$path}'.");
         }
 
-        foreach ($data as $section => $data) {
-            if (is_array($data)) {
-                foreach ($data as $key => $value) {
-                    self::put($key, $value);
+        foreach ($data as $section => $value) {
+            if (is_array($value)) {
+                foreach ($value as $key => $sectionValue) {
+                    self::put($key, $sectionValue);
                 }
             } else {
-                self::put($section, $data);
+                self::put($section, $value);
             }
         }
     }
@@ -64,7 +64,13 @@ class IniEnv
 
     protected static function put(string $key, $value): void
     {
-        $val = is_bool($value) ? ($value ? '1' : '0') : (string)$value;
+        if (is_array($value)) {
+            $val = json_encode($value);
+        } elseif (is_bool($value)) {
+            $val = $value ? '1' : '0';
+        } else {
+            $val = (string) $value;
+        }
         putenv("{$key}={$val}");
     }
 }
