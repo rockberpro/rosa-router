@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://github.com/rockberpro/rosa-router/actions/workflows/tests.yml"><img src="https://github.com/rockberpro/rosa-router/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
   <a href="https://packagist.org/packages/rockberpro/rosa-router"><img src="https://img.shields.io/packagist/v/rockberpro/rosa-router.svg" alt="Latest Version"></a>
-  <a href="https://www.php.net/"><img src="https://img.shields.io/badge/PHP-%3E%3D8.0-777BB4?logo=php&logoColor=white" alt="PHP Version"></a>
+  <a href="https://www.php.net/"><img src="https://img.shields.io/badge/PHP-%3E%3D7.4-777BB4?logo=php&logoColor=white" alt="PHP Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/PSR--4-autoload-blue.svg" alt="PSR-4">
 </p>
@@ -38,7 +38,7 @@
 
 Most PHP routers force a choice up front: the classic **stateless** model — where
 the framework boots from scratch on every request — or a **stateful**, long-running
-server for lower latency. ROSA Router runs the *same* route definitions in **both
+server for lower latency. ROSA Router runs the _same_ route definitions in **both
 modes**, so you can start simple on a shared host and later switch to a persistent
 [ReactPHP](https://reactphp.org/) server by changing a single flag — no rewrite.
 
@@ -87,16 +87,16 @@ Bootstrap::setup('config/.env');  // custom path
 Bootstrap::setup('config/.ini');  // INI format
 ```
 
-| Variable | Description | Example |
-|---|---|---|
-| `API_NAME` | Application name | `rosa-api` |
-| `API_DEBUG` | Verbose error output | `false` |
-| `API_LOGS` / `API_LOGS_DB` | Enable file / database logging | `true` / `false` |
-| `API_ALLOW_ORIGIN` | CORS allowed origin | `*` |
-| `API_SERVER_ADDRESS` / `API_SERVER_PORT` | Address & port for stateful mode | `0.0.0.0` / `8081` |
-| `API_AUTH_METHOD` | Authentication strategy — `JWT` or `KEY` | `JWT` |
-| `JWT_ISSUER` / `JWT_SUBJECT` / `JWT_SECRET` | JWT signing settings | — |
-| `API_DB_*` | Database connection (host, port, user, pass, name, type) | `pgsql` |
+| Variable                                    | Description                                              | Example            |
+| ------------------------------------------- | -------------------------------------------------------- | ------------------ |
+| `API_NAME`                                  | Application name                                         | `rosa-api`         |
+| `API_DEBUG`                                 | Verbose error output                                     | `false`            |
+| `API_LOGS` / `API_LOGS_DB`                  | Enable file / database logging                           | `true` / `false`   |
+| `API_ALLOW_ORIGIN`                          | CORS allowed origin                                      | `*`                |
+| `API_SERVER_ADDRESS` / `API_SERVER_PORT`    | Address & port for stateful mode                         | `0.0.0.0` / `8081` |
+| `API_AUTH_METHOD`                           | Authentication strategy — `JWT` or `KEY`                 | `JWT`              |
+| `JWT_ISSUER` / `JWT_SUBJECT` / `JWT_SECRET` | JWT signing settings                                     | —                  |
+| `API_DB_*`                                  | Database connection (host, port, user, pass, name, type) | `pgsql`            |
 
 ## How It Works
 
@@ -392,10 +392,10 @@ Route::prefix('v1')
 
 When using JWT, the built-in endpoints issue and refresh tokens:
 
-| Method & route | Description |
-|---|---|
-| `POST /api/auth/refresh` | Exchange credentials for an access + refresh token |
-| `POST /api/auth/access` | Exchange a valid refresh token for a new access token |
+| Method & route           | Description                                           |
+| ------------------------ | ----------------------------------------------------- |
+| `POST /api/auth/refresh` | Exchange credentials for an access + refresh token    |
+| `POST /api/auth/access`  | Exchange a valid refresh token for a new access token |
 
 Send the token on protected requests via the `Authorization: Bearer <token>` header.
 
