@@ -18,18 +18,17 @@ class InnerMiddleware
  * not override. This is what makes an outer "log everything" group actually
  * cover routes that also sit inside an inner auth group.
  *
- * Route state is held in process-global statics; isolate so the shared
- * registry starts empty and isn't polluted by other test classes.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Route state is held in process-global statics; Route::reset() in setUp()
+ * gives each test a clean registry without spawning a separate process.
  */
 class MiddlewareInheritanceTest extends TestCase
 {
     protected function setUp(): void
     {
         require_once __DIR__ . '/../vendor/autoload.php';
-        require_once __DIR__ . '/mock/middleware_merge_api.php';
+
+        Route::reset();
+        require __DIR__ . '/mock/middleware_merge_api.php';
     }
 
     private function routeByPath(string $path): array

@@ -19,7 +19,7 @@ class Route implements RouteInterface
     private static array $contextStack = [];
     private static array $currentContext = self::DEFAULT_CONTEXT;
 
-    private static self $instance;
+    private static ?self $instance = null;
 
     private string $prefix;
     private string $route;
@@ -404,12 +404,30 @@ class Route implements RouteInterface
 
     /**
      * Get all routes
-     * 
+     *
      * @method getRoutes
      * @return array
      */
     public static function getRoutes(): array
     {
         return RouteHandler::getInstance()->getRoutes();
+    }
+
+    /**
+     * Clear all process-global routing state.
+     *
+     * Resets the context stack, current context and shared instance, and drops
+     * the underlying route registry. Gives tests a clean slate without relying
+     * on separate processes, and lets stateful / ReactPHP hosts avoid
+     * cross-request state bleed.
+     *
+     * @return void
+     */
+    public static function reset(): void
+    {
+        self::$contextStack = [];
+        self::$currentContext = self::DEFAULT_CONTEXT;
+        self::$instance = null;
+        RouteHandler::reset();
     }
 }

@@ -56,4 +56,18 @@ class RouteHandler
         }
         return self::$instance;
     }
+
+    /**
+     * Drop the singleton (and with it every registered route).
+     *
+     * Provides a state-reset seam for tests and for long-running / stateful
+     * (ReactPHP) hosts where the process-global registry would otherwise leak
+     * across requests.
+     *
+     * @return void
+     */
+    public static function reset(): void
+    {
+        self::$instance = null;
+    }
 }
