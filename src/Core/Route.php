@@ -148,7 +148,7 @@ class Route implements RouteInterface
             self::$instance = new self();
         }
 
-        return new self();
+        return self::$instance;
     }
 
     /**

@@ -69,25 +69,27 @@ green in-process (67 tests).
 Longer term: consider whether the router can avoid statics entirely for the
 stateful mode.
 
-### [ ] 7. Make `RouteHandler` a consistent singleton
-`src/Core/RouteHandler.php` instance methods call `self::getInstance()->routes`
-instead of `$this->routes` — a singleton pretending to be an instance.
+### [x] 7. Make `RouteHandler` a consistent singleton — DONE
+Instance methods now use `$this->routes` directly instead of routing back
+through `self::getInstance()->routes`. `addRoute()` appends straight to
+`$this->routes`; the now-redundant `setRoutes()` indirection was dropped.
+`getInstance()` / `reset()` stay static (the singleton accessors); the call
+sites in `Route.php` already go through `RouteHandler::getInstance()`, so
+nothing else changed.
 
-- Use `$this->` inside instance methods, or commit fully to static. Pick one.
+### [x] 8. Make the fluent `Route` API return consistently — DONE
+`Route::prefix()` now returns the shared `self::$instance` like `middleware()` /
+`namespace()` / `controller()`, instead of a throwaway `new self()`. One return
+convention across the fluent methods, matching the static context model.
 
-### [ ] 8. Make the fluent `Route` API return consistently
-`Route::prefix()` returns `new self()` while `middleware()` / `namespace()` /
-`controller()` return `self::$instance` (`src/Core/Route.php`). Subtle, but it's
-the kind of inconsistency that produces a confusing bug later.
-
-- Standardise on one (returning the shared `self::$instance` is the safer
-  default given the static context model).
-
-### [ ] 9. Unify the exception namespacing
-Some exceptions sit in the global namespace (`DotEnvException`,
-`IniEnvException`); others are namespaced (`RequestException`,
-`LogHandlerException`, `RouteException`). Pick the namespaced convention and
-move the global ones under `Rockberpro\…\…`, updating their `use` sites.
+### [x] 9. Unify the exception namespacing — DONE
+`DotEnvException` / `IniEnvException` moved into `Rockberpro\RosaRouter\Utils`,
+so they're now PSR-4 autoloadable like the other namespaced exceptions. Their
+`?Throwable` constructor hints became `?\Throwable` (no longer in the global
+namespace); the stale `use DotEnvException;` / `use IniEnvException;` imports in
+`DotEnv` / `IniEnv` were removed (same namespace now). `EnvCoercionTest` dropped
+its manual `require_once` of the two files in favour of `use` imports — the
+autoloader resolves them. Suite green (67 tests).
 
 ---
 
