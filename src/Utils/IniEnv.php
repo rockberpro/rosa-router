@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RosaRouter\Utils;
 
-use IniEnvException;
-
 /**
  * Simple INI-based environment loader compatible with DotEnv::get usage.
  */
@@ -52,14 +50,7 @@ class IniEnv
         if ($value === false) {
             throw new IniEnvException("The environment variable '{$key}' was not found.");
         }
-        $v = strtolower(trim($value));
-        if (in_array($v, ['1', 'true', 'on', 'yes', 'y'], true)) {
-            return true;
-        }
-        if (in_array($v, ['0', 'false', 'off', 'no', 'n'], true)) {
-            return false;
-        }
-        return $value;
+        return EnvValue::coerce($value);
     }
 
     protected static function put(string $key, $value): void

@@ -9,15 +9,17 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
-    private static array $contextStack = [];
-    private static array $currentContext = [
+    private const DEFAULT_CONTEXT = [
         'prefix'     => null,
         'namespace'  => null,
         'controller' => null,
         'middleware' => null,
     ];
 
-    private static self $instance;
+    private static array $contextStack = [];
+    private static array $currentContext = self::DEFAULT_CONTEXT;
+
+    private static ?self $instance = null;
 
     private static array $routes = [];
 
@@ -146,7 +148,7 @@ class Route implements RouteInterface
             self::$instance = new self();
         }
 
-        return new self();
+        return self::$instance;
     }
 
     /**
@@ -215,12 +217,7 @@ class Route implements RouteInterface
         self::$contextStack[] = self::$currentContext;
 
         // reset context for the group scope
-        self::$currentContext = [
-            'prefix'     => null,
-            'namespace'  => null,
-            'controller' => null,
-            'middleware' => null,
-        ];
+        self::$currentContext = self::DEFAULT_CONTEXT;
 
         // execute route group
         $closure();
@@ -229,12 +226,7 @@ class Route implements RouteInterface
         array_pop(self::$contextStack);
 
         // clear current context completely after exiting group
-        self::$currentContext = [
-            'prefix'     => null,
-            'namespace'  => null,
-            'controller' => null,
-            'middleware' => null,
-        ];
+        self::$currentContext = self::DEFAULT_CONTEXT;
     }
 
     /**
@@ -414,12 +406,30 @@ class Route implements RouteInterface
 
     /**
      * Get all routes
-     * 
+     *
      * @method getRoutes
      * @return array
      */
     public static function getRoutes(): array
     {
         return RouteHandler::getInstance()->getRoutes();
+    }
+
+    /**
+     * Clear all process-global routing state.
+     *
+     * Resets the context stack, current context and shared instance, and drops
+     * the underlying route registry. Gives tests a clean slate without relying
+     * on separate processes, and lets stateful / ReactPHP hosts avoid
+     * cross-request state bleed.
+     *
+     * @return void
+     */
+    public static function reset(): void
+    {
+        self::$contextStack = [];
+        self::$currentContext = self::DEFAULT_CONTEXT;
+        self::$instance = null;
+        RouteHandler::reset();
     }
 }

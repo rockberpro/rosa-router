@@ -20,18 +20,7 @@ class RouteHandler
      */
     public function addRoute($method, array $route): void
     {
-        $routes = self::getInstance()->getRoutes();
-        $routes[$method][] = $route;
-        self::getInstance()->setRoutes($routes);
-    }
-
-    /**
-     * @param array $routes
-     * @return void
-     */
-    private function setRoutes(array $routes): void
-    {
-        self::getInstance()->routes = $routes;
+        $this->routes[$method][] = $route;
     }
 
     /**
@@ -42,7 +31,7 @@ class RouteHandler
      */
     public function getRoutes(): array
     {
-        return self::getInstance()->routes;
+        return $this->routes;
     }
 
     /**
@@ -55,5 +44,19 @@ class RouteHandler
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    /**
+     * Drop the singleton (and with it every registered route).
+     *
+     * Provides a state-reset seam for tests and for long-running / stateful
+     * (ReactPHP) hosts where the process-global registry would otherwise leak
+     * across requests.
+     *
+     * @return void
+     */
+    public static function reset(): void
+    {
+        self::$instance = null;
     }
 }

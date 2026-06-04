@@ -4,11 +4,8 @@ use PHPUnit\Framework\TestCase;
 use Rockberpro\RosaRouter\Core\Route;
 
 /**
- * Route state is held in process-global statics; isolate so the shared
- * registry starts empty and isn't polluted by other test classes.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Route state is held in process-global statics; Route::reset() in setUp()
+ * gives each test a clean registry without spawning a separate process.
  */
 class NestedRoutesTest extends TestCase
 {
@@ -16,7 +13,9 @@ class NestedRoutesTest extends TestCase
     {
         require_once getRootDir()."/vendor/autoload.php";
         require_once getRootDir().'/tests/middleware/TestMiddleware.php';
-        require_once getRootDir().'/tests/mock/api.php';
+
+        Route::reset();
+        require getRootDir().'/tests/mock/api.php';
     }
 
     public function testNestedRoutes()
