@@ -26,5 +26,9 @@
     "require-dev": {
         "phpunit/phpunit": "^9.6",
         "symfony/var-dumper": "^5.4"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-text --coverage-html coverage/html"
     }
 }
