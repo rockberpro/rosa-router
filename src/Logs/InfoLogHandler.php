@@ -2,58 +2,22 @@
 
 namespace Rockberpro\RestRouter\Logs;
 
-use Rockberpro\RestRouter\Core\Server;
-use Rockberpro\RestRouter\Database\Handlers\PDOLogHandler;
-use Rockberpro\RestRouter\Database\PDOConnection;
-use Rockberpro\RestRouter\Service\Container;
-use Rockberpro\RestRouter\Utils\DotEnv;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-class InfoLogHandler
+class InfoLogHandler extends AbstractLogHandler
 {
-    private Logger $logger;
-
-    public static function register(string $file_path)
+    protected static function channel(): string
     {
-        $container = Container::getInstance();
-        $container->set(InfoLogHandler::class, function() use ($file_path) {
-            $instance = new self();
-            $instance->logger = new Logger('info');
-
-            if (DotEnv::get('API_LOGS')) {
-                $instance->logger->pushHandler(new StreamHandler($file_path, Logger::INFO));
-            }
-            if (DotEnv::get('API_LOGS_DB')) {
-                $instance->logger->pushHandler(new PDOLogHandler(
-                    (new PDOConnection())->getPDO(),
-                    'logs',
-                    Logger::INFO,
-                ));
-            }
-
-            if (count($instance->logger->getHandlers()) === 0) {
-                throw new LogHandlerException(
-                    'LogRequestMiddleware is active but no log destination is enabled. '
-                    . 'Set API_LOGS=true and/or API_LOGS_DB=true, or remove the middleware from the route.'
-                );
-            }
-
-            return $instance;
-        });
+        return 'info';
     }
 
-    public function write($message, $data)
+    protected static function level(): int
     {
-        $log_data = [
-            'subject' => DotEnv::get('API_NAME'),
-            'remote_address' => Server::remoteAddress(),
-            'target_address' => Server::targetAddress(),
-            'user_agent' => Server::userAgent(),
-            'request_method' => Server::requestMethod(),
-            'request_uri' => Server::requestUri(),
-        ];
-        $data = array_merge($data, $log_data);
-        $this->logger->info($message, $data);
+        return Logger::INFO;
+    }
+
+    protected static function throwOnNoDestination(): bool
+    {
+        return true;
     }
 }
