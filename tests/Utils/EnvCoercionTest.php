@@ -97,13 +97,13 @@ class EnvCoercionTest extends TestCase
     public function testIniEnvLoadPopulatesEnvIncludingBoolsAndArrays(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'ini');
-        file_put_contents($path, <<<INI
+        file_put_contents($path, <<<INI_CONTENT
         [app]
         INI_FLAG = true
         INI_NAME = hello
         INI_LIST[] = a
         INI_LIST[] = b
-        INI
+        INI_CONTENT
         );
 
         try {
