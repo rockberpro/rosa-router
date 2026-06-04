@@ -95,15 +95,25 @@ autoloader resolves them. Suite green (67 tests).
 
 ## P3 — Test coverage
 
-### [ ] 10. Broaden core dispatch tests
-Current coverage is thin (route nesting, middleware inheritance, the log-handler
-guard). The matching/dispatch core deserves more:
+### [x] 10. Broaden core dispatch tests — DONE
+Added `DispatchTest` (matching/dispatch core) and `AuthMiddlewareTest`,
++15 tests (suite now 82, all green):
 
-- URL param extraction (`/user/{id}` → params).
-- Method mismatch / no-match behaviour.
-- The full middleware pipeline *executing* (order, short-circuit via early
-  `Response`), not just route-table assembly.
-- Auth middleware (JWT + KEY) happy/again paths.
+- **URL param extraction** — single / multiple params, optional trailing slash,
+  query-param population, and rejection of non-alphanumeric param values
+  (via `AbstractRequest::buildRequest`).
+- **No-match / method-mismatch** — unknown URI, segment-count mismatch, a method
+  with no route table, and the empty-path → `404 Not found` short-circuit in
+  `Request::handle()`.
+- **Middleware pipeline executing** — through `Request::handle()` with real
+  registered routes: outer→destination order, short-circuit via an early
+  `Response` (destination never runs), and the no-middleware direct path.
+- **Auth middleware (JWT)** — reject paths (missing / tampered token →
+  `JwtException`) run in-process; the happy path (`$next` reached) runs in a
+  separate process since `Cors::allowOrigin()` calls `header()`.
+
+The **KEY** auth method needs a live `PDO` (`PDOApiKeysHandler`), so it's left to
+integration coverage rather than unit-tested here.
 
 ---
 
