@@ -25,32 +25,27 @@ mocks. `composer dump-autoload` regenerated; suite green.
 
 ## P1 — De-duplication
 
-### [ ] 3. Collapse the two log handlers into one base
-`src/Logs/InfoLogHandler.php` and `src/Logs/ErrorLogHandler.php` are ~95%
-identical: same `register()` shape, same `write()` metadata block, differing
-only in channel name (`info`/`error`) and Monolog level.
+### [x] 3. Collapse the two log handlers into one base — DONE
+`AbstractLogHandler` now carries `register()`, the `getHandlers()`-empty guard,
+and the shared `write()` metadata assembly. `InfoLogHandler` / `ErrorLogHandler`
+are thin subclasses supplying only `channel()`, `level()`, and
+`throwOnNoDestination()`. The deliberate asymmetry is preserved via that last
+hook: info throws on no destination, error does not. `register()` uses
+`static::class` / `new static()` so each subclass binds under its own container
+key.
 
-- Extract an abstract `AbstractLogHandler` carrying `register()`, the
-  `getHandlers()`-empty guard (`LogHandlerException`), and the shared `write()`
-  metadata assembly.
-- Subclasses supply channel + level only.
-- Keep the deliberate asymmetry from the logging work: the no-destination
-  **throw applies to the info/request handler, not the error handler** (the
-  error handler runs inside the error path and must not throw there).
+### [x] 4. De-duplicate env bool coercion — DONE
+Extracted `Utils\EnvValue::coerce()`, called by both `DotEnv::get()` and
+`IniEnv::get()` after their `getenv()` lookup. The "throw if missing" logic
+stays in each class so the distinct exception types (`DotEnvException` /
+`IniEnvException`) are preserved — loud behaviour unchanged.
 
-### [ ] 4. De-duplicate env bool coercion
-`DotEnv::get()` and `IniEnv::get()` have byte-identical truthy/falsy coercion
-and "throw if missing" logic.
-
-- Extract a shared helper (e.g. a trait or small `EnvValue::coerce()`).
-- Preserve current loud behaviour: missing key throws.
-
-### [ ] 5. Factor the repeated context reset in `Route::group()`
-The 4-field `currentContext` default literal appears three times in
-`src/Core/Route.php` (initial property, group-enter reset, group-exit reset).
-
-- Extract a `private static function freshContext(): array` and call it in all
-  three spots.
+### [x] 5. Factor the repeated context reset in `Route::group()` — DONE
+The 4-field default now lives in a single `private const DEFAULT_CONTEXT`,
+referenced by the property default and both group-enter / group-exit resets. A
+const rather than a `freshContext()` method because PHP property defaults can't
+call a method but can reference a constant expression — one source of truth for
+all three spots.
 
 ---
 

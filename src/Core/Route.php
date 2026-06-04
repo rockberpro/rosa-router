@@ -9,13 +9,15 @@ class Route implements RouteInterface
 {
     const PREFIX = '/api';
 
-    private static array $contextStack = [];
-    private static array $currentContext = [
+    private const DEFAULT_CONTEXT = [
         'prefix'     => null,
         'namespace'  => null,
         'controller' => null,
         'middleware' => null,
     ];
+
+    private static array $contextStack = [];
+    private static array $currentContext = self::DEFAULT_CONTEXT;
 
     private static self $instance;
 
@@ -215,12 +217,7 @@ class Route implements RouteInterface
         self::$contextStack[] = self::$currentContext;
 
         // reset context for the group scope
-        self::$currentContext = [
-            'prefix'     => null,
-            'namespace'  => null,
-            'controller' => null,
-            'middleware' => null,
-        ];
+        self::$currentContext = self::DEFAULT_CONTEXT;
 
         // execute route group
         $closure();
@@ -229,12 +226,7 @@ class Route implements RouteInterface
         array_pop(self::$contextStack);
 
         // clear current context completely after exiting group
-        self::$currentContext = [
-            'prefix'     => null,
-            'namespace'  => null,
-            'controller' => null,
-            'middleware' => null,
-        ];
+        self::$currentContext = self::DEFAULT_CONTEXT;
     }
 
     /**
