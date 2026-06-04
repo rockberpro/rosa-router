@@ -51,22 +51,23 @@ all three spots.
 
 ## P2 — Global state / consistency
 
-### [ ] 6. Add a state-reset seam to the routing layer
-`Route` and `RouteHandler` hold process-global state with no way to reset it.
-We hit this directly: the test suite needs `@runTestsInSeparateProcesses`
-because the route registry leaks across classes. This also matters for the
-advertised **stateful / ReactPHP** mode, where global mutable state risks
-cross-request bleed in a long-running process.
+### [x] 6. Add a state-reset seam to the routing layer — DONE
+`RouteHandler::reset()` drops the singleton (and with it the route registry);
+`Route::reset()` clears `$contextStack` / `$currentContext`, nulls the shared
+`$instance`, and delegates to `RouteHandler::reset()`. `$instance` was retyped
+`?self` (was non-nullable, can't be `unset()`); the existing `isset()` guards
+already treat null as "not set", so no call sites changed.
 
-- Add `RouteHandler::reset()` and `Route::reset()` (clear `$contextStack`,
-  `$currentContext`, `$instance`, registered routes).
-- Once available, the test isolation annotations added in
-  `NestedRoutesTest` / `MiddlewareInheritanceTest` can be dropped in favour of
-  a `reset()` in `setUp()` — *but* note the mocks use `require_once`, so either
-  switch them to plain `require` or register routes via a callable the test
-  invokes after reset.
-- Longer term: consider whether the router can avoid statics entirely for the
-  stateful mode.
+`NestedRoutesTest` / `MiddlewareInheritanceTest` dropped their
+`@runTestsInSeparateProcesses` / `@preserveGlobalState disabled` annotations in
+favour of `Route::reset()` in `setUp()`. The mock `api.php` /
+`middleware_merge_api.php` requires switched `require_once` → `require` so the
+route registration re-runs after each reset (the `TestMiddleware.php` /
+`vendor/autoload.php` requires stay `require_once` — class definitions). Suite
+green in-process (67 tests).
+
+Longer term: consider whether the router can avoid statics entirely for the
+stateful mode.
 
 ### [ ] 7. Make `RouteHandler` a consistent singleton
 `src/Core/RouteHandler.php` instance methods call `self::getInstance()->routes`
