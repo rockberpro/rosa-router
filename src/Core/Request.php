@@ -214,7 +214,6 @@ class Request implements RequestInterface
      * 
      * @method get
      * @param string $key
-     * @param string $value
      */
     public function get($key)
     {
