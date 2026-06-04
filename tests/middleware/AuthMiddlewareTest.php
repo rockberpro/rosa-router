@@ -1,11 +1,11 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Rockberpro\RosaRouter\Core\Request;
-use Rockberpro\RosaRouter\Core\Response;
-use Rockberpro\RosaRouter\Jwt;
-use Rockberpro\RosaRouter\JwtException;
-use Rockberpro\RosaRouter\Middleware\AuthMiddleware;
+use Rockberpro\RestRouter\Core\Request;
+use Rockberpro\RestRouter\Core\Response;
+use Rockberpro\RestRouter\Jwt;
+use Rockberpro\RestRouter\JwtException;
+use Rockberpro\RestRouter\Middleware\AuthMiddleware;
 
 /**
  * Exercises AuthMiddleware under the JWT auth method.

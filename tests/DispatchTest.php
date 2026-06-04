@@ -1,13 +1,13 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Rockberpro\RosaRouter\Core\GetRequest;
-use Rockberpro\RosaRouter\Core\PostRequest;
-use Rockberpro\RosaRouter\Core\Request;
-use Rockberpro\RosaRouter\Core\RequestData;
-use Rockberpro\RosaRouter\Core\RequestException;
-use Rockberpro\RosaRouter\Core\Response;
-use Rockberpro\RosaRouter\Core\Route;
+use Rockberpro\RestRouter\Core\GetRequest;
+use Rockberpro\RestRouter\Core\PostRequest;
+use Rockberpro\RestRouter\Core\Request;
+use Rockberpro\RestRouter\Core\RequestData;
+use Rockberpro\RestRouter\Core\RequestException;
+use Rockberpro\RestRouter\Core\Response;
+use Rockberpro\RestRouter\Core\Route;
 
 /**
  * Records middleware / destination execution order across a single dispatch.
