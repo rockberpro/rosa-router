@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RestRouter\Utils;
 
-use IniEnvException;
-
 /**
  * Simple INI-based environment loader compatible with DotEnv::get usage.
  */

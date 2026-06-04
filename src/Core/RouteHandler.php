@@ -20,18 +20,7 @@ class RouteHandler
      */
     public function addRoute($method, array $route): void
     {
-        $routes = self::getInstance()->getRoutes();
-        $routes[$method][] = $route;
-        self::getInstance()->setRoutes($routes);
-    }
-
-    /**
-     * @param array $routes
-     * @return void
-     */
-    private function setRoutes(array $routes): void
-    {
-        self::getInstance()->routes = $routes;
+        $this->routes[$method][] = $route;
     }
 
     /**
@@ -42,7 +31,7 @@ class RouteHandler
      */
     public function getRoutes(): array
     {
-        return self::getInstance()->routes;
+        return $this->routes;
     }
 
     /**

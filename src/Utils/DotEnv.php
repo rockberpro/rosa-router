@@ -2,7 +2,6 @@
 
 namespace Rockberpro\RestRouter\Utils;
 
-use DotEnvException;
 use Throwable;
 
 class DotEnv

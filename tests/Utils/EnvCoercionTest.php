@@ -2,7 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 use Rockberpro\RestRouter\Utils\DotEnv;
+use Rockberpro\RestRouter\Utils\DotEnvException;
 use Rockberpro\RestRouter\Utils\IniEnv;
+use Rockberpro\RestRouter\Utils\IniEnvException;
 
 /**
  * DotEnv::get and IniEnv::get share the same getenv-backed boolean coercion
@@ -10,15 +12,6 @@ use Rockberpro\RestRouter\Utils\IniEnv;
  */
 class EnvCoercionTest extends TestCase
 {
-    public static function setUpBeforeClass(): void
-    {
-        // These exception classes live in the global namespace, so neither the
-        // composer PSR-4 map nor the project autoloader can resolve them on
-        // demand; load them explicitly so the throw paths are exercisable.
-        require_once __DIR__ . '/../../src/Utils/DotEnvException.php';
-        require_once __DIR__ . '/../../src/Utils/IniEnvException.php';
-    }
-
     /** @var array<int,string> env keys to clear after each test */
     private array $touched = [];
 
