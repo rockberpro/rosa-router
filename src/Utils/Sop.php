@@ -2,7 +2,7 @@
 
 namespace Rockberpro\RosaRouter\Utils;
 
-use Rockberpro\RosaRouter\Response;
+use Rockberpro\RosaRouter\Core\Response;
 use Rockberpro\RosaRouter\Core\Server;
 
 /**
@@ -10,11 +10,15 @@ use Rockberpro\RosaRouter\Core\Server;
  */
 class Sop
 {
-    public static function check()
+    /**
+     * Returns a denial Response when the host is not allowed, otherwise null.
+     * Never terminates the process, so it is safe in the stateful server mode.
+     */
+    public static function check(): ?Response
     {
         $origins = DotEnv::get('API_ALLOW_ORIGIN');
         if ($origins === '*') {
-            return;
+            return null;
         }
         $_origins = explode(',', $origins);
         $_allow = array_filter($_origins,function($origin) {
@@ -22,9 +26,11 @@ class Sop
         });
         $allow = end($_allow);
         if (!$allow) {
-            Response::json([
+            return new Response([
                 'message' => 'Access denied for your host'
             ], Response::FORBIDDEN);
         }
+
+        return null;
     }
 }

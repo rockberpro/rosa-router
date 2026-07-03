@@ -22,10 +22,12 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function handle(Request $request, Closure $next): Response
     {
-        Sop::check();
+        if ($denied = Sop::check()) {
+            return $denied;
+        }
 
         if (!DotEnv::get('API_AUTH_METHOD')) {
-            Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
+            return new Response(['message' => "Access denied"], Response::UNAUTHORIZED);
         }
 
         if (DotEnv::get('API_AUTH_METHOD') === 'JWT') {
@@ -35,10 +37,10 @@ class AuthMiddleware implements MiddlewareInterface
         if (DotEnv::get('API_AUTH_METHOD') === 'KEY') {
             $apiKey = new PDOApiKeysHandler();
             if (!$apiKey->exists(Server::key())) {
-                Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
+                return new Response(['message' => "Access denied"], Response::UNAUTHORIZED);
             }
             if ($apiKey->isRevoked(Server::key())) {
-                Response::json(['message' => "Access denied"], Response::UNAUTHORIZED);
+                return new Response(['message' => "Access denied"], Response::UNAUTHORIZED);
             }
         }
 
