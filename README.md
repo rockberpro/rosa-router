@@ -44,7 +44,7 @@ modes**, so you can start simple on a shared host and later switch to a persiste
 [ReactPHP](https://reactphp.org/) server by changing a single flag — no rewrite.
 
 On top of that it stays **dependency-light and explicit**: a clean routing syntax,
-first-class middleware, and **authentication built in** (JWT and API keys), without
+first-class middleware, and a **JWT utility** to build your own auth on, without
 pulling in a full framework.
 
 ## Features
@@ -53,7 +53,7 @@ pulling in a full framework.
 - 🔀 **Full HTTP method support** — `GET`, `POST`, `PUT`, `PATCH` and `DELETE`.
 - 🧩 **Route groups & prefixes** — Organize routes with prefixes, nesting and namespaces.
 - 🛡️ **Middleware** — Attach middleware to single routes or whole groups.
-- 🔐 **Built-in authentication** — JWT and API key strategies out of the box.
+- 🔐 **JWT utility** — Issue and verify JSON Web Tokens; enforce them in your own middleware.
 - 📝 **Request logging** — Opt-in per-route logging to file or database.
 - ⚡ **Stateless or stateful** — Run on a classic web server or as a long-running ReactPHP server.
 - 🪶 **Lightweight & fast** — Minimal overhead, optimized for performance.
@@ -96,8 +96,7 @@ Bootstrap::setup('config/.ini');  // INI format
 | `API_LOGS` / `API_LOGS_DB` | Request-log destination — file / database (see [Logging](#logging)) | `true` / `false` |
 | `API_ALLOW_ORIGIN` | CORS allowed origin | `*` |
 | `API_SERVER_ADDRESS` / `API_SERVER_PORT` | Address & port for stateful mode | `0.0.0.0` / `8081` |
-| `API_AUTH_METHOD` | Authentication strategy — `JWT` or `KEY` | `JWT` |
-| `JWT_ISSUER` / `JWT_SUBJECT` / `JWT_SECRET` | JWT signing settings | — |
+| `JWT_ISSUER` / `JWT_SUBJECT` / `JWT_SECRET` | JWT signing settings (see [Authentication](#authentication)) | — |
 | `API_DB_*` | Database connection (host, port, user, pass, name, type) | `pgsql` |
 
 ## How It Works
@@ -444,32 +443,46 @@ Route::controller(UserController::class)->group(function() {
 
 ## Authentication
 
-ROSA Router ships with authentication built in — no extra package required.
-Pick the strategy with `API_AUTH_METHOD` in your `.env`:
+ROSA Router does not bundle an authentication policy — you own it. What it ships
+is a `Jwt` utility for issuing and verifying tokens, plus the
+[middleware](#middleware) mechanism to enforce it. Compose them in a middleware
+you write, so the rules — claims, headers, token store — stay yours.
 
-- **`JWT`** — stateless JSON Web Tokens, signed with your `JWT_SECRET`.
-- **`KEY`** — API keys validated against the database.
-
-Protect any route or group with the bundled `AuthMiddleware`:
+Configure signing via `JWT_ISSUER` / `JWT_SUBJECT` / `JWT_SECRET` in your
+environment, then issue tokens:
 
 ```php
-use Rockberpro\RosaRouter\Middleware\AuthMiddleware;
+use Rockberpro\RosaRouter\Jwt;
 
-Route::prefix('v1')
-    ->middleware(AuthMiddleware::class)
-    ->group(function() {
-        Route::get('/me', [UserController::class, 'me']); // requires a valid token / key
-    });
+$access  = Jwt::getAccessToken();            // short-lived access token
+$refresh = Jwt::getRefreshToken($audience);  // long-lived refresh token
 ```
 
-When using JWT, the built-in endpoints issue and refresh tokens:
+Verify them in your own middleware. `Jwt::validate()` throws `JwtException` on an
+invalid, expired, or wrong-type token:
 
-| Method & route | Description |
-|---|---|
-| `POST /api/auth/refresh` | Exchange credentials for an access + refresh token |
-| `POST /api/auth/access` | Exchange a valid refresh token for a new access token |
+```php
+namespace App\Middleware;
 
-Send the token on protected requests via the `Authorization: Bearer <token>` header.
+use Closure;
+use Rockberpro\RosaRouter\Middleware\MiddlewareInterface;
+use Rockberpro\RosaRouter\Core\Request;
+use Rockberpro\RosaRouter\Core\Response;
+use Rockberpro\RosaRouter\Core\Server;
+use Rockberpro\RosaRouter\Jwt;
+
+class AuthMiddleware implements MiddlewareInterface
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        Jwt::validate(Server::authorization(), 'access'); // throws on failure
+        return $next($request);
+    }
+}
+```
+
+Attach it to routes as shown under [Middleware](#middleware), and send the token
+on protected requests via the `Authorization: Bearer <token>` header.
 
 ## Testing
 
