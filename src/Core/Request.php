@@ -291,11 +291,13 @@ class Request implements RequestInterface
 
     /**
      * @param string $key
-     * @return void
+     * @return string|null
      */
     public function getUrlEncodedParam(string $key): ?string
     {
-        return Server::getInstance()->getHttpRequest()->request->get($key);
+        $params = $this->getAllUrlEncodedParams();
+
+        return $params[$key] ?? null;
     }
 
     /**
@@ -303,7 +305,7 @@ class Request implements RequestInterface
      */
     public function getAllUrlEncodedParams(): array
     {
-        return Server::getInstance()->getHttpRequest()->request->all();
+        return Server::getInstance()->getUrlEncodedParams();
     }
 
     /**

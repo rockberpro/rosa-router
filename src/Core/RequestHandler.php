@@ -11,95 +11,24 @@ use Throwable;
 class RequestHandler
 {
     /**
-     * @return \React\Http\Message\Response|Core\Response
+     * Run the transport-agnostic request pipeline and return a Core\Response.
+     * The active transport is responsible for turning this into the concrete
+     * wire response (SAPI output or React response).
      */
-    public function dispatch()
+    public function dispatch(): Response
     {
-        if (Server::getInstance()->isStateful()) {
-            return $this->handleStateful();
-        }
-        return $this->handleStateless();
-    }
-
-    public function handleStateless(): \Rockberpro\RosaRouter\Core\Response
-    {
-        $request = new Request();
         try {
-            return $request->handle(
+            return (new Request())->handle(
                 Server::getInstance()->getRequestData()
             );
         }
         catch (Throwable $t) {
             $this->writeLog($t);
+
+            $message = DotEnv::get('API_DEBUG') ? $t->getMessage() : 'Internal server error';
+
+            return new Response(['message' => $message], 500);
         }
-
-        if (DotEnv::get('API_DEBUG')) {
-            return new \Rockberpro\RosaRouter\Core\Response([
-                'message' => $t->getMessage()
-            ], 500);
-        }
-
-        return new \Rockberpro\RosaRouter\Core\Response([
-            'message' => 'Internal server error'
-        ], 500);
-    }
-
-    public function handleStateful(): \React\Http\Message\Response
-    {
-        $request = new Request();
-        try {
-            $response = $request->handle(
-                Server::getInstance()->getRequestData()
-            );
-
-            if ($response) {
-                // for HEAD requests, return only headers (no body)
-                if (Server::requestMethod() === 'HEAD') {
-                    return new \React\Http\Message\Response(
-                        $response->status,
-                        $response->getHeadersForHead(),
-                        ''
-                    );
-                }
-                // for OPTIONS requests, return only headers (no body)
-                if (Server::requestMethod() === 'OPTIONS') {
-                    return new \React\Http\Message\Response(
-                        Response::NO_CONTENT,
-                        $response->getHeadersForOptions(),
-                        ''
-                    );
-                }
-
-                return new \React\Http\Message\Response(
-                    $response->status,
-                    ['Content-Type' => 'application/json'],
-                    json_encode($response->data)
-                );
-            }
-
-            return new \React\Http\Message\Response(
-                501,
-                ['Content-Type' => 'application/json'],
-                json_encode(['message' => 'Not implemented'])
-            );
-        }
-        catch (Throwable $t) {
-            $this->writeLog($t);
-        }
-
-        if (DotEnv::get('API_DEBUG')) {
-            return new \React\Http\Message\Response(
-                500,
-                ['Content-Type' => 'application/json'],
-                json_encode(['message' => $t->getMessage()])
-            );
-        }
-
-        return new \React\Http\Message\Response(
-            500,
-            ['Content-Type' => 'application/json'],
-            json_encode(['message' => 'Internal server error'])
-        );
     }
 
     /**

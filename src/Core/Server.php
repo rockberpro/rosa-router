@@ -4,6 +4,9 @@ namespace Rockberpro\RosaRouter\Core;
 
 use React\Http\Message\ServerRequest;
 use Rockberpro\RosaRouter\Bootstrap;
+use Rockberpro\RosaRouter\Core\Transport\StatefulTransport;
+use Rockberpro\RosaRouter\Core\Transport\StatelessTransport;
+use Rockberpro\RosaRouter\Core\Transport\Transport;
 use Rockberpro\RosaRouter\Service\Container;
 use Rockberpro\RosaRouter\Service\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
@@ -20,9 +23,13 @@ final class Server implements ServerInterface
      */
     private HttpRequest $httpRequest;
 
-    private ServerRequest $serverRequest;
-
-    private bool $isStateful = false;
+    /**
+     * The active transport for the current request. Chosen once by execute()
+     * and used for reading the request and emitting the response.
+     *
+     * @var Transport|null
+     */
+    private ?Transport $transport = null;
 
     /**
      * Prefer calling Server::setInstance() or Server::init()
@@ -52,88 +59,17 @@ final class Server implements ServerInterface
      */
     public function getRequestData(): RequestData
     {
-        if ($this->isStateful()) {
-            $serverRequest = $this->serverRequest;
-            return new RequestData(
-                $serverRequest->getMethod(),
-                $serverRequest->getUri()->getPath(),
-                $serverRequest->getUri()->getQuery(),
-                $serverRequest->getParsedBody() ?? [],
-                $serverRequest->getQueryParams()
-            );
-        }
-
-        $httpRequest = self::getHttpRequest();
-        return new RequestData(
-            $httpRequest->getMethod(),
-            $httpRequest->getPathInfo(),
-            $httpRequest->getQueryString(),
-            $this->getRequestBody(),
-            $httpRequest->query->all()
-        );
+        return $this->transport->requestData();
     }
 
     public function getRequestBody(): array
     {
-        if ($this->isStateful()) {
-            $serverRequest = $this->serverRequest;
-            $parsedBody = $serverRequest->getParsedBody();
-            if (is_array($parsedBody)) {
-                return $parsedBody;
-            }
-            return [];
-        }
-
-        $httpRequest = self::getHttpRequest();
-        return $this->extractRequestBody($httpRequest);
+        return $this->transport->requestBody();
     }
 
-    /**
-     * Extract request body as array supporting JSON and form-encoded bodies.
-     *
-     * @param HttpRequest $httpRequest
-     * @return array
-     */
-    private function extractRequestBody(HttpRequest $httpRequest): array
+    public function getUrlEncodedParams(): array
     {
-        $raw = $httpRequest->getContent();
-
-        // If no raw content, prefer parsed parameters (e.g. $_POST)
-        if ($raw === null || $raw === '') {
-            return $httpRequest->request->all() ?: [];
-        }
-
-        $contentType = strtolower((string) $httpRequest->headers->get('content-type', ''));
-
-        // JSON preferred parsing
-        if (strpos($contentType, 'application/json') !== false) {
-            try {
-                return $httpRequest->toArray();
-            } catch (\Throwable $e) {
-                // fallthrough to other parsers
-            }
-        }
-
-        // form data (application/x-www-form-urlencoded or multipart/form-data)
-        if (strpos($contentType, 'application/x-www-form-urlencoded') !== false
-            || strpos($contentType, 'multipart/form-data') !== false) {
-            return $httpRequest->request->all() ?: [];
-        }
-
-        // fallback: try parse_str (handles "nomeCompleto=Samuel")
-        $parsed = [];
-        parse_str($raw, $parsed);
-        if (!empty($parsed)) {
-            return $parsed;
-        }
-
-        // last resort: try JSON decode
-        $decoded = json_decode($raw, true);
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            return $decoded;
-        }
-
-        return [];
+        return $this->transport->urlEncodedParams();
     }
 
     /**
@@ -148,43 +84,15 @@ final class Server implements ServerInterface
         return $this->httpRequest;
     }
 
-    public function stateful(ServerRequest $serverRequest)
-    {
-        $this->serverRequest = $serverRequest;
-        $this->isStateful = true;
-
-        return $this;
-    }
-
-    public function isStateful(): bool
-    {
-        return $this->isStateful;
-    }
-
     /**
-     * Execute the server request handling.
+     * Execute the server request handling: run the transport-agnostic pipeline,
+     * then let the active transport emit the resulting response.
      */
     public function dispatch()
     {
         $response = (new RequestHandler())->dispatch();
-         if ($response instanceof \Rockberpro\RosaRouter\Core\Response) {
-             // if the incoming HTTP method is OPTIONS, send only headers/status without a body
-             if (Server::requestMethod() === 'OPTIONS') {
-                 $response->writeHeaders($response->getHeadersForOptions());
-                 $response->exit();
-             }
-             // if the incoming HTTP method is HEAD, send only headers/status without a body
-             if (Server::requestMethod() === 'HEAD') {
-                 $response->writeHeaders($response->getHeadersForHead());
-                 $response->exit();
-             }
-            $response->response();
-         }
-         if ($response instanceof \React\Http\Message\Response) {
-             return $response;
-         }
 
-        return null;
+        return $this->transport->emit($response);
     }
 
     /**
@@ -300,40 +208,27 @@ final class Server implements ServerInterface
 
         switch ($mode) {
             case self::MODE_STATELESS:
-                return self::doStateless();
+                if (self::$instance === null && !Container::getInstance()->has(Server::class)) {
+                    Container::getInstance()->set(Server::class, Server::init());
+                }
+                $server = self::getInstance();
+                $server->transport = new StatelessTransport($server->getHttpRequest());
+
+                return $server->dispatch();
 
             case self::MODE_STATEFUL:
-                return self::doStateful();
+                // Return the callable expected by React\Http\HttpServer. The
+                // transport is (re)bound per incoming request.
+                return function (ServerRequest $request) {
+                    $server = self::getInstance();
+                    $server->transport = new StatefulTransport($request);
+
+                    return $server->dispatch();
+                };
 
             default:
                 throw new \InvalidArgumentException("Unknown bootstrap mode: {$mode}");
         }
-    }
-
-    /**
-     * Internal implementation for stateless handling (preserves previous behavior).
-     */
-    protected static function doStateless()
-    {
-        if (self::$instance === null && !Container::getInstance()->has(Server::class)) {
-            $server = Server::init();
-            Container::getInstance()->set(Server::class, $server);
-        }
-
-        return Server::getInstance()->dispatch();
-    }
-
-    /**
-     * Internal implementation for stateful handling (preserves previous behavior).
-     * Returns the callable expected by React\Http\HttpServer.
-     */
-    protected static function doStateful(): callable
-    {
-        return function (ServerRequest $request) {
-            return Server::getInstance()
-                ->stateful($request)
-                ->dispatch();
-        };
     }
 
     /**
