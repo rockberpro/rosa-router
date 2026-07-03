@@ -81,10 +81,34 @@ class EnvCoercionTest extends TestCase
         IniEnv::get('DEFINITELY_NOT_SET_' . uniqid());
     }
 
-    public function testIniEnvLoadThrowsForMissingFile(): void
+    public function testIniEnvLoadSkipsMissingFile(): void
     {
-        $this->expectException(IniEnvException::class);
+        // A missing env file is optional: variables may already be provided by
+        // the real environment, so load() returns silently rather than throwing.
+        $this->expectNotToPerformAssertions();
         IniEnv::load(sys_get_temp_dir() . '/does-not-exist-' . uniqid() . '.ini');
+    }
+
+    public function testIniEnvLoadThrowsForUnreadableFile(): void
+    {
+        // A file that exists but cannot be read is a genuine error.
+        if (function_exists('posix_getuid') && posix_getuid() === 0) {
+            $this->markTestSkipped('Root bypasses file permission checks.');
+        }
+
+        $path = tempnam(sys_get_temp_dir(), 'ini');
+        chmod($path, 0000);
+
+        try {
+            if (is_readable($path)) {
+                $this->markTestSkipped('Filesystem does not enforce read permissions.');
+            }
+            $this->expectException(IniEnvException::class);
+            IniEnv::load($path);
+        } finally {
+            chmod($path, 0600);
+            unlink($path);
+        }
     }
 
     public function testIniEnvLoadPopulatesEnvIncludingBoolsAndArrays(): void

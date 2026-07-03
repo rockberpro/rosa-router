@@ -17,8 +17,14 @@ class IniEnv
      */
     public static function load(string $path): void
     {
-        if (!is_file($path) || !is_readable($path)) {
-            throw new IniEnvException("The INI file '{$path}' was not found or is not readable.");
+        // An env file is optional: variables may already be provided by the
+        // real environment. A missing file is skipped silently; a file that
+        // exists but cannot be read is a genuine error.
+        if (!is_file($path)) {
+            return;
+        }
+        if (!is_readable($path)) {
+            throw new IniEnvException("The INI file '{$path}' is not readable.");
         }
 
         $data = parse_ini_file($path, true, INI_SCANNER_TYPED);
