@@ -18,57 +18,55 @@ class Jwt
      */
     public static function validate($token, $type): void
     {
-        $instance = new self();
-
-        if (!preg_match("/Bearer\s((.*)\.(.*)\.(.*))/", $token)) {
+        if (!preg_match('/^Bearer\s+([^.\s]+)\.([^.\s]+)\.([^.\s]+)$/', $token, $matches)) {
             throw new JwtException('Invalid token provided');
         }
-        
-        $jwt_parts = explode('.', $token);
-        $json_header = self::base64UrlDecode(explode(' ', $jwt_parts[0])[1]);
-        $json_payload = self::base64UrlDecode($jwt_parts[1]);
-        $signature = ($jwt_parts[2]);
 
-        $header = json_decode($json_header, true);
-        $payload = json_decode($json_payload, true);
+        [, $header_b64, $payload_b64, $signature] = $matches;
+
+        $header = json_decode(self::base64UrlDecode($header_b64), true);
+        $payload = json_decode(self::base64UrlDecode($payload_b64), true);
+
+        if (!is_array($header) || !is_array($payload)) {
+            throw new JwtException('Invalid token provided');
+        }
 
         /** header */
-        if ($header['alg'] !== 'HS256') {
+        if (($header['alg'] ?? null) !== 'HS256') {
             throw new JwtException('Invalid algorithm');
         }
-        if ($header['typ'] !== 'JWT') {
+        if (($header['typ'] ?? null) !== 'JWT') {
             throw new JwtException('Invalid token type');
         }
 
+        /** signature — verify over the received segments before trusting any claim */
+        $val_signature = hash_hmac('sha256', ($header_b64.'.'.$payload_b64), DotEnv::get('JWT_SECRET'), true);
+        $enc_val_sig = self::base64UrlEncode($val_signature);
+
+        if (!hash_equals($enc_val_sig, $signature)) {
+            throw new JwtException('Invalid token');
+        }
+
         /** payload */
+        $now = (new DateTime())->getTimestamp();
         if ($type === 'access') {
-            if ($payload['exp'] < (new DateTime())->getTimestamp()) {
+            if (!isset($payload['exp']) || $payload['exp'] < $now) {
                 throw new JwtException('Token is expired');
             }
         }
         if ($type === 'refresh') {
-            if (isset($payload['exp']) && $payload['exp'] < (new DateTime())->getTimestamp()) {
+            if (isset($payload['exp']) && $payload['exp'] < $now) {
                 throw new JwtException('Token is expired');
             }
         }
-        if ($payload['iss'] !== DotEnv::get('JWT_ISSUER')) {
+        if (($payload['iss'] ?? null) !== DotEnv::get('JWT_ISSUER')) {
             throw new JwtException('Invalid token issuer');
         }
-        if ($payload['sub'] !== DotEnv::get('JWT_SUBJECT')) {
+        if (($payload['sub'] ?? null) !== DotEnv::get('JWT_SUBJECT')) {
             throw new JwtException('Invalid token subject');
         }
-        if ($payload['typ'] !== $type) {
+        if (($payload['typ'] ?? null) !== $type) {
             throw new JwtException('Invalid token type');
-        }
-
-        /** signature */
-        $val_header = self::base64UrlEncode($json_header);
-        $val_payload = self::base64UrlEncode($json_payload);
-        $val_signature = hash_hmac('sha256', ($val_header.'.'.$val_payload), DotEnv::get('JWT_SECRET'), true);
-        $enc_val_sig = self::base64UrlEncode($val_signature);
-
-        if (!hash_equals($signature, $enc_val_sig)) {
-            throw new JwtException('Invalid token');
         }
     }
 
@@ -148,7 +146,7 @@ class Jwt
             'iss' => DotEnv::get('JWT_ISSUER'),
             'sub' => DotEnv::get('JWT_SUBJECT'),
             'typ' => $type,
-            'iat' => date('Y-m-d H:i:s'),
+            'iat' => (new DateTime())->getTimestamp(),
         ];
 
         if ($expires) {
@@ -177,7 +175,10 @@ class Jwt
     private static function base64UrlDecode(string $input): string
     {
         $replaced = str_replace(['-', '_'], ['+', '/'], $input);
-        $padded = str_pad($replaced, strlen($replaced) % 4, '=', STR_PAD_RIGHT);
-        return base64_decode($padded);
+        $remainder = strlen($replaced) % 4;
+        if ($remainder) {
+            $replaced .= str_repeat('=', 4 - $remainder);
+        }
+        return (string) base64_decode($replaced, true);
     }
 }
