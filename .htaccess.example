@@ -1,9 +1,0 @@
-### An example how to configure .htaccess if router is located in a
-###   subdirectory of the project
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
-RewriteRule ^api/(.*)$ index.php [QSA,L]
-RewriteCond %{HTTP:Authorization} ^(.*)
-RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]

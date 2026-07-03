@@ -1,6 +1,4 @@
 /vendor/**
-/logs/**
-/docker/dbdata/**
 .env
 /coverage/**
 /.phpunit.cache/**

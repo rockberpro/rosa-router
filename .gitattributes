@@ -1,0 +1,18 @@
+# Keep the published Composer dist to library code only.
+# Everything below stays in the repo but is stripped from the package
+# tarball consumers download.
+#
+# NOTE: directory entries must NOT have a trailing slash — a trailing
+# slash fails to match the files inside the directory.
+
+/tests              export-ignore
+/docs               export-ignore
+/resources          export-ignore
+/phpunit.xml        export-ignore
+/.phpunit.cache     export-ignore
+/.github            export-ignore
+/.env.example       export-ignore
+/composer.lock      export-ignore
+/issues.md          export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
