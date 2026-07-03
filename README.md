@@ -119,8 +119,11 @@ require_once "vendor/autoload.php";
 Bootstrap::setup();
 
 $server = Server::init();
-if ($server->isApiEndpoint()) {
-    $server->loadRoutes('./routes/api.php');
+// '/api' is the default base prefix — pass a different one to change it
+// (see the "Base prefix" section). isApiEndpoint() runs first, so it must
+// be given the same prefix.
+if ($server->isApiEndpoint('/api')) {
+    $server->loadRoutes('./routes/api.php', '/api');
     $server->execute(Server::MODE_STATELESS);
 }
 ```
@@ -146,7 +149,8 @@ $port = DotEnv::get('API_SERVER_PORT');
 $address = DotEnv::get('API_SERVER_ADDRESS');
 
 $server = Server::init();
-$server->loadRoutes('./routes/api.php');
+// '/api' is the default base prefix — pass a different one to change it
+$server->loadRoutes('./routes/api.php', '/api');
 
 $server = new HttpServer(
     $server->execute(Server::MODE_STATEFUL)
@@ -226,6 +230,34 @@ return new Response(['message' => 'Not found'], Response::NOT_FOUND);   // 404
 return new Response(['message' => 'Invalid'], Response::UNPROCESSABLE_ENTITY); // 422
 ```
 
+### Base prefix
+
+Every route is served under a base prefix that is prepended before any group
+`prefix()`. It defaults to `/api`, so `Route::get('/status', ...)` is reachable
+at `/api/status`.
+
+Pass a second argument to `loadRoutes()` to change it. The prefix is scoped to
+that file, so different route files can be mounted under different roots:
+
+```php
+$server->loadRoutes('./routes/api.php', '/v1');      // routes served under /v1
+$server->loadRoutes('./routes/admin.php', '/admin'); // routes served under /admin
+```
+
+`isApiEndpoint()` reports whether the incoming request targets the base prefix.
+In stateless mode it runs *before* `loadRoutes()`, so give it the same prefix so
+the two agree:
+
+```php
+if ($server->isApiEndpoint('/v1')) {
+    $server->loadRoutes('./routes/api.php', '/v1');
+    $server->execute(Server::MODE_STATELESS);
+}
+```
+
+Passing `''` (or `'/'`) disables the base prefix, serving routes at the site
+root; with no base prefix every request is treated as an API endpoint.
+
 ### Grouped routes
 
 Use `prefix()` + `group()` to share a common URI segment across several routes
@@ -245,8 +277,8 @@ it apply to every route inside (see the [Middleware](#middleware) and
 ### Nested routes
 
 Groups can be nested to any depth. Each nested `prefix()` is appended to its
-parent, so the final URI is the concatenation of every prefix in the chain.
-All routes are served under the framework's `/api` base path:
+parent, so the final URI is the concatenation of every prefix in the chain,
+below the [base prefix](#base-prefix) (`/api` by default):
 
 ```php
 Route::prefix('v1')->group(function() {
