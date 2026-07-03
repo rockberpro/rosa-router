@@ -7,7 +7,9 @@ use Exception;
 
 class Route implements RouteInterface
 {
-    const PREFIX = '/api';
+    private const DEFAULT_PREFIX = '/api';
+
+    private static string $basePrefix = self::DEFAULT_PREFIX;
 
     private const DEFAULT_CONTEXT = [
         'prefix'     => null,
@@ -134,8 +136,35 @@ class Route implements RouteInterface
     }
 
     /**
+     * Set the base prefix prepended to every registered route.
+     *
+     * Normalizes to exactly one leading slash and no trailing slash.
+     * An empty string (or "/") means "no base prefix".
+     *
+     * @method setBasePrefix
+     * @param string $prefix
+     * @return void
+     */
+    public static function setBasePrefix(string $prefix): void
+    {
+        $prefix = '/' . trim($prefix, '/');
+        self::$basePrefix = ($prefix === '/') ? '' : $prefix;
+    }
+
+    /**
+     * Get the base prefix currently prepended to every registered route.
+     *
+     * @method getBasePrefix
+     * @return string
+     */
+    public static function getBasePrefix(): string
+    {
+        return self::$basePrefix;
+    }
+
+    /**
      * Adds prefix to the route group
-     * 
+     *
      * @method prefix
      * @param $prefix
      * @return self
@@ -376,7 +405,7 @@ class Route implements RouteInterface
     private static function route($route): string
     {
         $prefixes = self::collectPrefixes();
-        return self::PREFIX . implode('', $prefixes) . $route;
+        return self::$basePrefix . implode('', $prefixes) . $route;
     }
 
     /**

@@ -42,9 +42,18 @@ final class Server implements ServerInterface
 
     public function __construct() {}
 
-    public function isApiEndpoint(): bool
+    public function isApiEndpoint(?string $prefix = null): bool
     {
-        return strpos(self::getInstance()->getHttpRequest()->getPathInfo(), '/api/') !== false;
+        $prefix = $prefix ?? Route::getBasePrefix();
+
+        // An empty base prefix means every path is treated as an API endpoint.
+        if ($prefix === '') {
+            return true;
+        }
+
+        $path = self::getInstance()->getHttpRequest()->getPathInfo();
+
+        return strpos($path, rtrim($prefix, '/') . '/') === 0;
     }
 
     public static function getRootDir()
@@ -157,9 +166,11 @@ final class Server implements ServerInterface
      * isolated scope so route definitions don't leak variables.
      *
      * @param string $file Absolute or relative path to the routes file
+     * @param string|null $prefix Base prefix for the routes in this file.
+     *                            Null keeps the active base prefix (defaults to "/api").
      * @return void
      */
-    public function loadRoutes(string $file): void
+    public function loadRoutes(string $file, ?string $prefix = null): void
     {
         // Include the routes file inside a closure to avoid leaking
         // local variables into the global scope used by the routes file.
@@ -180,7 +191,22 @@ final class Server implements ServerInterface
             }
         }
 
-        $loader($path);
+        // No override: register routes under whatever base prefix is active.
+        if ($prefix === null) {
+            $loader($path);
+            return;
+        }
+
+        // Scope the base prefix to this file so a later loadRoutes() call
+        // doesn't inherit it. Routes bake in the prefix at registration time,
+        // so the set/restore only needs to wrap the include.
+        $previous = Route::getBasePrefix();
+        Route::setBasePrefix($prefix);
+        try {
+            $loader($path);
+        } finally {
+            Route::setBasePrefix($previous);
+        }
     }
 
     /**
