@@ -3,10 +3,9 @@
 namespace Rockberpro\RosaRouter\Logs;
 
 use Rockberpro\RosaRouter\Core\Server;
-use Rockberpro\RosaRouter\Database\Handlers\PDOLogHandler;
-use Rockberpro\RosaRouter\Database\PDOConnection;
 use Rockberpro\RosaRouter\Service\Container;
 use Rockberpro\RosaRouter\Utils\DotEnv;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -38,28 +37,31 @@ abstract class AbstractLogHandler
      */
     abstract protected static function throwOnNoDestination(): bool;
 
-    public static function register(string $file_path)
+    /**
+     * @param string $file_path Stream/file destination, used when API_LOGS is truthy.
+     * @param HandlerInterface[] $handlers Extra Monolog handlers to attach (Slack,
+     *        syslog, Elasticsearch, your own DB schema, …). They are pushed
+     *        alongside the built-in stream handler and count as a destination.
+     */
+    public static function register(string $file_path, array $handlers = [])
     {
         $container = Container::getInstance();
-        $container->set(static::class, function() use ($file_path) {
+        $container->set(static::class, function() use ($file_path, $handlers) {
             $instance = new static();
             $instance->logger = new Logger(static::channel());
 
             if (DotEnv::get('API_LOGS')) {
                 $instance->logger->pushHandler(new StreamHandler($file_path, static::level()));
             }
-            if (DotEnv::get('API_LOGS_DB')) {
-                $instance->logger->pushHandler(new PDOLogHandler(
-                    (new PDOConnection())->getPDO(),
-                    'logs',
-                    static::level(),
-                ));
+            foreach ($handlers as $handler) {
+                $instance->logger->pushHandler($handler);
             }
 
             if (static::throwOnNoDestination() && count($instance->logger->getHandlers()) === 0) {
                 throw new LogHandlerException(
                     'LogRequestMiddleware is active but no log destination is enabled. '
-                    . 'Set API_LOGS=true and/or API_LOGS_DB=true, or remove the middleware from the route.'
+                    . 'Set API_LOGS=true (file logging) or pass a Monolog handler through '
+                    . 'Bootstrap::setup(), or remove the middleware from the route.'
                 );
             }
 

@@ -93,11 +93,10 @@ Bootstrap::setup('config/.ini');  // INI format
 |---|---|---|
 | `API_NAME` | Application name | `rosa-api` |
 | `API_DEBUG` | Verbose error output | `false` |
-| `API_LOGS` / `API_LOGS_DB` | Request-log destination — file / database (see [Logging](#logging)) | `true` / `false` |
+| `API_LOGS` | Enable built-in file/stream request logging (see [Logging](#logging)) | `true` |
 | `API_ALLOW_ORIGIN` | CORS allowed origin | `*` |
 | `API_SERVER_ADDRESS` / `API_SERVER_PORT` | Address & port for stateful mode | `0.0.0.0` / `8081` |
 | `JWT_ISSUER` / `JWT_SUBJECT` / `JWT_SECRET` | JWT signing settings (see [Authentication](#authentication)) | — |
-| `API_DB_*` | Database connection (host, port, user, pass, name, type) | `pgsql` |
 
 ## How It Works
 
@@ -357,6 +356,11 @@ ROSA Router ships with a `LogRequestMiddleware` that records each incoming
 request (endpoint, method, params, remote address, user agent). Logging works in
 two independent layers:
 
+Logging is built on [Monolog](https://github.com/Seldaek/monolog). File/stream
+logging is included out of the box; for any other destination (a database,
+Slack, syslog, Elasticsearch, …) you push your own Monolog handler through the
+seam described below — the router keeps zero persistence or schema opinions.
+
 1. **Trigger — bind the middleware.** Like any middleware, it only runs on routes
    you attach it to. Logging is **opt-in**, never automatic:
 
@@ -381,11 +385,31 @@ two independent layers:
    });
    ```
 
-2. **Destination — pick where logs go** via env (see [Configuration](#configuration)):
-   - `API_LOGS=true` — write to the info log file (`logs/info.log`).
-   - `API_LOGS_DB=true` — write to the `logs` database table.
+2. **Destination — pick where logs go.**
+   - **Built in:** set `API_LOGS=true` to write to the info log file
+     (`logs/info.log`) — see [Configuration](#configuration).
+   - **Anything else:** pass your own Monolog handler(s) to `Bootstrap::setup()`.
+     They are attached alongside the built-in file handler, so you can enable
+     either, both, or several at once:
 
-   You can enable either, both, or combine the middleware with others:
+   ```php
+   use Monolog\Handler\SlackWebhookHandler;
+   use Monolog\Logger;
+   use Rockberpro\RosaRouter\Bootstrap;
+
+   Bootstrap::setup(
+       '.env',
+       'logs/info.log',
+       'logs/error.log',
+       // request/info handlers — e.g. mirror requests into your own DB schema,
+       // Slack, syslog, Elasticsearch, …
+       infoHandlers: [new SlackWebhookHandler($webhookUrl, level: Logger::INFO)],
+   );
+   ```
+
+   Because it accepts any `Monolog\Handler\HandlerInterface`, you get Monolog's
+   whole ecosystem — including database logging — without the library baking in
+   a schema. Combine the middleware with others as usual:
 
    ```php
    Route::middleware([AuthMiddleware::class, LogRequestMiddleware::class])
@@ -393,7 +417,7 @@ two independent layers:
    ```
 
 **No silent failures.** If you bind `LogRequestMiddleware` to a route but leave
-**both** `API_LOGS` and `API_LOGS_DB` disabled, the request has nowhere to be
+`API_LOGS` disabled **and** supply no handler, the request has nowhere to be
 logged — a contradiction — and the router throws a `LogHandlerException` instead
 of quietly dropping the log. Either enable a destination, or remove the
 middleware from that route. A missing/undefined env variable likewise throws,
