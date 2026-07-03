@@ -25,19 +25,24 @@ class Bootstrap
             return true;
         }
 
-        // detect by file extension: .ini -> IniEnv, .env -> DotEnv
-        $lower = strtolower(trim($envPath));
-        // Use substr_compare for PHP 7.4 compatibility
-        if (substr_compare($lower, '.ini', -4, 4) === 0) {
-            IniEnv::load($envPath);
-        } elseif (substr_compare($lower, '.env', -4, 4) === 0) {
-            DotEnv::load($envPath);
-        } else {
-            // fallback: try ini first, then dotenv
-            try {
+        // An env file is optional: variables may already be provided by the
+        // real environment (e.g. a container or the web server). Only attempt
+        // to load it when the file actually exists, otherwise skip silently.
+        if (is_file($envPath)) {
+            // detect by file extension: .ini -> IniEnv, .env -> DotEnv
+            $lower = strtolower(trim($envPath));
+            // Use substr_compare for PHP 7.4 compatibility
+            if (substr_compare($lower, '.ini', -4, 4) === 0) {
                 IniEnv::load($envPath);
-            } catch (\Throwable $e) {
+            } elseif (substr_compare($lower, '.env', -4, 4) === 0) {
                 DotEnv::load($envPath);
+            } else {
+                // fallback: try ini first, then dotenv
+                try {
+                    IniEnv::load($envPath);
+                } catch (\Throwable $e) {
+                    DotEnv::load($envPath);
+                }
             }
         }
 
