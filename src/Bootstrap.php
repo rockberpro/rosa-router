@@ -18,8 +18,15 @@ class Bootstrap
 
     /**
      * Initialize environment and register log handlers. Idempotent.
+     *
+     * File/stream logging is built in via API_LOGS. To log anywhere else (a
+     * database, Slack, syslog, …) pass your own Monolog handlers — they are
+     * attached to the request/info and error channels respectively.
+     *
+     * @param \Monolog\Handler\HandlerInterface[] $infoHandlers
+     * @param \Monolog\Handler\HandlerInterface[] $errorHandlers
      */
-    public static function setup(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log"): bool
+    public static function setup(string $envPath = ".env", string $infoLog = "logs/info.log", string $errorLog = "logs/error.log", array $infoHandlers = [], array $errorHandlers = []): bool
     {
         if (self::$booted) {
             return true;
@@ -46,8 +53,8 @@ class Bootstrap
             }
         }
 
-        InfoLogHandler::register($infoLog);
-        ErrorLogHandler::register($errorLog);
+        InfoLogHandler::register($infoLog, $infoHandlers);
+        ErrorLogHandler::register($errorLog, $errorHandlers);
 
         return self::$booted = true;
     }
