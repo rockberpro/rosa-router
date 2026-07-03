@@ -13,6 +13,7 @@ interface ServerInterface
     public static function serverAddress(): string;
     public static function userAgent(): string;
     public static function remoteAddress(): string;
+    public static function origin(): string;
     public static function targetAddress(): string;
     public static function requestMethod(): string;
     public static function requestUri(): string;

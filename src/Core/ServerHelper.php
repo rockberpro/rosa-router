@@ -49,6 +49,11 @@ class ServerHelper
         return $_SERVER['REMOTE_ADDR'] ?? '';
     }
 
+    public static function origin(): string
+    {
+        return $_SERVER['HTTP_ORIGIN'] ?? '';
+    }
+
     public static function targetAddress(): string
     {
         return $_SERVER['HTTP_HOST'] ?? '';

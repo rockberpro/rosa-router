@@ -2,8 +2,6 @@
 
 namespace Rockberpro\RosaRouter\Utils;
 
-use Rockberpro\RosaRouter\Core\Server;
-
 /**
  * Cross-origin Resource Sharing
  */
@@ -11,18 +9,19 @@ class Cors
 {
     public static function allowOrigin()
     {
-        $origins = DotEnv::get('API_ALLOW_ORIGIN');
-        if ($origins === '*') {
-            header("Access-Control-Allow-Origin: *");
+        if (OriginPolicy::allowsAny()) {
+            header('Access-Control-Allow-Origin: *');
             return;
         }
-        $_origins = explode(',', $origins);
-        $_allow = array_filter($_origins, function($origin) {
-            return Server::remoteAddress() === $origin;
-        });
-        $allow = end($_allow);
-        if ($allow) {
-            header("Access-Control-Allow-Origin: {$allow}");
+
+        $origin = OriginPolicy::resolve();
+        if ($origin === null) {
+            return;
         }
+
+        // Reflecting a specific origin makes the response origin-dependent,
+        // so it must vary on Origin to stay cache-safe.
+        header('Vary: Origin', false);
+        header("Access-Control-Allow-Origin: {$origin}");
     }
 }

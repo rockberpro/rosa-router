@@ -395,6 +395,11 @@ final class Server implements ServerInterface
         return ServerHelper::remoteAddress();
     }
 
+    public static function origin(): string
+    {
+        return ServerHelper::origin();
+    }
+
     public static function targetAddress(): string
     {
         return ServerHelper::targetAddress();
